@@ -231,8 +231,15 @@ create table if not exists gestao.movimentacoes (
   prazo         date,
   movimentacao_retificada_id uuid references gestao.movimentacoes(id),
   movimentacao_ressalvada_id uuid references gestao.movimentacoes(id),
-  criado_em     timestamptz not null default now()
+  -- clock_timestamp() (não now()) dá ordem cronológica estável mesmo entre
+  -- movimentações criadas na MESMA transação — usado na janela de
+  -- retificação (007c) e na ordenação da timeline.
+  criado_em     timestamptz not null default clock_timestamp()
 );
+
+-- Ajuste idempotente para bancos já criados: `create table if not exists`
+-- não altera coluna existente, então reforçamos o default aqui.
+alter table gestao.movimentacoes alter column criado_em set default clock_timestamp();
 
 -- ---------------------------------------------------------------------
 -- comentarios — IMUTÁVEL, append-only.

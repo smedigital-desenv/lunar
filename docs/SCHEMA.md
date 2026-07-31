@@ -39,7 +39,9 @@
 - `fn_unidades_no_escopo(usuario_id uuid) → setof uuid` — unidade + descendentes (recursivo); todas se global; vazio p/ agente.
 - `fn_escopo_global(uuid) → bool` · `fn_nivel(uuid) → smallint` · `fn_perfil(uuid) → text` · `fn_pode_administrar(uuid) → bool`.
 - `fn_escopo_permite(unidade uuid, sigilo text, usuario uuid) → bool` — escopo + trava de `restrito`.
-- `fn_pode_ver_demanda(demanda_id, usuario) → bool` · `fn_pode_ver_tarefa(tarefa_id, usuario) → bool` (predicados das policies de SELECT).
+- `fn_acesso_demanda_base(demanda_id, usuario) → bool` — acesso à demanda por vínculo direto/chefia (sem posse de tarefa).
+- `fn_pode_ver_demanda(demanda_id, usuario) → bool` — base OU possui alguma tarefa na demanda (vê o cabeçalho).
+- `fn_pode_ver_tarefa(tarefa_id, usuario) → bool` — **visibilidade estrita por tarefa**: própria tarefa + subárvore (recursivo por `parent_id`) OU acesso base; NÃO vê tarefas irmãs (critério 4).
 
 ## Funções — apoio
 

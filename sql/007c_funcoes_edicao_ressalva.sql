@@ -104,12 +104,18 @@ begin
       using errcode = 'insufficient_privilege';
   end if;
 
-  -- JANELA: qualquer movimentação posterior de outro usuário fecha a janela.
+  -- JANELA (escopo por entidade): se a movimentação é de uma TAREFA, só uma
+  -- intervenção posterior de terceiro NAQUELA tarefa fecha a janela; se é de
+  -- DEMANDA (tarefa_id nulo), qualquer intervenção posterior de terceiro na
+  -- demanda fecha. (Fiel à ESPEC: "naquela demanda ou tarefa".)
   if exists (
     select 1 from gestao.movimentacoes p
-     where p.demanda_id = m.demanda_id
-       and p.criado_em > m.criado_em
+     where p.criado_em > m.criado_em
        and p.autor_id <> m.autor_id
+       and (
+         (m.tarefa_id is not null and p.tarefa_id = m.tarefa_id)
+         or (m.tarefa_id is null and p.demanda_id = m.demanda_id)
+       )
   ) then
     raise exception
       'Janela de retificação encerrada (houve intervenção de terceiro). Use ressalva.'

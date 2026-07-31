@@ -171,7 +171,7 @@ begin
     insert into gestao.tarefas(
       demanda_id, titulo, descricao, responsavel_id, unidade_responsavel_id,
       situacao, prioridade, prazo, criado_por)
-    select d.titulo, 'Encaminhamento', null, p_destinatario_id, v_unidade_dest,
+    select d.id, d.titulo, 'Encaminhamento', p_destinatario_id, v_unidade_dest,
            'em_andamento', coalesce(p_prioridade, d.prioridade), p_prazo, v_autor
       from gestao.demandas d where d.id = v_demanda
     returning id into v_tarefa;
@@ -183,8 +183,10 @@ begin
      where id = v_demanda;
   end if;
 
-  perform gestao.fn_garantir_participante(v_demanda, p_destinatario_id, 'participante', v_autor);
-
+  -- Visibilidade estrita por tarefa (critério 4): NÃO adicionamos o
+  -- destinatário como participante da demanda. No ramo de demanda ele já
+  -- vira responsavel_atual; no ramo de tarefa, o acesso vem da posse da
+  -- tarefa (fn_pode_ver_tarefa), sem expor as tarefas irmãs.
   perform gestao.fn_registrar_movimentacao(
     v_demanda, v_tarefa, v_autor, 'encaminhamento', p_texto,
     null, null, p_destinatario_id, p_prioridade, p_prazo);
@@ -246,8 +248,8 @@ begin
     v_unidade_resp, 'aberta', coalesce(p_prioridade, p.prioridade), p_prazo, v_autor)
   returning id into v_sub;
 
-  perform gestao.fn_garantir_participante(p.demanda_id, p_responsavel_id, 'participante', v_autor);
-
+  -- Visibilidade estrita por tarefa (critério 4): o recebedor da subtarefa
+  -- NÃO vira participante da demanda; enxerga só a própria subárvore.
   perform gestao.fn_registrar_movimentacao(
     p.demanda_id, v_sub, v_autor, 'subtarefa', p_titulo,
     null, 'aberta', p_responsavel_id, coalesce(p_prioridade, p.prioridade), p_prazo);

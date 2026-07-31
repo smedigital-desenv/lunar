@@ -61,9 +61,10 @@ begin
 end;
 $$;
 
--- fn_pode_ver_demanda — vínculo direto com a tramitação (vale inclusive
--- para restrito) OU visibilidade por escopo.
-create or replace function gestao.fn_pode_ver_demanda(
+-- fn_acesso_demanda_base — acesso à demanda por vínculo direto (criador,
+-- solicitante, responsável atual, participante explícito) ou por escopo de
+-- chefia. NÃO considera posse de tarefa (evita recursão com fn_pode_ver_tarefa).
+create or replace function gestao.fn_acesso_demanda_base(
   p_demanda_id uuid, p_usuario_id uuid)
 returns boolean
 language plpgsql stable security definer
@@ -96,8 +97,11 @@ begin
 end;
 $$;
 
--- fn_pode_ver_tarefa — o responsável sempre vê a tarefa recebida; senão,
--- herda a visibilidade da demanda ou entra pelo escopo da unidade da tarefa.
+-- fn_pode_ver_tarefa — VISIBILIDADE ESTRITA POR TAREFA (critério 4):
+--   • recebeu a tarefa (responsável), OU
+--   • é responsável por algum ANCESTRAL dela (vê a própria subárvore), OU
+--   • tem acesso base à demanda (criador/chefia/participante).
+-- NÃO enxerga tarefas irmãs.
 create or replace function gestao.fn_pode_ver_tarefa(
   p_tarefa_id uuid, p_usuario_id uuid)
 returns boolean
@@ -105,30 +109,58 @@ language plpgsql stable security definer
 set search_path = gestao, pg_temp
 as $$
 declare
-  t gestao.tarefas%rowtype;
-  v_sigilo text;
+  v_demanda uuid;
+  v_owner   boolean;
 begin
-  select * into t from gestao.tarefas where id = p_tarefa_id;
-  if not found then
+  select demanda_id into v_demanda from gestao.tarefas where id = p_tarefa_id;
+  if v_demanda is null then
     return false;
   end if;
 
-  if t.responsavel_id = p_usuario_id then
+  if gestao.fn_acesso_demanda_base(v_demanda, p_usuario_id) then
     return true;
   end if;
 
-  if gestao.fn_pode_ver_demanda(t.demanda_id, p_usuario_id) then
-    return true;
-  end if;
+  -- Posse da própria tarefa ou de algum ancestral (sobe por parent_id).
+  with recursive cadeia as (
+    select t.id, t.parent_id, t.responsavel_id
+      from gestao.tarefas t where t.id = p_tarefa_id
+    union all
+    select p.id, p.parent_id, p.responsavel_id
+      from gestao.tarefas p join cadeia c on p.id = c.parent_id
+  )
+  select exists (select 1 from cadeia where responsavel_id = p_usuario_id)
+    into v_owner;
 
-  select sigilo into v_sigilo from gestao.demandas where id = t.demanda_id;
-  return gestao.fn_escopo_permite(t.unidade_responsavel_id, v_sigilo, p_usuario_id);
+  return v_owner;
 end;
 $$;
 
-grant execute on function gestao.fn_escopo_permite(uuid, text, uuid) to authenticated;
-grant execute on function gestao.fn_pode_ver_demanda(uuid, uuid)     to authenticated;
-grant execute on function gestao.fn_pode_ver_tarefa(uuid, uuid)      to authenticated;
+-- fn_pode_ver_demanda — acesso base OU possui alguma tarefa na demanda
+-- (quem recebeu uma tarefa enxerga o CABEÇALHO da demanda, mas não as
+-- tarefas irmãs — estas seguem fn_pode_ver_tarefa).
+create or replace function gestao.fn_pode_ver_demanda(
+  p_demanda_id uuid, p_usuario_id uuid)
+returns boolean
+language plpgsql stable security definer
+set search_path = gestao, pg_temp
+as $$
+begin
+  if gestao.fn_acesso_demanda_base(p_demanda_id, p_usuario_id) then
+    return true;
+  end if;
+  return exists (
+    select 1 from gestao.tarefas t
+     where t.demanda_id = p_demanda_id
+       and t.responsavel_id = p_usuario_id
+  );
+end;
+$$;
+
+grant execute on function gestao.fn_escopo_permite(uuid, text, uuid)     to authenticated;
+grant execute on function gestao.fn_acesso_demanda_base(uuid, uuid)      to authenticated;
+grant execute on function gestao.fn_pode_ver_demanda(uuid, uuid)         to authenticated;
+grant execute on function gestao.fn_pode_ver_tarefa(uuid, uuid)          to authenticated;
 
 -- =====================================================================
 -- Habilita RLS em todas as tabelas e concede apenas SELECT.
@@ -226,38 +258,49 @@ create policy pol_sel_pessoas on gestao.pessoas_envolvidas
 
 -- --- Movimentações e comentários: visíveis se o usuário vê a demanda ou a
 -- --- tarefa correspondente.
+-- Registro ligado a uma tarefa segue a visibilidade da tarefa (não vaza
+-- para irmãs); registro só de demanda segue a visibilidade da demanda.
 drop policy if exists pol_sel_mov on gestao.movimentacoes;
 create policy pol_sel_mov on gestao.movimentacoes
   for select to authenticated
   using (
-    gestao.fn_pode_ver_demanda(demanda_id, auth.uid())
-    or (tarefa_id is not null and gestao.fn_pode_ver_tarefa(tarefa_id, auth.uid()))
+    case
+      when tarefa_id is not null then gestao.fn_pode_ver_tarefa(tarefa_id, auth.uid())
+      else gestao.fn_pode_ver_demanda(demanda_id, auth.uid())
+    end
   );
 
 drop policy if exists pol_sel_comentarios on gestao.comentarios;
 create policy pol_sel_comentarios on gestao.comentarios
   for select to authenticated
   using (
-    gestao.fn_pode_ver_demanda(demanda_id, auth.uid())
-    or (tarefa_id is not null and gestao.fn_pode_ver_tarefa(tarefa_id, auth.uid()))
+    case
+      when tarefa_id is not null then gestao.fn_pode_ver_tarefa(tarefa_id, auth.uid())
+      else gestao.fn_pode_ver_demanda(demanda_id, auth.uid())
+    end
   );
 
 -- --- Anexos: quem participa da tramitação da demanda/tarefa/devolutiva,
 -- --- mais chefias no escopo (seção 13). Inativos permanecem visíveis à
 -- --- chefia; a listagem padrão os filtra em 007.
+-- Anexo de tarefa segue a tarefa; anexo de devolutiva segue a movimentação
+-- (que por sua vez segue tarefa/demanda); anexo só de demanda segue a demanda.
 drop policy if exists pol_sel_anexos on gestao.anexos;
 create policy pol_sel_anexos on gestao.anexos
   for select to authenticated
   using (
-    (demanda_id is not null and gestao.fn_pode_ver_demanda(demanda_id, auth.uid()))
-    or (tarefa_id is not null and gestao.fn_pode_ver_tarefa(tarefa_id, auth.uid()))
-    or (movimentacao_id is not null and exists (
-          select 1 from gestao.movimentacoes m
-           where m.id = anexos.movimentacao_id
-             and (gestao.fn_pode_ver_demanda(m.demanda_id, auth.uid())
-                  or (m.tarefa_id is not null
-                      and gestao.fn_pode_ver_tarefa(m.tarefa_id, auth.uid())))
-       ))
+    case
+      when tarefa_id is not null then gestao.fn_pode_ver_tarefa(tarefa_id, auth.uid())
+      when movimentacao_id is not null then exists (
+        select 1 from gestao.movimentacoes m
+         where m.id = anexos.movimentacao_id
+           and case
+                 when m.tarefa_id is not null then gestao.fn_pode_ver_tarefa(m.tarefa_id, auth.uid())
+                 else gestao.fn_pode_ver_demanda(m.demanda_id, auth.uid())
+               end)
+      when demanda_id is not null then gestao.fn_pode_ver_demanda(demanda_id, auth.uid())
+      else false
+    end
   );
 
 -- --- Notificações: só as do próprio usuário.
