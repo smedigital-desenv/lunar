@@ -106,23 +106,44 @@ set search_path = gestao, pg_temp
 as $$
 declare
   t gestao.tarefas%rowtype;
-  v_sigilo text;
+  d gestao.demandas%rowtype;
+  v_ancestral uuid;
 begin
   select * into t from gestao.tarefas where id = p_tarefa_id;
   if not found then
     return false;
   end if;
 
+  -- 1) A própria tarefa recebida.
   if t.responsavel_id = p_usuario_id then
     return true;
   end if;
 
-  if gestao.fn_pode_ver_demanda(t.demanda_id, p_usuario_id) then
+  -- 2) Responsável de uma tarefa ANCESTRAL enxerga o próprio ramo (as
+  --    descendentes), mas não as tarefas irmãs de outros ramos (regra 4 /
+  --    critério de aceite 22.4).
+  v_ancestral := t.parent_id;
+  while v_ancestral is not null loop
+    if exists (select 1 from gestao.tarefas a
+                where a.id = v_ancestral and a.responsavel_id = p_usuario_id) then
+      return true;
+    end if;
+    select parent_id into v_ancestral from gestao.tarefas where id = v_ancestral;
+  end loop;
+
+  -- 3) Vínculo forte com a demanda (autor, solicitante ou responsável atual)
+  --    ou visibilidade por escopo/chefia enxergam TODAS as tarefas. O
+  --    participante "simples" NÃO entra aqui: vê a demanda (fn_pode_ver_demanda),
+  --    mas não as tarefas alheias — é o que isola as irmãs.
+  select * into d from gestao.demandas where id = t.demanda_id;
+  if found and (d.criado_por = p_usuario_id
+                or d.solicitante_id = p_usuario_id
+                or d.responsavel_atual_id = p_usuario_id) then
     return true;
   end if;
 
-  select sigilo into v_sigilo from gestao.demandas where id = t.demanda_id;
-  return gestao.fn_escopo_permite(t.unidade_responsavel_id, v_sigilo, p_usuario_id);
+  return gestao.fn_escopo_permite(t.unidade_responsavel_id,
+                                  coalesce(d.sigilo, 'normal'), p_usuario_id);
 end;
 $$;
 
