@@ -3,20 +3,21 @@
 > Atualizado ao final de cada sessão do Claude Code. Máximo 40 linhas.
 > Formato: o que está pronto, o que vem a seguir, decisões que não estão no código.
 
-**Última atualização:** 2026-07-31 (Sessões 2 e 4)
-**Fase atual:** Sessões 1 e 2 concluídas (banco validado). Sessão 4 (serviços) iniciada.
+**Última atualização:** 2026-07-31 (Sessões 2, 4 e 5)
+**Fase atual:** Sessões 1, 2 e 5 concluídas. Sessão 4 (serviços) iniciada.
 
 ## Concluído
 
 - Sessão 1 (`sql/001`…`008`) rodada e commitada (`d23aca7`, no GitHub).
-- **Sessão 2: `sql/999_testes.sql` — todos os 13 critérios VERDES** (1–10 e 12 PASSOU; 11 PENDENTE=Sessão 10; 13 N/A=front). Roda em transação com ROLLBACK, `auth.uid()` simulado + `SET LOCAL ROLE`.
-- `docs/SCHEMA.md` gerado e atualizado.
-- Serviços (Sessão 4) criados: `js/services/` supabaseClient, demandas, tarefas, movimentacoes, anexos, notificacoes.
+- **Sessão 2: `sql/999_testes.sql` — 13 critérios VERDES** (1–10 e 12 PASSOU; 11 PENDENTE=Sessão 10; 13 N/A=front). `aa661c0` no GitHub.
+- Serviços (Sessão 4): `js/services/` supabaseClient, demandas, tarefas, movimentacoes, anexos, notificacoes.
+- **Sessão 5 (tela de referência):** `assets/css/app.css` (design system), `js/ui/componentes.js`, `pages/demanda.html`, `js/ui/demanda.js`. Renderização verificada no navegador com dados de exemplo (cabeçalho, árvore de subtarefas, timeline com retificação, ações por perfil).
 
 ## Próximo passo
 
-- Definir a próxima frente com o usuário. Autenticação (Sessão 3) **adiada a pedido** — não criar login/guarda por ora.
-- Candidatas sem depender de auth: Sessão 5 (tela da demanda, padrão visual) usando dados de seed; completar serviços que faltam RPC (marcar notificação lida, comentar, admin) quando definirmos as funções.
+- Autenticação (Sessão 3) **adiada a pedido**.
+- A tela usa **dados de exemplo** (mock) até haver config/sessão; `carregarReal()` já faz import dinâmico dos serviços — a virada para dados reais é pontual quando a auth entrar. Faltam views/joins para trazer nomes (autor/responsável) e listagem de anexos ativos.
+- Candidatas: Sessão 6 (caixas de entrada/saída, mesmo padrão), ou fechar lacunas de banco (marcar notificação lida, comentar, admin).
 
 ## Decisões do usuário aplicadas (2026-07-31)
 

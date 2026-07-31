@@ -1,0 +1,254 @@
+/* =====================================================================
+   app.css — design system compartilhado (mobile-first)
+   Sistema de Gestão de Demandas — SME Ribeirão Preto
+   Complementa o Bootstrap 5 (carregado por CDN). As telas seguintes
+   reaproveitam estes tokens e componentes. Nada de estilo novo por tela.
+   ===================================================================== */
+
+:root {
+  /* Cores institucionais */
+  --cor-primaria: #14539a;
+  --cor-primaria-escura: #0e3d75;
+  --cor-primaria-clara: #e8f0fa;
+  --cor-acento: #0aa2c0;
+
+  /* Neutros */
+  --cinza-50:  #f6f8fa;
+  --cinza-100: #eef1f5;
+  --cinza-200: #dde3ea;
+  --cinza-300: #c4ccd6;
+  --cinza-500: #6b7684;
+  --cinza-700: #3a434f;
+  --cinza-900: #1b2027;
+
+  /* Situações */
+  --sit-aberta: #0d6efd;
+  --sit-andamento: #b8860b;
+  --sit-complementacao: #d97706;
+  --sit-devolvida: #7048e8;
+  --sit-concluida: #198754;
+  --sit-reaberta: #0aa2c0;
+  --sit-inativa: #6c757d;
+
+  /* Prioridades */
+  --pri-baixa: #6c757d;
+  --pri-normal: #14539a;
+  --pri-alta: #d97706;
+  --pri-urgente: #dc3545;
+
+  /* Layout */
+  --raio: 10px;
+  --raio-sm: 6px;
+  --sombra: 0 1px 3px rgba(20, 30, 45, .10), 0 1px 2px rgba(20, 30, 45, .06);
+  --sombra-forte: 0 6px 24px rgba(20, 30, 45, .14);
+  --gap: 1rem;
+  --largura-max: 960px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--cinza-900);
+  background: var(--cinza-50);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --------------------------------------------------------------- Cabeçalho */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+  background: var(--cor-primaria);
+  color: #fff;
+  box-shadow: var(--sombra);
+}
+.app-header__barra {
+  max-width: var(--largura-max);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .6rem .9rem;
+}
+.app-header__titulo {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  flex: 1 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.app-header a { color: #fff; text-decoration: none; }
+
+/* Container das páginas */
+.pagina {
+  max-width: var(--largura-max);
+  margin: 0 auto;
+  padding: var(--gap) .9rem 5rem;
+}
+
+/* --------------------------------------------------------------- Cartões */
+.cartao {
+  background: #fff;
+  border: 1px solid var(--cinza-200);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  padding: 1rem;
+  margin-bottom: var(--gap);
+}
+.cartao__titulo {
+  font-size: .8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--cinza-500);
+  margin: 0 0 .6rem;
+}
+
+/* --------------------------------------------------------------- Badges */
+.badge-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .18rem .55rem;
+  border-radius: 999px;
+  font-size: .74rem;
+  font-weight: 600;
+  line-height: 1.4;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.badge-chip::before {
+  content: "";
+  width: .5rem; height: .5rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Situação — cor via variável setada por classe */
+.badge-situacao { color: var(--cor); background: color-mix(in srgb, var(--cor) 12%, #fff); border-color: color-mix(in srgb, var(--cor) 30%, #fff); }
+.badge-situacao--aberta { --cor: var(--sit-aberta); }
+.badge-situacao--em_andamento { --cor: var(--sit-andamento); }
+.badge-situacao--aguardando_complementacao { --cor: var(--sit-complementacao); }
+.badge-situacao--devolvida { --cor: var(--sit-devolvida); }
+.badge-situacao--concluida { --cor: var(--sit-concluida); }
+.badge-situacao--reaberta { --cor: var(--sit-reaberta); }
+.badge-situacao--inativa { --cor: var(--sit-inativa); }
+
+/* Prioridade */
+.badge-prioridade { color: var(--cor); background: color-mix(in srgb, var(--cor) 12%, #fff); border-color: color-mix(in srgb, var(--cor) 30%, #fff); }
+.badge-prioridade--baixa { --cor: var(--pri-baixa); }
+.badge-prioridade--normal { --cor: var(--pri-normal); }
+.badge-prioridade--alta { --cor: var(--pri-alta); }
+.badge-prioridade--urgente { --cor: var(--pri-urgente); }
+
+/* Sigilo restrito — tarja de atenção */
+.badge-sigilo {
+  color: #b02a37;
+  background: #fdecee;
+  border-color: #f5c2c7;
+}
+
+/* --------------------------------------------------------------- Cabeçalho da demanda */
+.demanda-cabecalho__numero {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--cor-primaria);
+  letter-spacing: .02em;
+}
+.demanda-cabecalho__titulo {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: .25rem 0 .5rem;
+}
+.demanda-cabecalho__chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+.meta-grade {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: .5rem .9rem;
+  margin-top: .75rem;
+}
+.meta-item__rotulo { font-size: .72rem; color: var(--cinza-500); text-transform: uppercase; letter-spacing: .03em; }
+.meta-item__valor { font-weight: 600; }
+
+/* --------------------------------------------------------------- Árvore de tarefas */
+.arvore { list-style: none; margin: 0; padding: 0; }
+.arvore .arvore { margin-left: 1.1rem; border-left: 2px solid var(--cinza-200); padding-left: .6rem; }
+.tarefa-no {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem .6rem;
+  border: 1px solid var(--cinza-200);
+  border-radius: var(--raio-sm);
+  background: #fff;
+  margin: .35rem 0;
+}
+.tarefa-no__titulo { flex: 1 1 auto; font-weight: 600; }
+.tarefa-no--inativa { opacity: .55; }
+
+/* --------------------------------------------------------------- Timeline */
+.timeline { list-style: none; margin: 0; padding: 0; position: relative; }
+.timeline__item { position: relative; padding: 0 0 1rem 1.9rem; }
+.timeline__item::before {
+  content: "";
+  position: absolute;
+  left: .55rem; top: 1.4rem; bottom: -.1rem;
+  width: 2px; background: var(--cinza-200);
+}
+.timeline__item:last-child::before { display: none; }
+.timeline__marcador {
+  position: absolute; left: 0; top: .15rem;
+  width: 1.2rem; height: 1.2rem; border-radius: 50%;
+  background: var(--cor-primaria-clara);
+  color: var(--cor-primaria);
+  display: grid; place-items: center;
+  font-size: .7rem; font-weight: 700;
+  border: 2px solid #fff; box-shadow: 0 0 0 1px var(--cinza-200);
+}
+.timeline__cabecalho { display: flex; flex-wrap: wrap; gap: .4rem; align-items: baseline; }
+.timeline__autor { font-weight: 600; }
+.timeline__data { color: var(--cinza-500); font-size: .8rem; font-variant-numeric: tabular-nums; }
+.timeline__texto { margin: .25rem 0 0; white-space: pre-wrap; }
+.timeline__item--retificado .timeline__texto { text-decoration: line-through; color: var(--cinza-500); }
+.timeline__aviso { font-size: .8rem; color: #b02a37; margin-top: .2rem; }
+
+/* --------------------------------------------------------------- Barra de ações */
+.barra-acoes {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  background: #fff;
+  border-top: 1px solid var(--cinza-200);
+  box-shadow: 0 -2px 10px rgba(20,30,45,.06);
+  padding: .6rem .9rem;
+  display: flex; gap: .5rem; flex-wrap: wrap;
+  z-index: 1010;
+}
+.barra-acoes .btn { flex: 1 1 auto; }
+
+/* --------------------------------------------------------------- Utilitários */
+.texto-silencioso { color: var(--cinza-500); }
+.carregando { padding: 2rem; text-align: center; color: var(--cinza-500); }
+.tarja-demo {
+  background: #fff3cd; color: #664d03; border: 1px solid #ffe69c;
+  border-radius: var(--raio-sm); padding: .5rem .75rem; font-size: .85rem;
+  margin-bottom: var(--gap);
+}
+
+/* --------------------------------------------------------------- Responsivo */
+@media (min-width: 768px) {
+  .meta-grade { grid-template-columns: repeat(3, 1fr); }
+  .barra-acoes {
+    position: static;
+    border: 1px solid var(--cinza-200);
+    border-radius: var(--raio);
+    box-shadow: var(--sombra);
+    margin-top: var(--gap);
+  }
+  .barra-acoes .btn { flex: 0 0 auto; }
+  .pagina { padding-bottom: var(--gap); }
+}
