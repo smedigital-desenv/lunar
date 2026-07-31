@@ -3,21 +3,23 @@
 > Atualizado ao final de cada sessão do Claude Code. Máximo 40 linhas.
 > Formato: o que está pronto, o que vem a seguir, decisões que não estão no código.
 
-**Última atualização:** 2026-07-31 (Sessões 2, 4 e 5)
-**Fase atual:** Sessões 1, 2 e 5 concluídas. Sessão 4 (serviços) iniciada.
+**Última atualização:** 2026-07-31 (Sessões 2, 4, 5 e 6)
+**Fase atual:** Sessões 1, 2, 5 e 6 concluídas. Sessão 4 (serviços) em evolução.
 
 ## Concluído
 
 - Sessão 1 (`sql/001`…`008`) rodada e commitada (`d23aca7`, no GitHub).
 - **Sessão 2: `sql/999_testes.sql` — 13 critérios VERDES** (1–10 e 12 PASSOU; 11 PENDENTE=Sessão 10; 13 N/A=front). `aa661c0` no GitHub.
 - Serviços (Sessão 4): `js/services/` supabaseClient, demandas, tarefas, movimentacoes, anexos, notificacoes.
-- **Sessão 5 (tela de referência):** `assets/css/app.css` (design system), `js/ui/componentes.js`, `pages/demanda.html`, `js/ui/demanda.js`. Renderização verificada no navegador com dados de exemplo (cabeçalho, árvore de subtarefas, timeline com retificação, ações por perfil).
+- **Sessão 5 (tela de referência):** `assets/css/app.css` (design system), `js/ui/componentes.js`, `pages/demanda.html`, `js/ui/demanda.js`. Render verificado no navegador.
+- **Sessão 6 (caixas):** `pages/caixa-entrada.html` + `pages/caixa-saida.html`, `js/ui/caixa.js` (filtros/paginação compartilhados), `caixa-entrada.js`/`caixa-saida.js`. Serviços `listarCaixaEntrada` (tarefas.js) e `listarCaixaSaida` (demandas.js). Filtros (todos/pendentes/em andamento/urgentes/encerrados) e paginação **verificados no navegador**.
 
 ## Próximo passo
 
 - Autenticação (Sessão 3) **adiada a pedido**.
-- A tela usa **dados de exemplo** (mock) até haver config/sessão; `carregarReal()` já faz import dinâmico dos serviços — a virada para dados reais é pontual quando a auth entrar. Faltam views/joins para trazer nomes (autor/responsável) e listagem de anexos ativos.
-- Candidatas: Sessão 6 (caixas de entrada/saída, mesmo padrão), ou fechar lacunas de banco (marcar notificação lida, comentar, admin).
+- Telas usam **dados de exemplo** até haver config/sessão; `carregarReal()`/`listarCaixa*` já prontos para a virada. `listarCaixa*` ainda **não testados com auth real** (usam `supabase.auth.getUser()` + `.range()`).
+- Pendências de banco: views/joins p/ nomes (autor/responsável) na demanda e no `demandas(numero,titulo)` embutido; marcar notificação lida, comentar, admin (faltam RPCs).
+- Candidatas: Sessão 7 (modais de tramitação — envio real dos botões), Sessão 8 (dashboard/pesquisa) ou fechar lacunas de banco.
 
 ## Decisões do usuário aplicadas (2026-07-31)
 

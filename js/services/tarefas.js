@@ -57,3 +57,33 @@ export async function listarPorDemanda(demandaId) {
   if (error) throw error;
   return data;
 }
+
+// Aplica o filtro do painel a uma query (situação/prioridade).
+function filtroCaixa(q, filtro) {
+  switch (filtro) {
+    case 'pendentes':    return q.in('situacao', ['aberta', 'aguardando_complementacao', 'devolvida']);
+    case 'em_andamento': return q.in('situacao', ['em_andamento', 'reaberta']);
+    case 'urgentes':     return q.eq('prioridade', 'urgente');
+    case 'encerrados':   return q.eq('situacao', 'concluida');
+    default:             return q; // todos
+  }
+}
+
+// Caixa de ENTRADA: tarefas atribuídas ao usuário corrente, paginadas.
+export async function listarCaixaEntrada({ filtro = 'todos', pagina = 1, porPagina = 10 } = {}) {
+  const { data: sess } = await supabase.auth.getUser();
+  const uid = sess?.user?.id;
+  if (!uid) throw new Error('Sem sessão autenticada.');
+
+  let q = supabase.from('tarefas')
+    .select('id, demanda_id, titulo, situacao, prioridade, prazo, demandas(numero,titulo)',
+            { count: 'exact' })
+    .eq('responsavel_id', uid).eq('ativo', true);
+  q = filtroCaixa(q, filtro);
+
+  const de = (pagina - 1) * porPagina;
+  const { data, count, error } = await q
+    .order('criado_em', { ascending: false }).range(de, de + porPagina - 1);
+  if (error) throw error;
+  return { itens: data ?? [], total: count ?? 0 };
+}
