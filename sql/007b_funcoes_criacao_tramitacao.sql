@@ -171,7 +171,7 @@ begin
     insert into gestao.tarefas(
       demanda_id, titulo, descricao, responsavel_id, unidade_responsavel_id,
       situacao, prioridade, prazo, criado_por)
-    select d.titulo, 'Encaminhamento', null, p_destinatario_id, v_unidade_dest,
+    select v_demanda, d.titulo, 'Encaminhamento', p_destinatario_id, v_unidade_dest,
            'em_andamento', coalesce(p_prioridade, d.prioridade), p_prazo, v_autor
       from gestao.demandas d where d.id = v_demanda
     returning id into v_tarefa;
