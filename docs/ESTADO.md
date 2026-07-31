@@ -3,8 +3,8 @@
 > Atualizado ao final de cada sessão do Claude Code. Máximo 40 linhas.
 > Formato: o que está pronto, o que vem a seguir, decisões que não estão no código.
 
-**Última atualização:** 2026-07-31 (Sessões 2, 4, 5 e 6)
-**Fase atual:** Sessões 1, 2, 5 e 6 concluídas. Sessão 4 (serviços) em evolução.
+**Última atualização:** 2026-07-31 (Sessões 2, 4, 5, 6 e 7)
+**Fase atual:** Sessões 1, 2, 5, 6 e 7 concluídas. Sessão 4 (serviços) em evolução.
 
 ## Concluído
 
@@ -12,7 +12,8 @@
 - **Sessão 2: `sql/999_testes.sql` — 13 critérios VERDES** (1–10 e 12 PASSOU; 11 PENDENTE=Sessão 10; 13 N/A=front). `aa661c0` no GitHub.
 - Serviços (Sessão 4): `js/services/` supabaseClient, demandas, tarefas, movimentacoes, anexos, notificacoes.
 - **Sessão 5 (tela de referência):** `assets/css/app.css` (design system), `js/ui/componentes.js`, `pages/demanda.html`, `js/ui/demanda.js`. Render verificado no navegador.
-- **Sessão 6 (caixas):** `pages/caixa-entrada.html` + `pages/caixa-saida.html`, `js/ui/caixa.js` (filtros/paginação compartilhados), `caixa-entrada.js`/`caixa-saida.js`. Serviços `listarCaixaEntrada` (tarefas.js) e `listarCaixaSaida` (demandas.js). Filtros (todos/pendentes/em andamento/urgentes/encerrados) e paginação **verificados no navegador**.
+- **Sessão 6 (caixas):** `pages/caixa-entrada.html` + `pages/caixa-saida.html`, `js/ui/caixa.js` (filtros/paginação compartilhados), `caixa-entrada.js`/`caixa-saida.js`. Serviços `listarCaixaEntrada` (tarefas.js) e `listarCaixaSaida` (demandas.js). Filtros e paginação **verificados no navegador**.
+- **Sessão 7 (modais de tramitação):** `js/ui/modais.js` (`abrirFormulario` declarativo) + `js/ui/acoes-demanda.js` (campos e execução de cada ação). Wired em `demanda.js`: barra de ações, "Devolver" nas tarefas, retificar/ressalva na timeline (retificar só na própria movimentação com janela aberta). Abertura, validação de obrigatórios e submit-demo **verificados no navegador**. Em modo demo o submit só confirma por toast; em modo real chama a RPC e recarrega.
 
 ## Próximo passo
 

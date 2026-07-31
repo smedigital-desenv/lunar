@@ -119,6 +119,11 @@ export function itemTimeline(mov, opts = {}) {
     partes.push(`<p class="timeline__aviso">Ressalva de `
       + `${escapeHtml(opts.ressalva.autor_nome)}: ${escapeHtml(opts.ressalva.texto)}</p>`);
   }
+  if (opts.acoes && opts.acoes.length) {
+    partes.push('<div class="mt-1">' + opts.acoes.map(a =>
+      `<button class="btn btn-sm btn-link p-0 me-3" data-mov-acao="${escapeHtml(a.chave)}"`
+      + ` data-mov-id="${escapeHtml(a.movId)}">${escapeHtml(a.rotulo)}</button>`).join('') + '</div>');
+  }
   partes.push('</li>');
   return partes.join('');
 }
