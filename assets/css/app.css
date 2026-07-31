@@ -230,6 +230,30 @@ body {
 }
 .barra-acoes .btn { flex: 1 1 auto; }
 
+/* --------------------------------------------------------------- KPIs (painel) */
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--gap);
+  margin-bottom: var(--gap);
+}
+.kpi {
+  background: #fff;
+  border: 1px solid var(--cinza-200);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  padding: .9rem 1rem;
+}
+.kpi__valor { font-size: 1.9rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.kpi__rotulo { font-size: .75rem; color: var(--cinza-500); text-transform: uppercase; letter-spacing: .03em; }
+.kpi--alerta .kpi__valor { color: var(--pri-urgente); }
+.kpi--ok .kpi__valor { color: var(--sit-concluida); }
+
+/* Barras simples para quebras (por setor/prioridade/responsável). */
+.barra-linha { display: grid; grid-template-columns: 9rem 1fr auto; gap: .5rem; align-items: center; margin: .3rem 0; }
+.barra-trilho { background: var(--cinza-100); border-radius: 999px; height: .5rem; overflow: hidden; }
+.barra-preenchida { background: var(--cor-primaria); height: 100%; }
+
 /* --------------------------------------------------------------- Utilitários */
 .texto-silencioso { color: var(--cinza-500); }
 .carregando { padding: 2rem; text-align: center; color: var(--cinza-500); }
