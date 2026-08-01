@@ -8,7 +8,7 @@
 
 > **Todos os SQL (`001`…`013` + seed) executados no Supabase** (confirmado pelo usuário, 2026-08-01).
 > `js/config.js` **preenchido e versionado** (URL + anon key do projeto `iqldovwttomkjkoakosc`; anon é pública/protegida por RLS — service_role nunca). Removido do `.gitignore`.
-> Falta p/ o real: habilitar provider Email (login de teste) e/ou Google OAuth; publicar a Edge Function `relatorios` (`--no-verify-jwt`) + bucket privado `relatorios`.
+> Falta p/ o real: habilitar provider Email; **rodar `sql/008b_corrige_seed_auth.sql`** (login por senha dava 500 — faltava `auth.identities` + tokens NULL nos usuários do seed); e/ou Google OAuth; publicar a Edge Function `relatorios` + bucket.
 > **Testes:** roteiro em `docs/TESTES.md`.
 
 ## Concluído
