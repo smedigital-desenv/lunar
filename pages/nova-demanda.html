@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nova demanda — SME Ribeirão Preto</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet" crossorigin="anonymous">
+  <link rel="stylesheet" href="../assets/css/app.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="app-header__barra">
+      <a href="./caixa-saida.html" aria-label="Voltar" title="Voltar">&#8592;</a>
+      <h1 class="app-header__titulo">Nova demanda</h1>
+      <div id="sino-notificacoes" class="app-header__sino"></div>
+      <div id="usuario-sessao" class="app-header__sessao"></div>
+    </div>
+  </header>
+
+  <main class="pagina">
+    <div id="tarja-demo" class="tarja-demo" hidden>
+      Modo demonstração — o cadastro real fica disponível após login/configuração.
+    </div>
+    <div id="alerta" class="alert alert-danger" role="alert" hidden></div>
+
+    <form id="form-demanda" class="cartao" novalidate>
+      <div class="mb-3">
+        <label class="form-label" for="titulo">Título *</label>
+        <input class="form-control" id="titulo" name="titulo" required maxlength="200">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="objeto">Objeto / queixa *</label>
+        <textarea class="form-control" id="objeto" name="objeto" rows="3" required></textarea>
+        <div class="form-text">Campo estruturado que alimenta o relatório do processo.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="descricao">Descrição</label>
+        <textarea class="form-control" id="descricao" name="descricao" rows="3"></textarea>
+      </div>
+
+      <div class="form-grade">
+        <div class="mb-3">
+          <label class="form-label" for="tipo">Tipo</label>
+          <select class="form-select" id="tipo" name="tipo"></select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="prioridade">Prioridade</label>
+          <select class="form-select" id="prioridade" name="prioridade">
+            <option value="baixa">Baixa</option>
+            <option value="normal" selected>Normal</option>
+            <option value="alta">Alta</option>
+            <option value="urgente">Urgente</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="categoria">Categoria</label>
+          <input class="form-control" id="categoria" name="categoria">
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="setor">Setor</label>
+          <input class="form-control" id="setor" name="setor">
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="prazo">Prazo</label>
+          <input class="form-control" type="date" id="prazo" name="prazo">
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="responsavel">Responsável</label>
+          <select class="form-select" id="responsavel" name="responsavel"></select>
+          <div class="form-text">Em branco = você.</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="escola">Escola</label>
+          <select class="form-select" id="escola" name="escola"></select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="aluno">Aluno</label>
+          <input class="form-control" id="aluno" name="aluno">
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="solar">Nº processo Solar</label>
+          <input class="form-control" id="solar" name="solar">
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="sigilo">Sigilo</label>
+          <select class="form-select" id="sigilo" name="sigilo">
+            <option value="normal" selected>Normal</option>
+            <option value="restrito">Restrito</option>
+          </select>
+        </div>
+      </div>
+
+      <fieldset class="mb-3">
+        <legend class="cartao__titulo">Pessoas envolvidas</legend>
+        <div id="pessoas"></div>
+        <button type="button" id="add-pessoa" class="btn btn-sm btn-outline-primary">+ Adicionar pessoa</button>
+      </fieldset>
+
+      <div class="barra-acoes">
+        <button type="submit" id="salvar" class="btn btn-primary">Criar demanda</button>
+        <a href="./caixa-saida.html" class="btn btn-outline-secondary">Cancelar</a>
+      </div>
+    </form>
+  </main>
+
+  <script type="module" src="../js/ui/nova-demanda.js"></script>
+</body>
+</html>

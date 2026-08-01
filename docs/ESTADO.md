@@ -6,8 +6,10 @@
 **Última atualização:** 2026-08-01 (Sessões 3, 9, 10 e 11)
 **Fase atual:** Sessões 1–11 concluídas. Sessão 4 (serviços) em evolução.
 
-> `sql/009` e `sql/010` **executados no Supabase em 2026-08-01.**
-> ATENÇÃO (ainda não feito): rodar `sql/011_relatorios.sql` e `sql/012_auth_provisionamento.sql`; publicar a Edge Function `relatorios` (`--no-verify-jwt`) + bucket privado `relatorios`; preencher `js/config.js`; habilitar provider Email (login de teste) e/ou Google OAuth.
+> `sql/009` e `sql/010` executados; `sql/013` executado (confirmado pelo usuário).
+> CONFIRMAR se `sql/011_relatorios.sql` e `sql/012_auth_provisionamento.sql` já foram rodados (o login real depende do 012).
+> Para ligar o real: preencher `js/config.js`; habilitar provider Email (login de teste) e/ou Google OAuth; publicar a Edge Function `relatorios` (`--no-verify-jwt`) + bucket privado `relatorios`.
+> **Testes:** roteiro em `docs/TESTES.md`.
 
 ## Concluído
 
@@ -22,6 +24,7 @@
 - **Sessão 10 (relatórios PDF):** `sql/011_relatorios.sql` (`fn_dados_relatorio` com anonimização + anexos ativos; `fn_emitir_relatorio` grava `relatorios_emitidos` + movimentação `emissao_relatorio`; `fn_validar_relatorio` pública). Edge Function `supabase/functions/relatorios/index.ts` (Deno + pdf-lib): resumo e inteiro teor, A4, "Página X de Y", rodapé com hash SHA-256 + código + URL, versão anonimizada p/ sigilo restrito, upload ao bucket privado `relatorios` (service role), rota GET pública de validação (HTML/JSON). Serviço `js/services/relatorios.js`. Botões de emissão na barra de ações da `demanda.js` (aviso em demo). **Não testável aqui** (sem Supabase/Deno); render dos botões e aviso demo **verificados no navegador**.
 - **Sessão 11 (implantação):** `docs/IMPLANTACAO.md` (Supabase, Google OAuth c/ domínio, ordem dos SQL, buckets `anexos`+`relatorios` privados, deploy da Edge Function, GitHub Pages, organograma real, checklist). Adicionado `.gitignore` (protege `js/config.js`).
 - **Sessão 3 (autenticação):** `sql/012_auth_provisionamento.sql` (trigger de domínio em `auth.users` + `fn_provisionar_usuario` admin, idempotente). `js/config.js` (do exemplo, no `.gitignore`). `js/auth.js`: `loginGoogle` (OAuth c/ `hd`), `loginSenha` (teste), `logout`, `sessaoAtual`, `usuarioCorrente` (perfil+unidade via embedding PostgREST; recusa fora do domínio/não provisionado), `protegerRota`, `estaConfigurado`. `pages/login.html` + `js/ui/login.js` (Google + "acesso de teste" e-mail/senha; aviso demo). `js/ui/sessao.js`: guarda de rota + usuário/Sair no cabeçalho, com **import preguiçoso** do supabase (não quebra offline/demo). Slot `#usuario-sessao` + `iniciarSessao()` nas 5 páginas; estilos no `app.css`. **Decisão do usuário:** login bloqueado até admin provisionar; e-mail/senha habilitado p/ testes com os usuários do seed. Login demo, aviso e recuperação do dashboard **verificados no navegador (mobile)**.
+- **Nova demanda (destrava testes):** o roteiro nunca previu tela de criação e o seed não traz demandas. Criados `pages/nova-demanda.html` + `js/ui/nova-demanda.js` (form: título/objeto obrigatórios, tipo/escola/responsável via `js/services/referencias.js`, pessoas envolvidas dinâmicas → `fn_criar_demanda`) e link "+ Nova" nas caixas. Verificado em demo.
 - **Sessão 3 — Admin de usuários:** `sql/013_admin_usuarios.sql` (`fn_listar_contas_pendentes`, `fn_inativar_usuario`, `fn_reativar_usuario`, todas admin; inativar/reativar auditam). `js/services/admin.js`. `pages/admin.html` + `js/ui/admin.js`: libera contas pendentes (nome+perfil+unidade → `fn_provisionar_usuario`), inativa/reativa usuários, com modo demo. Link "Admin" no cabeçalho só p/ `pode_administrar` (RLS é o gate real). **Verificado no navegador (mobile)**.
 
 ## Próximo passo

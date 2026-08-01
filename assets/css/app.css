@@ -420,3 +420,11 @@ body {
 .admin-usuario__acoes { display: flex; align-items: center; gap: .4rem; flex: 0 0 auto; }
 .admin-usuario--inativo .admin-usuario__info strong { color: var(--cinza-500); text-decoration: line-through; }
 .sessao__admin { color: #fff; font-size: .75rem; text-decoration: underline; }
+
+/* --------------------------------------------------------------- Formulário nova demanda */
+.form-grade { display: grid; grid-template-columns: 1fr; gap: 0 1rem; }
+@media (min-width: 640px) { .form-grade { grid-template-columns: 1fr 1fr; } }
+.pessoa-linha { display: grid; grid-template-columns: 1fr; gap: .4rem; margin-bottom: .5rem; }
+@media (min-width: 640px) {
+  .pessoa-linha { grid-template-columns: 1.3fr 1fr 1.4fr auto; align-items: center; }
+}
