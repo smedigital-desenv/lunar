@@ -255,7 +255,7 @@ Deno.serve(async (req) => {
   if (req.method === "GET") {
     const codigo = url.searchParams.get("codigo");
     if (!codigo) return json({ valido: false, erro: "Informe ?codigo=" }, 400);
-    const admin = createClient(URL_BASE, SERVICE);
+    const admin = createClient(URL_BASE, SERVICE, { db: { schema: "gestao" } });
     const { data, error } = await admin.rpc("fn_validar_relatorio", { p_codigo: codigo });
     if (error) return json({ valido: false, erro: error.message }, 500);
     if ((req.headers.get("accept") || "").includes("text/html")) {
@@ -275,7 +275,7 @@ Deno.serve(async (req) => {
       return json({ erro: "Parâmetros: demanda_id e tipo (resumo|inteiro_teor)." }, 400);
     }
 
-    const usuario = createClient(URL_BASE, ANON, { global: { headers: { Authorization: auth } } });
+    const usuario = createClient(URL_BASE, ANON, { db: { schema: "gestao" }, global: { headers: { Authorization: auth } } });
     const anon = !!anonimizado;
 
     const { data: dados, error: eDados } = await usuario.rpc("fn_dados_relatorio", { p_demanda_id: demanda_id, p_anonimizado: anon });
@@ -288,7 +288,7 @@ Deno.serve(async (req) => {
 
     // Upload ao storage (service role; bucket privado).
     const caminho = `${dados.demanda.numero}/${tipo}-${codigo}.pdf`;
-    const admin = createClient(URL_BASE, SERVICE);
+    const admin = createClient(URL_BASE, SERVICE, { db: { schema: "gestao" } });
     const { error: eUp } = await admin.storage.from(BUCKET).upload(caminho, pdf, { contentType: "application/pdf", upsert: true });
     const caminhoGravado = eUp ? null : caminho;
 
