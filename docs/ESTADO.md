@@ -24,7 +24,7 @@
 
 ## Próximo passo
 
-- **Autenticação (Sessão 3) — único bloco restante, adiada a pedido.** Sem ela o sistema roda em modo demo e as chamadas reais (inclusive emissão de relatório) não retornam dados.
+- **Autenticação (Sessão 3) — único bloco restante. Adiada por decisão do usuário: NÃO implementar até ele concluir os testes do sistema (2026-08-01).** Até lá, o sistema roda em modo demo e as chamadas reais (inclusive emissão de relatório) não retornam dados. Só retomar quando o usuário liberar.
 - Telas usam **dados de exemplo** até haver config/sessão; `carregarReal()`/`listarCaixa*` já prontos para a virada. `listarCaixa*` ainda **não testados com auth real**.
 - Pendências de banco: views/joins p/ nomes (autor/responsável); comentar, admin (faltam RPCs).
 
