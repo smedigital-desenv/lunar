@@ -130,7 +130,7 @@ function renderPessoas(pessoas) {
   return `<h2 class="cartao__titulo">Pessoas envolvidas</h2><ul>${linhas}</ul>`;
 }
 
-function renderArvore(tarefas) {
+function renderArvore(tarefas, usuarioId) {
   if (!tarefas || !tarefas.length) return '<p class="texto-silencioso">Sem subtarefas.</p>';
   const filhosDe = new Map();
   for (const t of tarefas) {
@@ -141,16 +141,23 @@ function renderArvore(tarefas) {
   const ramo = (chave) => {
     const filhos = filhosDe.get(chave) || [];
     if (!filhos.length) return '';
-    return `<ul class="arvore">` + filhos.map(t => `
+    return `<ul class="arvore">` + filhos.map(t => {
+      // "Trocar destino" só para quem encaminhou (criador da tarefa).
+      const souCriador = usuarioId && t.criado_por === usuarioId;
+      const acaoTrocar = souCriador && t.ativo !== false
+        ? `<button class="btn btn-sm btn-link p-0" data-tarefa-acao="reencaminhar" data-tarefa-id="${escapeHtml(t.id)}">Trocar destino</button>`
+        : '';
+      return `
       <li>
         <div class="tarefa-no${t.ativo === false ? ' tarefa-no--inativa' : ''}">
           <span class="tarefa-no__titulo">${escapeHtml(t.titulo)}</span>
           ${badgeSituacao(t.situacao)}
           <span class="texto-silencioso">${escapeHtml(t.responsavel_nome || '—')}</span>
           <button class="btn btn-sm btn-link p-0" data-tarefa-acao="devolutiva" data-tarefa-id="${escapeHtml(t.id)}">Devolver</button>
+          ${acaoTrocar}
         </div>
         ${ramo(t.id)}
-      </li>`).join('') + `</ul>`;
+      </li>`; }).join('') + `</ul>`;
   };
   return ramo('__raiz');
 }
@@ -245,7 +252,7 @@ async function iniciar() {
   document.getElementById('cabecalho').innerHTML = renderCabecalho(demanda);
   document.getElementById('dados').innerHTML = renderDados(demanda);
   document.getElementById('pessoas').innerHTML = renderPessoas(pessoas);
-  document.getElementById('arvore').innerHTML = renderArvore(tarefas);
+  document.getElementById('arvore').innerHTML = renderArvore(tarefas, usuario.id);
   document.getElementById('timeline').innerHTML = renderTimeline(movimentacoes, usuario);
   document.getElementById('acoes').innerHTML = renderAcoes(demanda, usuario);
 

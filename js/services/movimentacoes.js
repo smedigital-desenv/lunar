@@ -9,11 +9,17 @@ import { supabase, rpc } from './supabaseClient.js';
 // Timeline cronológica completa da demanda (inclui movimentações de tarefas).
 export async function listarPorDemanda(demandaId) {
   const { data, error } = await supabase
-    .from('movimentacoes').select('*')
+    .from('movimentacoes')
+    .select('*, autor:usuarios!autor_id(nome), destinatario:usuarios!destinatario_id(nome)')
     .eq('demanda_id', demandaId)
     .order('criado_em', { ascending: true });
   if (error) throw error;
-  return data;
+  // Achata os nomes para os campos que a timeline espera.
+  return (data ?? []).map(m => ({
+    ...m,
+    autor_nome: m.autor?.nome ?? null,
+    destinatario_nome: m.destinatario?.nome ?? null
+  }));
 }
 
 // Retifica uma movimentação (só enquanto a janela estiver aberta).

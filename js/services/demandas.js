@@ -61,12 +61,24 @@ export function reativarDemanda(id, motivo) {
   return rpc('fn_reativar', { p_entidade: 'demanda', p_id: id, p_motivo: motivo });
 }
 
-// Leitura de uma demanda por id (RLS decide a visibilidade).
+// Leitura de uma demanda por id (RLS decide a visibilidade), já com os
+// nomes de responsável, solicitante, escola e tipo.
 export async function obterDemanda(id) {
   const { data, error } = await supabase
-    .from('demandas').select('*').eq('id', id).maybeSingle();
+    .from('demandas')
+    .select('*, responsavel:usuarios!responsavel_atual_id(nome),'
+      + ' solicitante:usuarios!solicitante_id(nome),'
+      + ' escola:escolas!escola_id(nome), tipo:tipos_demanda!tipo_id(nome)')
+    .eq('id', id).maybeSingle();
   if (error) throw error;
-  return data;
+  if (!data) return null;
+  return {
+    ...data,
+    responsavel_nome: data.responsavel?.nome ?? null,
+    solicitante_nome: data.solicitante?.nome ?? null,
+    escola_nome: data.escola?.nome ?? null,
+    tipo_nome: data.tipo?.nome ?? null
+  };
 }
 
 // Aplica o filtro do painel a uma query (situação/prioridade).

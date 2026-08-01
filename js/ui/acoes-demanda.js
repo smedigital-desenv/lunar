@@ -25,6 +25,9 @@ export function camposDaAcao(chave, ctx) {
       { nome: 'titulo', rotulo: 'Título', tipo: 'text', obrigatorio: true },
       { nome: 'descricao', rotulo: 'Descrição', tipo: 'textarea' },
       { nome: 'prazo', rotulo: 'Prazo (opcional)', tipo: 'date' } ] };
+    case 'reencaminhar': return { titulo: 'Trocar destinatário', textoConfirmar: 'Trocar', campos: [
+      { nome: 'destinatario', rotulo: 'Novo destinatário', tipo: 'select', opcoes: usuarios, obrigatorio: true },
+      { nome: 'texto', rotulo: 'Observação (opcional)', tipo: 'textarea' } ] };
     case 'devolutiva': return { titulo: 'Registrar devolutiva', textoConfirmar: 'Registrar', campos: [
       { nome: 'texto', rotulo: 'Texto da devolutiva', tipo: 'textarea', obrigatorio: true },
       { nome: 'anexos', rotulo: 'Anexos (PDF, Word, Excel, imagem — até 20 MB)', tipo: 'file' } ] };
@@ -64,6 +67,8 @@ async function executar(chave, vals, ctx) {
       demandaId: id, prioridade: vals.prioridade || null, prazo: vals.prazo || null });
     case 'subtarefa': return tar.criarSubtarefa({ parentId: vals.parent, responsavelId: vals.responsavel,
       titulo: vals.titulo, descricao: vals.descricao || null, prazo: vals.prazo || null });
+    case 'reencaminhar': return tar.reencaminhar({ tarefaId: ctx.tarefaId,
+      novoDestinatarioId: vals.destinatario, texto: vals.texto || null });
     case 'devolutiva': {
       const metadados = [];
       for (const f of (vals.anexos || [])) metadados.push(await anx.subirAnexo(f, { pasta: `demanda/${id}` }));

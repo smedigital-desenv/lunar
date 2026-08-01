@@ -51,11 +51,22 @@ export function reativarTarefa(id, motivo) {
 // Árvore de tarefas de uma demanda (para montar a hierarquia no front).
 export async function listarPorDemanda(demandaId) {
   const { data, error } = await supabase
-    .from('tarefas').select('*')
+    .from('tarefas')
+    .select('*, responsavel:usuarios!responsavel_id(nome)')
     .eq('demanda_id', demandaId)
     .order('criado_em', { ascending: true });
   if (error) throw error;
-  return data;
+  return (data ?? []).map(t => ({ ...t, responsavel_nome: t.responsavel?.nome ?? null }));
+}
+
+// Troca o destinatário de uma tarefa já encaminhada (só enquanto o
+// destinatário não agiu). Regra e permissão validadas no banco.
+export function reencaminhar({ tarefaId, novoDestinatarioId, texto }) {
+  return rpc('fn_reencaminhar_tarefa', {
+    p_tarefa_id: tarefaId,
+    p_novo_destinatario_id: novoDestinatarioId,
+    p_texto: texto || null
+  });
 }
 
 // Aplica o filtro do painel a uma query (situação/prioridade).
