@@ -1,0 +1,12 @@
+# Config real do front (URL + anon key). NUNCA versionar (regra 10).
+js/config.js
+
+# Segredos/serviços do Supabase (a service_role jamais é versionada).
+.env
+.env.*
+supabase/.env
+supabase/.temp/
+
+# Sistema
+.DS_Store
+Thumbs.db

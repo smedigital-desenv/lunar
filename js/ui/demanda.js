@@ -193,7 +193,32 @@ function acoesDisponiveis(d, usuario) {
   if (ativa && d.situacao === 'concluida' && gerenteMais) acoes.push(['reabrir', 'Reabrir']);
   if (ativa && gerenteMais) acoes.push(['inativar', 'Inativar']);
   if (!ativa && gerenteMais) acoes.push(['reativar', 'Reativar']);
+  // Relatórios do processo (Sessão 10) — disponíveis a quem vê a demanda,
+  // inclusive concluída/inativa (certidão para juntada). Versão anonimizada
+  // apenas para sigilo restrito (seção 14).
+  acoes.push(['relatorio_resumo', 'Relatório-resumo'], ['relatorio_inteiro', 'Inteiro teor']);
+  if (d.sigilo === 'restrito') {
+    acoes.push(['relatorio_resumo_anon', 'Resumo (anonimizado)'],
+               ['relatorio_inteiro_anon', 'Inteiro teor (anonimizado)']);
+  }
   return acoes;
+}
+
+// Emite um relatório via Edge Function e baixa o PDF. Indisponível em demo.
+async function emitirRelatorio(acao, demanda, demo) {
+  const tipo = acao.includes('inteiro') ? 'inteiro_teor' : 'resumo';
+  const anon = acao.endsWith('_anon');
+  if (demo) { toast('Emissão de relatório requer sessão (indisponível no modo demo).', 'aviso'); return; }
+  try {
+    const svc = await import('../services/relatorios.js');
+    toast('Gerando relatório…', 'info');
+    const r = await svc.emitirRelatorio(demanda.id, tipo, anon);
+    svc.baixarPdf(r.pdf_base64, `${demanda.numero}-${tipo}${anon ? '-anon' : ''}.pdf`);
+    toast(`Relatório emitido. Código ${r.codigo}.`, 'sucesso');
+  } catch (e) {
+    console.error(e);
+    toast('Falha ao emitir relatório.', 'erro');
+  }
 }
 function renderAcoes(d, usuario) {
   const acoes = acoesDisponiveis(d, usuario);
@@ -222,7 +247,9 @@ async function iniciar() {
 
   document.getElementById('acoes').addEventListener('click', (e) => {
     const b = e.target.closest('[data-acao]');
-    if (b) abrirEExecutar(b.dataset.acao, { ...ctxBase });
+    if (!b) return;
+    if (b.dataset.acao.startsWith('relatorio')) { emitirRelatorio(b.dataset.acao, demanda, demo); return; }
+    abrirEExecutar(b.dataset.acao, { ...ctxBase });
   });
   document.getElementById('arvore').addEventListener('click', (e) => {
     const b = e.target.closest('[data-tarefa-acao]');

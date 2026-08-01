@@ -61,7 +61,10 @@
 - `fn_retificar_movimentacao(movimentacao_id, texto_correto, justificativa) → uuid` (janela aberta)
 - `fn_registrar_ressalva(movimentacao_id, texto_correto, justificativa) → uuid`
 - `fn_inativar(entidade[demanda|tarefa|anexo], id, motivo) → void` · `fn_reativar(entidade, id, motivo) → void` (gerente+)
-- *(pendente Sessão 10)* `fn_emitir_relatorio(demanda_id, tipo)`.
+- `fn_dados_relatorio(demanda_id, anonimizado) → jsonb` — dados p/ o PDF (checa acesso; anonimiza aluno/responsáveis; anexos ativos). SECURITY DEFINER.
+- `fn_emitir_relatorio(demanda_id, tipo, anonimizado, hash, codigo, caminho) → uuid` — grava `relatorios_emitidos` + movimentação `emissao_relatorio` (hash/código vêm da Edge Function).
+- `fn_validar_relatorio(codigo) → jsonb` — rota **pública** (anon): confirma emissão e devolve metadados + hash.
+- **Notificações (S9):** `fn_marcar_notificacao_lida(id)` · `fn_marcar_todas_notificacoes_lidas() → int` (SECURITY DEFINER; tabela sem UPDATE ao front).
 
 ## Convenções de escrita do front
 
