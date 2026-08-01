@@ -42,7 +42,13 @@ sql/008_seed.sql
 sql/009_dashboard_pesquisa.sql
 sql/010_notificacoes.sql
 sql/011_relatorios.sql
+sql/012_auth_provisionamento.sql
 ```
+
+> `sql/012` cria a **trava de domínio** em `auth.users` (trigger) e a função
+> `fn_provisionar_usuario` (admin). O trigger é criado no schema `auth`; rode-o
+> como `postgres`/dono do projeto (o SQL Editor do Supabase já roda com esse
+> privilégio).
 
 - `008_seed.sql` cria o organograma de exemplo, usuários fictícios, tipos de
   demanda, escolas e feriados do ano. Em produção, **substitua** pelo organograma
@@ -65,17 +71,30 @@ O acesso é por conta Google institucional **`@educacao.pmrp.sp.gov.br`**.
    → **Enable**.
 3. **Authentication → URL Configuration:** defina o **Site URL** (a URL do GitHub
    Pages, passo 6) e adicione-a às **Redirect URLs**.
-4. **Trava de domínio (duas camadas):**
-   - No front (`js/auth.js`, Sessão 3): recusar login cujo e-mail não termine em
-     `@educacao.pmrp.sp.gov.br` e deslogar.
-   - No banco: a coluna `usuarios.email` tem `CHECK` de domínio, e o
-     provisionamento do usuário (função de Sessão 3) recusa fora do domínio.
-     Enquanto a Sessão 3 não estiver publicada, cadastre os usuários manualmente
-     via função `SECURITY DEFINER` (nunca `INSERT` direto).
+4. **Trava de domínio (três camadas):**
+   - Front (`js/auth.js`): recusa login cujo e-mail não termine em
+     `@educacao.pmrp.sp.gov.br` e desloga.
+   - `auth.users`: trigger `trg_bloquear_dominio` (de `sql/012`) barra a criação
+     de qualquer conta fora do domínio.
+   - `gestao.usuarios`: `CHECK` de domínio + `fn_provisionar_usuario` revalida.
+5. **Provisionamento (login bloqueado até cadastro):** ter conta Google no
+   domínio **não** dá acesso. É preciso uma linha em `gestao.usuarios` (perfil +
+   unidade), criada por um **admin** via `fn_provisionar_usuario(auth_id, nome,
+   perfil, unidade_id)`. Fluxo: a pessoa faz login uma vez (cria a conta em
+   `auth.users`); um admin pega o `id` dela (Auth → Users) e chama a função. O
+   **primeiro admin** vem do seed (`admin_ti`); em produção, semeie o admin real
+   antes de liberar.
+6. **Acesso de teste (e-mail/senha):** para testar sem configurar o Google OAuth,
+   habilite **Authentication → Providers → Email** e use os usuários do seed
+   (`secretario@…`, `agente.sai@…`, etc.; senha `dev-123456`). A tela de login
+   tem a seção "Acesso de teste". Se o login por senha falhar (versões de GoTrue
+   que exigem `auth.identities`), recrie os usuários de teste em **Auth → Add
+   user** com o mesmo e-mail. **Remova/!inative os usuários de teste antes de
+   produção.**
 
-> **Sessão 3 (autenticação) ainda não publicada.** Sem ela, o front opera em
-> *modo demonstração* (dados de exemplo) e as chamadas ao banco/Edge Functions
-> não retornam dados reais. Conclua a Sessão 3 antes do uso em produção.
+> Sem `js/config.js` preenchido, o front opera em *modo demonstração* (dados de
+> exemplo) e não redireciona para o login. Com config real, as páginas internas
+> exigem sessão e usuário provisionado.
 
 ---
 

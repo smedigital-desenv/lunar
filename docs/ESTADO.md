@@ -3,11 +3,11 @@
 > Atualizado ao final de cada sessão do Claude Code. Máximo 40 linhas.
 > Formato: o que está pronto, o que vem a seguir, decisões que não estão no código.
 
-**Última atualização:** 2026-08-01 (Sessões 9, 10 e 11)
-**Fase atual:** Sessões 1, 2, 5–11 concluídas. Sessão 4 (serviços) em evolução. Só falta a Sessão 3 (autenticação, adiada a pedido).
+**Última atualização:** 2026-08-01 (Sessões 3, 9, 10 e 11)
+**Fase atual:** Sessões 1–11 concluídas. Sessão 4 (serviços) em evolução.
 
 > `sql/009` e `sql/010` **executados no Supabase em 2026-08-01.**
-> ATENÇÃO: rodar `sql/011_relatorios.sql` no Supabase; publicar a Edge Function `relatorios` (`supabase functions deploy relatorios --no-verify-jwt`); criar o bucket privado `relatorios`. Ainda não feito.
+> ATENÇÃO (ainda não feito): rodar `sql/011_relatorios.sql` e `sql/012_auth_provisionamento.sql`; publicar a Edge Function `relatorios` (`--no-verify-jwt`) + bucket privado `relatorios`; preencher `js/config.js`; habilitar provider Email (login de teste) e/ou Google OAuth.
 
 ## Concluído
 
@@ -21,12 +21,13 @@
 - **Sessão 9 (notificações):** `sql/010_notificacoes.sql` (`fn_marcar_notificacao_lida` e `fn_marcar_todas_notificacoes_lidas`, SECURITY DEFINER — a tabela segue sem UPDATE ao front) — **aplicado no banco (2026-08-01)**. `js/services/notificacoes.js` ganhou `marcarLida`/`marcarTodasLidas`. Widget `js/ui/notificacoes.js`: sino no cabeçalho com badge de não lidas, painel com lista (lida/não lida + data de leitura), marcação individual/total, clique navega p/ a demanda; **polling 60 s**; modo demo com exemplos. Sino montado nas 5 páginas (`app-header__sino`) e estilos no `app.css`. Badge, painel, marcar-todas e modo demo **verificados no navegador (mobile 390px)**. Notificações já são **criadas** pelas funções de tramitação (`sql/007b`).
 - **Sessão 10 (relatórios PDF):** `sql/011_relatorios.sql` (`fn_dados_relatorio` com anonimização + anexos ativos; `fn_emitir_relatorio` grava `relatorios_emitidos` + movimentação `emissao_relatorio`; `fn_validar_relatorio` pública). Edge Function `supabase/functions/relatorios/index.ts` (Deno + pdf-lib): resumo e inteiro teor, A4, "Página X de Y", rodapé com hash SHA-256 + código + URL, versão anonimizada p/ sigilo restrito, upload ao bucket privado `relatorios` (service role), rota GET pública de validação (HTML/JSON). Serviço `js/services/relatorios.js`. Botões de emissão na barra de ações da `demanda.js` (aviso em demo). **Não testável aqui** (sem Supabase/Deno); render dos botões e aviso demo **verificados no navegador**.
 - **Sessão 11 (implantação):** `docs/IMPLANTACAO.md` (Supabase, Google OAuth c/ domínio, ordem dos SQL, buckets `anexos`+`relatorios` privados, deploy da Edge Function, GitHub Pages, organograma real, checklist). Adicionado `.gitignore` (protege `js/config.js`).
+- **Sessão 3 (autenticação):** `sql/012_auth_provisionamento.sql` (trigger de domínio em `auth.users` + `fn_provisionar_usuario` admin, idempotente). `js/config.js` (do exemplo, no `.gitignore`). `js/auth.js`: `loginGoogle` (OAuth c/ `hd`), `loginSenha` (teste), `logout`, `sessaoAtual`, `usuarioCorrente` (perfil+unidade via embedding PostgREST; recusa fora do domínio/não provisionado), `protegerRota`, `estaConfigurado`. `pages/login.html` + `js/ui/login.js` (Google + "acesso de teste" e-mail/senha; aviso demo). `js/ui/sessao.js`: guarda de rota + usuário/Sair no cabeçalho, com **import preguiçoso** do supabase (não quebra offline/demo). Slot `#usuario-sessao` + `iniciarSessao()` nas 5 páginas; estilos no `app.css`. **Decisão do usuário:** login bloqueado até admin provisionar; e-mail/senha habilitado p/ testes com os usuários do seed. Login demo, aviso e recuperação do dashboard **verificados no navegador (mobile)**.
 
 ## Próximo passo
 
-- **Autenticação (Sessão 3) — único bloco restante. Adiada por decisão do usuário: NÃO implementar até ele concluir os testes do sistema (2026-08-01).** Até lá, o sistema roda em modo demo e as chamadas reais (inclusive emissão de relatório) não retornam dados. Só retomar quando o usuário liberar.
-- Telas usam **dados de exemplo** até haver config/sessão; `carregarReal()`/`listarCaixa*` já prontos para a virada. `listarCaixa*` ainda **não testados com auth real**.
-- Pendências de banco: views/joins p/ nomes (autor/responsável); comentar, admin (faltam RPCs).
+- **Ligar o real:** rodar `sql/011`+`sql/012`, preencher `js/config.js`, habilitar provider Email (login de teste com usuários do seed, senha `dev-123456`) e/ou Google OAuth, deploy da Edge Function `relatorios` + bucket. Aí as telas saem do modo demo.
+- Telas usam **dados de exemplo** até haver config/sessão; `carregarReal()`/`listarCaixa*` já prontos. `listarCaixa*` e o fluxo autenticado ainda **não testados com Supabase real** (sem acesso ao `esm.sh`/banco aqui).
+- Pendências de banco: views/joins p/ nomes (autor/responsável); comentar; **admin.js + RPCs de admin** (usar `fn_provisionar_usuario` para usuários; faltam CRUD de unidades/tipos/feriados).
 
 ## Decisões do usuário aplicadas (2026-07-31)
 

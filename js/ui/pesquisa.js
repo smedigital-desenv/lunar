@@ -93,3 +93,7 @@ renderizar();
 // Sino de notificações no cabeçalho (Sessão 9).
 import { montarSino } from './notificacoes.js';
 montarSino('sino-notificacoes');
+
+// Sessão e guarda de rota (Sessão 3).
+import { iniciarSessao } from './sessao.js';
+iniciarSessao();
