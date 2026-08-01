@@ -1,5 +1,5 @@
-// Copie este arquivo para js/config.js e preencha com os dados do projeto.
-// js/config.js está no .gitignore e NUNCA deve ser versionado.
+// Modelo. Os valores reais ficam em js/config.js (versionado — contém só
+// URL + anon key, públicas e protegidas por RLS).
 // Use apenas a anon key. A service_role key jamais entra no front-end.
 
 export const SUPABASE_URL = 'https://SEU-PROJETO.supabase.co';

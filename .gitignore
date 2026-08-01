@@ -1,5 +1,5 @@
-# Config real do front (URL + anon key). NUNCA versionar (regra 10).
-js/config.js
+# js/config.js É versionado: contém apenas URL + anon key (públicas por
+# natureza, protegidas por RLS). A service_role NUNCA entra aqui (regra 10).
 
 # Segredos/serviços do Supabase (a service_role jamais é versionada).
 .env

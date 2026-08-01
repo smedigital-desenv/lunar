@@ -7,7 +7,8 @@
 **Fase atual:** Sessões 1–11 concluídas. Sessão 4 (serviços) em evolução.
 
 > **Todos os SQL (`001`…`013` + seed) executados no Supabase** (confirmado pelo usuário, 2026-08-01).
-> Para ligar o real: preencher `js/config.js`; habilitar provider Email (login de teste) e/ou Google OAuth; publicar a Edge Function `relatorios` (`--no-verify-jwt`) + bucket privado `relatorios`.
+> `js/config.js` **preenchido e versionado** (URL + anon key do projeto `iqldovwttomkjkoakosc`; anon é pública/protegida por RLS — service_role nunca). Removido do `.gitignore`.
+> Falta p/ o real: habilitar provider Email (login de teste) e/ou Google OAuth; publicar a Edge Function `relatorios` (`--no-verify-jwt`) + bucket privado `relatorios`.
 > **Testes:** roteiro em `docs/TESTES.md`.
 
 ## Concluído
