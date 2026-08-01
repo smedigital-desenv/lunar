@@ -70,17 +70,23 @@ async function carregar() {
 }
 
 async function carregarReal(id) {
-  const [dem, tar, mov] = await Promise.all([
+  const [dem, tar, mov, ref, auth] = await Promise.all([
     import('../services/demandas.js'),
     import('../services/tarefas.js'),
-    import('../services/movimentacoes.js')
+    import('../services/movimentacoes.js'),
+    import('../services/referencias.js'),
+    import('../auth.js')
   ]);
   const demanda = await dem.obterDemanda(id);
   if (!demanda) return null;
-  const [tarefas, movimentacoes] = await Promise.all([
-    tar.listarPorDemanda(id), mov.listarPorDemanda(id)
+  const [tarefas, movimentacoes, listaUsuarios, usuario] = await Promise.all([
+    tar.listarPorDemanda(id), mov.listarPorDemanda(id),
+    ref.listarUsuariosAtivos(), auth.usuarioCorrente()
   ]);
-  return { demanda, tarefas, movimentacoes, pessoas: [], usuario: null };
+  // Selects de destinatário/responsável precisam de UUIDs reais (não os
+  // exemplos u_julia/…). valor = id da conta; rotulo = nome.
+  const usuarios = (listaUsuarios || []).map(u => ({ valor: u.id, rotulo: u.nome }));
+  return { demanda, tarefas, movimentacoes, pessoas: [], usuario, usuarios };
 }
 
 // ---------------------------------------------------------------- Render
@@ -243,7 +249,7 @@ async function iniciar() {
   document.getElementById('timeline').innerHTML = renderTimeline(movimentacoes, usuario);
   document.getElementById('acoes').innerHTML = renderAcoes(demanda, usuario);
 
-  const ctxBase = { demanda, tarefas, usuarios: USUARIOS_EXEMPLO, demo };
+  const ctxBase = { demanda, tarefas, usuarios: dados.usuarios || USUARIOS_EXEMPLO, demo };
 
   document.getElementById('acoes').addEventListener('click', (e) => {
     const b = e.target.closest('[data-acao]');
