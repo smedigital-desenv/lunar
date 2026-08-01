@@ -6,8 +6,7 @@
 **Última atualização:** 2026-08-01 (Sessões 3, 9, 10 e 11)
 **Fase atual:** Sessões 1–11 concluídas. Sessão 4 (serviços) em evolução.
 
-> `sql/009` e `sql/010` executados; `sql/013` executado (confirmado pelo usuário).
-> CONFIRMAR se `sql/011_relatorios.sql` e `sql/012_auth_provisionamento.sql` já foram rodados (o login real depende do 012).
+> **Todos os SQL (`001`…`013` + seed) executados no Supabase** (confirmado pelo usuário, 2026-08-01).
 > Para ligar o real: preencher `js/config.js`; habilitar provider Email (login de teste) e/ou Google OAuth; publicar a Edge Function `relatorios` (`--no-verify-jwt`) + bucket privado `relatorios`.
 > **Testes:** roteiro em `docs/TESTES.md`.
 
