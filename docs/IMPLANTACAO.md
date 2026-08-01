@@ -43,6 +43,7 @@ sql/009_dashboard_pesquisa.sql
 sql/010_notificacoes.sql
 sql/011_relatorios.sql
 sql/012_auth_provisionamento.sql
+sql/013_admin_usuarios.sql
 ```
 
 > `sql/012` cria a **trava de domínio** em `auth.users` (trigger) e a função
@@ -83,7 +84,9 @@ O acesso é por conta Google institucional **`@educacao.pmrp.sp.gov.br`**.
    perfil, unidade_id)`. Fluxo: a pessoa faz login uma vez (cria a conta em
    `auth.users`); um admin pega o `id` dela (Auth → Users) e chama a função. O
    **primeiro admin** vem do seed (`admin_ti`); em produção, semeie o admin real
-   antes de liberar.
+   antes de liberar. Depois disso, o admin usa a tela **`pages/admin.html`**
+   (link "Admin" no cabeçalho) para liberar contas pendentes e inativar/reativar
+   usuários — sem mexer em SQL.
 6. **Acesso de teste (e-mail/senha):** para testar sem configurar o Google OAuth,
    habilite **Authentication → Providers → Email** e use os usuários do seed
    (`secretario@…`, `agente.sai@…`, etc.; senha `dev-123456`). A tela de login

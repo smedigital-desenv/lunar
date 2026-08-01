@@ -66,6 +66,7 @@
 - `fn_validar_relatorio(codigo) → jsonb` — rota **pública** (anon): confirma emissão e devolve metadados + hash.
 - **Notificações (S9):** `fn_marcar_notificacao_lida(id)` · `fn_marcar_todas_notificacoes_lidas() → int` (SECURITY DEFINER; tabela sem UPDATE ao front).
 - **Autenticação (S3):** trigger `trg_bloquear_dominio` em `auth.users` (via `fn_bloquear_dominio_auth`) barra e-mail fora do domínio · `fn_provisionar_usuario(auth_id, nome, perfil, unidade_id) → uuid` (admin; cria/ajusta acesso, idempotente). Login exige linha em `gestao.usuarios`.
+- **Admin de usuários (S3):** `fn_listar_contas_pendentes() → table(id,email,criado_em)` (contas em `auth.users` sem acesso) · `fn_inativar_usuario(id, motivo)` · `fn_reativar_usuario(id, motivo)` (todas admin; inativar/reativar gravam em `auditoria`).
 
 ## Convenções de escrita do front
 

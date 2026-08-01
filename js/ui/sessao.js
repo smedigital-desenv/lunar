@@ -29,6 +29,8 @@ export async function iniciarSessao(elId = 'usuario-sessao') {
       + `<span class="sessao__perfil">${escapeHtml(usuario.perfil_nome)}`
       + (usuario.unidade_sigla ? ` · ${escapeHtml(usuario.unidade_sigla)}` : '')
       + `</span></span>`
+      + (usuario.pode_administrar
+          ? `<a class="sessao__admin" href="./admin.html">Admin</a>` : '')
       + `<button type="button" id="btn-sair" class="sessao__sair" aria-label="Sair">Sair</button>`;
     document.getElementById('btn-sair').addEventListener('click', () => auth.logout());
   }
