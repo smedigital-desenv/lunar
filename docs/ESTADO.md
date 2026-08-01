@@ -6,8 +6,7 @@
 **Última atualização:** 2026-08-01 (Sessões 2, 4, 5, 6, 7, 8 e 9)
 **Fase atual:** Sessões 1, 2, 5, 6, 7, 8 e 9 concluídas. Sessão 4 (serviços) em evolução.
 
-> `sql/009_dashboard_pesquisa.sql` **executado no Supabase em 2026-08-01.**
-> ATENÇÃO: rodar `sql/010_notificacoes.sql` no Supabase (RPCs de marcar notificação lida). Ainda não executado.
+> `sql/009_dashboard_pesquisa.sql` e `sql/010_notificacoes.sql` **executados no Supabase em 2026-08-01.**
 
 ## Concluído
 
@@ -18,7 +17,7 @@
 - **Sessão 6 (caixas):** `pages/caixa-entrada.html` + `pages/caixa-saida.html`, `js/ui/caixa.js` (filtros/paginação compartilhados), `caixa-entrada.js`/`caixa-saida.js`. Serviços `listarCaixaEntrada` (tarefas.js) e `listarCaixaSaida` (demandas.js). Filtros e paginação **verificados no navegador**.
 - **Sessão 7 (modais de tramitação):** `js/ui/modais.js` (`abrirFormulario` declarativo) + `js/ui/acoes-demanda.js` (campos e execução de cada ação). Wired em `demanda.js`: barra de ações, "Devolver" nas tarefas, retificar/ressalva na timeline (retificar só na própria movimentação com janela aberta). Abertura, validação e submit-demo **verificados no navegador**.
 - **Sessão 8 (painel e pesquisa):** `sql/009_dashboard_pesquisa.sql` (`fn_dashboard` e `fn_pesquisar_demandas`, SECURITY INVOKER → contadores/busca já filtrados por RLS; índice GIN em movimentacoes) — **aplicado no banco (2026-08-01)**. `js/services/painel.js`. `pages/dashboard.html`+`js/ui/dashboard.js` (KPIs, quebras por prioridade/setor/responsável, tempo médio) e `pages/pesquisa.html`+`js/ui/pesquisa.js` (busca tsvector + filtros + paginação). Estilos KPI adicionados ao `app.css`. Render e busca **verificados no navegador** (modo demo).
-- **Sessão 9 (notificações):** `sql/010_notificacoes.sql` (`fn_marcar_notificacao_lida` e `fn_marcar_todas_notificacoes_lidas`, SECURITY DEFINER — a tabela segue sem UPDATE ao front). `js/services/notificacoes.js` ganhou `marcarLida`/`marcarTodasLidas`. Widget `js/ui/notificacoes.js`: sino no cabeçalho com badge de não lidas, painel com lista (lida/não lida + data de leitura), marcação individual/total, clique navega p/ a demanda; **polling 60 s**; modo demo com exemplos. Sino montado nas 5 páginas (`app-header__sino`) e estilos no `app.css`. Badge, painel, marcar-todas e modo demo **verificados no navegador (mobile 390px)**. Notificações já são **criadas** pelas funções de tramitação (`sql/007b`).
+- **Sessão 9 (notificações):** `sql/010_notificacoes.sql` (`fn_marcar_notificacao_lida` e `fn_marcar_todas_notificacoes_lidas`, SECURITY DEFINER — a tabela segue sem UPDATE ao front) — **aplicado no banco (2026-08-01)**. `js/services/notificacoes.js` ganhou `marcarLida`/`marcarTodasLidas`. Widget `js/ui/notificacoes.js`: sino no cabeçalho com badge de não lidas, painel com lista (lida/não lida + data de leitura), marcação individual/total, clique navega p/ a demanda; **polling 60 s**; modo demo com exemplos. Sino montado nas 5 páginas (`app-header__sino`) e estilos no `app.css`. Badge, painel, marcar-todas e modo demo **verificados no navegador (mobile 390px)**. Notificações já são **criadas** pelas funções de tramitação (`sql/007b`).
 
 ## Próximo passo
 
