@@ -1,8 +1,8 @@
 // =====================================================================
-// notificacoes.js — leitura das notificações do usuário corrente.
+// notificacoes.js — notificações do usuário corrente.
 //
-// LEITURA apenas por enquanto. Marcar como lida exige uma função de banco
-// (notificacoes não tem grant de UPDATE ao front) — a criar na Sessão 9.
+// Leitura via SELECT (RLS restringe às próprias). Marcar como lida passa
+// por RPC SECURITY DEFINER (notificacoes não tem grant de UPDATE ao front).
 // =====================================================================
 
 import { supabase } from './supabaseClient.js';
@@ -27,5 +27,15 @@ export async function contarNaoLidas() {
   return count ?? 0;
 }
 
-// marcarLida / marcarTodasLidas: PENDENTE — requer função SECURITY DEFINER
-// no banco (Sessão 9). Não implementar via UPDATE direto (sem grant).
+// Marca UMA notificação como lida (idempotente no banco).
+export async function marcarLida(id) {
+  const { error } = await supabase.rpc('fn_marcar_notificacao_lida', { p_id: id });
+  if (error) throw error;
+}
+
+// Marca todas as não lidas do usuário como lidas. Retorna a quantidade.
+export async function marcarTodasLidas() {
+  const { data, error } = await supabase.rpc('fn_marcar_todas_notificacoes_lidas');
+  if (error) throw error;
+  return data ?? 0;
+}

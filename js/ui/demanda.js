@@ -241,3 +241,7 @@ iniciar().catch(err => {
   console.error(err);
   document.getElementById('carregando').textContent = 'Erro ao carregar a demanda.';
 });
+
+// Sino de notificações no cabeçalho (Sessão 9).
+import { montarSino } from './notificacoes.js';
+montarSino('sino-notificacoes');

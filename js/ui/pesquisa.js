@@ -89,3 +89,7 @@ elPag.addEventListener('click', (e) => {
 });
 
 renderizar();
+
+// Sino de notificações no cabeçalho (Sessão 9).
+import { montarSino } from './notificacoes.js';
+montarSino('sino-notificacoes');

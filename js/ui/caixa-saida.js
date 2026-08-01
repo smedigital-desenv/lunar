@@ -45,3 +45,7 @@ iniciarCaixa({
     meta: `Prazo: ${fmtPrazo(d.prazo)}`
   })
 });
+
+// Sino de notificações no cabeçalho (Sessão 9).
+import { montarSino } from './notificacoes.js';
+montarSino('sino-notificacoes');
