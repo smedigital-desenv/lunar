@@ -142,7 +142,14 @@ function renderArvore(tarefas, usuarioId) {
     const filhos = filhosDe.get(chave) || [];
     if (!filhos.length) return '';
     return `<ul class="arvore">` + filhos.map(t => {
-      // "Trocar destino" só para quem encaminhou (criador da tarefa).
+      const encerrada = ['devolvida', 'concluida'].includes(t.situacao) || t.ativo === false;
+      // "Devolver" só para o responsável atual e só enquanto a tarefa está em
+      // andamento (evita devolver de novo). Em demo (sem usuarioId), mostra.
+      const podeDevolver = !encerrada && (!usuarioId || t.responsavel_id === usuarioId);
+      const acaoDevolver = podeDevolver
+        ? `<button class="btn btn-sm btn-link p-0" data-tarefa-acao="devolutiva" data-tarefa-id="${escapeHtml(t.id)}">Devolver</button>`
+        : '';
+      // "Trocar destino" só para quem encaminhou (criador) e tarefa ativa.
       const souCriador = usuarioId && t.criado_por === usuarioId;
       const acaoTrocar = souCriador && t.ativo !== false
         ? `<button class="btn btn-sm btn-link p-0" data-tarefa-acao="reencaminhar" data-tarefa-id="${escapeHtml(t.id)}">Trocar destino</button>`
@@ -153,7 +160,7 @@ function renderArvore(tarefas, usuarioId) {
           <span class="tarefa-no__titulo">${escapeHtml(t.titulo)}</span>
           ${badgeSituacao(t.situacao)}
           <span class="texto-silencioso">${escapeHtml(t.responsavel_nome || '—')}</span>
-          <button class="btn btn-sm btn-link p-0" data-tarefa-acao="devolutiva" data-tarefa-id="${escapeHtml(t.id)}">Devolver</button>
+          ${acaoDevolver}
           ${acaoTrocar}
         </div>
         ${ramo(t.id)}

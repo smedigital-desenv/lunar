@@ -31,6 +31,17 @@ begin
     raise exception 'Texto da devolutiva é obrigatório.' using errcode = 'check_violation';
   end if;
 
+  -- Só o responsável ATUAL pode devolver, e só uma vez (não redevolve algo
+  -- já devolvido/concluído). Evita clicar "Devolver" várias vezes.
+  if t.responsavel_id <> v_autor then
+    raise exception 'Apenas o responsável atual da tarefa pode devolvê-la.'
+      using errcode = 'insufficient_privilege';
+  end if;
+  if t.situacao in ('devolvida', 'concluida') then
+    raise exception 'Esta tarefa não está em andamento para ser devolvida.'
+      using errcode = 'check_violation';
+  end if;
+
   -- Devolve a responsabilidade a quem delegou (criador da tarefa), movendo a
   -- tarefa para a unidade dele. Assim ela sai da Entrada de quem devolveu.
   select unidade_id into v_unidade_delegador
