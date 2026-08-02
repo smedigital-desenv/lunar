@@ -30,8 +30,11 @@ export function camposDaAcao(chave, ctx) {
       { nome: 'texto', rotulo: 'Observação (opcional)', tipo: 'textarea' } ] };
     case 'devolutiva': return { titulo: 'Devolver tarefa', textoConfirmar: 'Devolver', campos: [
       { tipo: 'aviso', texto: 'Devolver significa que você NÃO vai executar esta tarefa — ela volta para quem delegou.' },
-      { nome: 'texto', rotulo: 'Motivo da devolução', tipo: 'textarea', obrigatorio: true },
-      { nome: 'anexos', rotulo: 'Anexos (opcional)', tipo: 'file' },
+      { nome: 'texto', rotulo: 'Motivo da devolução', tipo: 'textarea', obrigatorio: true } ] };
+    case 'concluir_tarefa': return { titulo: 'Concluir tarefa', textoConfirmar: 'Concluir', campos: [
+      { tipo: 'aviso', texto: 'Concluir indica que você EXECUTOU a tarefa. Registre a resposta/resultado e anexe o que produziu.' },
+      { nome: 'texto', rotulo: 'Resposta / resultado', tipo: 'textarea', obrigatorio: true },
+      { nome: 'anexos', rotulo: 'Anexos (PDF, Word, Excel, imagem — até 20 MB)', tipo: 'file' },
       { nome: 'link', rotulo: 'Link do Google Drive (opcional)', tipo: 'url',
         placeholder: 'https://drive.google.com/...' } ] };
     case 'complementacao': return { titulo: 'Solicitar complementação', textoConfirmar: 'Solicitar', campos: [
@@ -80,12 +83,13 @@ async function executar(chave, vals, ctx) {
       titulo: vals.titulo, descricao: vals.descricao || null, prazo: vals.prazo || null });
     case 'reencaminhar': return tar.reencaminhar({ tarefaId: ctx.tarefaId,
       novoDestinatarioId: vals.destinatario, texto: vals.texto || null });
-    case 'devolutiva': {
+    case 'devolutiva': return tar.registrarDevolutiva(ctx.tarefaId, vals.texto, []);
+    case 'concluir_tarefa': {
       const metadados = [];
       for (const f of (vals.anexos || [])) metadados.push(await anx.subirAnexo(f, { pasta: `demanda/${id}` }));
       // Link do Google Drive: anexo só com link_externo (sem upload).
       if (vals.link) metadados.push({ nome_original: 'Link do Google Drive', link_externo: vals.link });
-      return tar.registrarDevolutiva(ctx.tarefaId, vals.texto, metadados);
+      return tar.concluirTarefa(ctx.tarefaId, vals.texto, metadados);
     }
     case 'complementacao': return dem.solicitarComplementacao(id, vals.texto);
     case 'concluir': return dem.concluir(id, vals.conclusao);

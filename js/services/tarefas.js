@@ -34,8 +34,16 @@ export function criarSubtarefa({ parentId, responsavelId, titulo,
 // Devolutiva com anexos. `anexos` é um array de metadados vindos de
 // anexos.subirAnexo() (nome_original, nome_storage, mime, tamanho_bytes,
 // hash_sha256, storage_path).
+// Devolver = a pessoa NÃO vai executar (recusa); volta ao delegador.
 export function registrarDevolutiva(tarefaId, texto, anexos = []) {
   return rpc('fn_registrar_devolutiva', {
+    p_tarefa_id: tarefaId, p_texto: texto, p_anexos: anexos
+  });
+}
+
+// Concluir tarefa = a pessoa EXECUTOU; registra a resposta/resultado.
+export function concluirTarefa(tarefaId, texto, anexos = []) {
+  return rpc('fn_concluir_tarefa', {
     p_tarefa_id: tarefaId, p_texto: texto, p_anexos: anexos
   });
 }
@@ -80,16 +88,21 @@ function filtroCaixa(q, filtro) {
   }
 }
 
-// Caixa de ENTRADA: tarefas atribuídas ao usuário corrente, paginadas.
+// Caixa de ENTRADA: tarefas PENDENTES atribuídas ao usuário corrente.
+// Exclui tarefas concluídas e tarefas de demandas concluídas/inativas —
+// o que já foi resolvido não polui a "a fazer".
 export async function listarCaixaEntrada({ filtro = 'todos', pagina = 1, porPagina = 10 } = {}) {
   const { data: sess } = await supabase.auth.getUser();
   const uid = sess?.user?.id;
   if (!uid) throw new Error('Sem sessão autenticada.');
 
   let q = supabase.from('tarefas')
-    .select('id, demanda_id, titulo, situacao, prioridade, prazo, demandas(numero,titulo)',
+    .select('id, demanda_id, titulo, situacao, prioridade, prazo, demandas!inner(numero, titulo, situacao, ativo)',
             { count: 'exact' })
-    .eq('responsavel_id', uid).eq('ativo', true);
+    .eq('responsavel_id', uid).eq('ativo', true)
+    .neq('situacao', 'concluida')
+    .eq('demandas.ativo', true)
+    .neq('demandas.situacao', 'concluida');
   q = filtroCaixa(q, filtro);
 
   const de = (pagina - 1) * porPagina;

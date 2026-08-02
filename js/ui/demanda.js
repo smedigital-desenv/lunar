@@ -142,12 +142,16 @@ function renderArvore(tarefas, usuarioId) {
     const filhos = filhosDe.get(chave) || [];
     if (!filhos.length) return '';
     return `<ul class="arvore">` + filhos.map(t => {
-      const encerrada = ['devolvida', 'concluida'].includes(t.situacao) || t.ativo === false;
-      // "Devolver" só para o responsável atual e só enquanto a tarefa está em
-      // andamento (evita devolver de novo). Em demo (sem usuarioId), mostra.
-      const podeDevolver = !encerrada && (!usuarioId || t.responsavel_id === usuarioId);
-      const acaoDevolver = podeDevolver
-        ? `<button class="btn btn-sm btn-link p-0" data-tarefa-acao="devolutiva" data-tarefa-id="${escapeHtml(t.id)}">Devolver</button>`
+      const ehResponsavel = !usuarioId || t.responsavel_id === usuarioId;
+      const ativa = t.ativo !== false && t.situacao !== 'concluida';
+      // "Concluir" (executou) e "Devolver" (não vai executar): só o responsável
+      // atual, enquanto a tarefa está em aberto. Devolver não aparece se já
+      // devolvida (evita devolver de novo).
+      const acaoConcluir = ativa && ehResponsavel
+        ? `<button class="btn btn-sm btn-link p-0" data-tarefa-acao="concluir_tarefa" data-tarefa-id="${escapeHtml(t.id)}">Concluir</button>`
+        : '';
+      const acaoDevolver = ativa && t.situacao !== 'devolvida' && ehResponsavel
+        ? `<button class="btn btn-sm btn-link p-0 text-danger" data-tarefa-acao="devolutiva" data-tarefa-id="${escapeHtml(t.id)}">Devolver</button>`
         : '';
       // "Trocar destino" só para quem encaminhou (criador) e tarefa ativa.
       const souCriador = usuarioId && t.criado_por === usuarioId;
@@ -160,6 +164,7 @@ function renderArvore(tarefas, usuarioId) {
           <span class="tarefa-no__titulo">${escapeHtml(t.titulo)}</span>
           ${badgeSituacao(t.situacao)}
           <span class="texto-silencioso">${escapeHtml(t.responsavel_nome || '—')}</span>
+          ${acaoConcluir}
           ${acaoDevolver}
           ${acaoTrocar}
         </div>
