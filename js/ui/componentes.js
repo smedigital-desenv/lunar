@@ -100,7 +100,9 @@ export function iniciais(nome) {
 export function itemTimeline(mov, opts = {}) {
   const retificado = !!opts.retificadoPor;
   const partes = [];
-  partes.push(`<li class="timeline__item${retificado ? ' timeline__item--retificado' : ''}">`);
+  // A classe por tipo permite colorir o marcador conforme o evento (app.css).
+  const classeTipo = mov.tipo ? ` timeline__item--${mov.tipo}` : '';
+  partes.push(`<li class="timeline__item${classeTipo}${retificado ? ' timeline__item--retificado' : ''}">`);
   partes.push(`<span class="timeline__marcador" title="${escapeHtml(rotuloTipo(mov.tipo))}">${iconeTipo(mov.tipo)}</span>`);
   partes.push('<div class="timeline__cabecalho">');
   partes.push(`<span class="timeline__autor">${escapeHtml(mov.autor_nome || '—')}</span>`);

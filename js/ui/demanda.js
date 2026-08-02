@@ -261,11 +261,40 @@ async function emitirRelatorio(acao, demanda, demo) {
     toast(`Falha ao emitir relatório: ${e.message || e}`, 'erro');
   }
 }
+// Ação em destaque conforme o estado da demanda: é o próximo passo natural
+// do fluxo. As de uso corrente ficam discretas ao lado; as raras (governança
+// e relatórios) vão para o menu "Mais", para a barra não virar uma fileira
+// de botões idênticos.
+const ACAO_PRIMARIA = ['complementar', 'concluir', 'encaminhar', 'reativar'];
+const ACAO_RECOLHIDA = ['editar', 'inativar', 'reativar', 'reabrir',
+  'relatorio_resumo', 'relatorio_inteiro', 'relatorio_resumo_anon', 'relatorio_inteiro_anon'];
+
+function botao(chave, rotulo, classe) {
+  return `<button class="btn ${classe}" data-acao="${chave}">${escapeHtml(rotulo)}</button>`;
+}
+
 function renderAcoes(d, usuario) {
   const acoes = acoesDisponiveis(d, usuario);
   if (!acoes.length) return '<span class="texto-silencioso">Nenhuma ação disponível.</span>';
-  return acoes.map(([chave, rotulo]) =>
-    `<button class="btn btn-outline-primary" data-acao="${chave}">${escapeHtml(rotulo)}</button>`).join('');
+
+  const primaria = ACAO_PRIMARIA.map(c => acoes.find(([k]) => k === c)).find(Boolean);
+  const recolhidas = acoes.filter(([k]) => k !== primaria?.[0] && ACAO_RECOLHIDA.includes(k));
+  const diretas = acoes.filter(([k]) => k !== primaria?.[0] && !ACAO_RECOLHIDA.includes(k));
+
+  const partes = [];
+  if (primaria) partes.push(botao(primaria[0], primaria[1], 'btn-primary'));
+  for (const [k, r] of diretas) partes.push(botao(k, r, 'btn-outline-secondary'));
+  if (recolhidas.length) {
+    partes.push('<span class="barra-acoes__espaco"></span>');
+    partes.push(`<div class="dropdown">
+      <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown"
+              aria-expanded="false">Mais</button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        ${recolhidas.map(([k, r]) =>
+          `<li><button class="dropdown-item" data-acao="${k}">${escapeHtml(r)}</button></li>`).join('')}
+      </ul></div>`);
+  }
+  return partes.join('');
 }
 
 // ---------------------------------------------------------------- Inicialização
