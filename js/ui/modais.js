@@ -13,6 +13,9 @@ export const PRIORIDADES = [
 ];
 
 function campoHtml(c) {
+  if (c.tipo === 'aviso') {
+    return `<div class="alert alert-warning py-2 small">${escapeHtml(c.texto || '')}</div>`;
+  }
   const req = c.obrigatorio ? ' <span class="text-danger">*</span>' : '';
   const rotulo = `<label class="form-label">${escapeHtml(c.rotulo)}${req}</label>`;
   const nome = escapeHtml(c.nome);
@@ -69,6 +72,7 @@ export function abrirFormulario({ titulo, campos, textoConfirmar = 'Confirmar' }
       const form = el.querySelector(`#${id}-form`);
       const valores = {};
       for (const c of campos) {
+        if (c.tipo === 'aviso') continue;          // texto estático, não coletado
         const input = form.elements[c.nome];
         valores[c.nome] = c.tipo === 'file'
           ? (input.files ? Array.from(input.files) : [])

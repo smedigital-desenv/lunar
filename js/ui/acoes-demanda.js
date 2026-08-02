@@ -35,8 +35,16 @@ export function camposDaAcao(chave, ctx) {
         placeholder: 'https://drive.google.com/...' } ] };
     case 'complementacao': return { titulo: 'Solicitar complementação', textoConfirmar: 'Solicitar', campos: [
       { nome: 'texto', rotulo: 'O que falta / motivo', tipo: 'textarea', obrigatorio: true } ] };
-    case 'concluir': return { titulo: 'Concluir demanda', textoConfirmar: 'Concluir', campos: [
-      { nome: 'conclusao', rotulo: 'Conclusão / desfecho', tipo: 'textarea', obrigatorio: true } ] };
+    case 'concluir': {
+      const abertas = (ctx.tarefas || []).filter(t => t.ativo !== false && t.situacao !== 'concluida').length;
+      const campos = [];
+      if (abertas > 0) {
+        campos.push({ tipo: 'aviso',
+          texto: `Atenção: há ${abertas} subtarefa(s) em aberto. Concluir a demanda não as encerra.` });
+      }
+      campos.push({ nome: 'conclusao', rotulo: 'Conclusão / desfecho', tipo: 'textarea', obrigatorio: true });
+      return { titulo: 'Concluir demanda', textoConfirmar: 'Concluir', campos };
+    }
     case 'reabrir': return { titulo: 'Reabrir demanda', textoConfirmar: 'Reabrir', campos: [
       { nome: 'justificativa', rotulo: 'Justificativa', tipo: 'textarea', obrigatorio: true } ] };
     case 'editar': return { titulo: 'Editar demanda', textoConfirmar: 'Salvar', campos: [
