@@ -54,11 +54,12 @@ async function carregar() {
 }
 
 function renderKpis(d) {
+  // Cada KPI é um link para a lista das demandas daquele indicador.
   return KPIS.map(([chave, rotulo, classe]) =>
-    `<div class="kpi ${classe}">
+    `<a class="kpi kpi--link ${classe}" href="./lista.html?kpi=${encodeURIComponent(chave)}">
        <div class="kpi__valor">${Number(d[chave] || 0)}</div>
        <div class="kpi__rotulo">${escapeHtml(rotulo)}</div>
-     </div>`).join('');
+     </a>`).join('');
 }
 
 // ----------------------------------------------------------- Gráficos

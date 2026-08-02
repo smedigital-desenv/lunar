@@ -435,3 +435,7 @@ body {
 .cartao--largo { grid-column: 1 / -1; }
 .grafico { position: relative; height: 240px; }
 .grafico--largo { height: 300px; }
+
+/* KPIs clicáveis (drill-down para a lista do indicador) */
+.kpi--link { display: block; text-decoration: none; color: inherit; cursor: pointer; transition: box-shadow .15s, transform .15s; }
+.kpi--link:hover { box-shadow: var(--sombra-forte); transform: translateY(-1px); }

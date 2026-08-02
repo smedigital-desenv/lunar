@@ -15,6 +15,11 @@ export function obterGerencial() {
   return rpc('fn_dashboard_gerencial', {});
 }
 
+// Lista as demandas de um KPI do painel (drill-down). Retorna { total, itens }.
+export function listarPorKpi(kpi, pagina = 1, porPagina = 20) {
+  return rpc('fn_listar_por_kpi', { p_kpi: kpi, p_pagina: pagina, p_por_pagina: porPagina });
+}
+
 // Busca textual + filtros, paginada. Retorna { total, itens }.
 export function pesquisar({ termo, situacao, prioridade, setor, de, ate,
                             pagina = 1, porPagina = 10 } = {}) {
