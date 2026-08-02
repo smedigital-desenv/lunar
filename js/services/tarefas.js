@@ -18,8 +18,9 @@ export function encaminhar({ destinatarioId, texto, demandaId = null,
   });
 }
 
-// Cria subtarefa sob uma tarefa (parentId).
-export function criarSubtarefa({ parentId, responsavelId, titulo,
+// Cria subtarefa. Sob uma tarefa (parentId) OU direto na demanda (demandaId,
+// quando não há tarefa-mãe). Informe pelo menos um dos dois.
+export function criarSubtarefa({ parentId = null, demandaId = null, responsavelId, titulo,
                                  descricao = null, prazo = null, prioridade = null }) {
   return rpc('fn_criar_subtarefa', {
     p_parent_id: parentId,
@@ -27,7 +28,8 @@ export function criarSubtarefa({ parentId, responsavelId, titulo,
     p_titulo: titulo,
     p_descricao: descricao,
     p_prazo: prazo,
-    p_prioridade: prioridade
+    p_prioridade: prioridade,
+    p_demanda_id: demandaId
   });
 }
 

@@ -20,7 +20,8 @@ export function camposDaAcao(chave, ctx) {
       { nome: 'prioridade', rotulo: 'Prioridade', tipo: 'select', opcoes: PRIORIDADES },
       { nome: 'prazo', rotulo: 'Prazo (opcional)', tipo: 'date' } ] };
     case 'subtarefa': return { titulo: 'Nova subtarefa', textoConfirmar: 'Criar', campos: [
-      { nome: 'parent', rotulo: 'Tarefa-mãe', tipo: 'select', opcoes: tarefas, obrigatorio: true },
+      { nome: 'parent', rotulo: 'Tarefa-mãe', tipo: 'select', obrigatorio: false,
+        opcoes: [{ valor: '', rotulo: '(diretamente na demanda)' }, ...tarefas] },
       { nome: 'responsavel', rotulo: 'Responsável', tipo: 'select', opcoes: usuarios, obrigatorio: true },
       { nome: 'titulo', rotulo: 'Título', tipo: 'text', obrigatorio: true },
       { nome: 'descricao', rotulo: 'Descrição', tipo: 'textarea' },
@@ -79,8 +80,9 @@ async function executar(chave, vals, ctx) {
   switch (chave) {
     case 'encaminhar': return tar.encaminhar({ destinatarioId: vals.destinatario, texto: vals.texto,
       demandaId: id, prioridade: vals.prioridade || null, prazo: vals.prazo || null });
-    case 'subtarefa': return tar.criarSubtarefa({ parentId: vals.parent, responsavelId: vals.responsavel,
-      titulo: vals.titulo, descricao: vals.descricao || null, prazo: vals.prazo || null });
+    case 'subtarefa': return tar.criarSubtarefa({ parentId: vals.parent || null, demandaId: id,
+      responsavelId: vals.responsavel, titulo: vals.titulo,
+      descricao: vals.descricao || null, prazo: vals.prazo || null });
     case 'reencaminhar': return tar.reencaminhar({ tarefaId: ctx.tarefaId,
       novoDestinatarioId: vals.destinatario, texto: vals.texto || null });
     case 'devolutiva': return tar.registrarDevolutiva(ctx.tarefaId, vals.texto, []);
