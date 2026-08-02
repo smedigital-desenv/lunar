@@ -107,3 +107,7 @@ iniciarSessao();
 // Barra de navegação principal (aba "Todos" quando kpi=todos; senão veio do Painel).
 import { montarNavegacao } from './navegacao.js';
 montarNavegacao(kpi === 'todos' ? 'todos' : 'painel');
+
+// Visão lista + detalhe (desktop).
+import { habilitarDetalheLateral } from './detalhe-lado.js';
+habilitarDetalheLateral();

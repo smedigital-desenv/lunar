@@ -500,3 +500,40 @@ body.com-nav { padding-bottom: 4rem; }
 }
 .troca-teste__rot { font-weight: 600; }
 .troca-teste__sel { max-width: 18rem; padding: .15rem .4rem; border-radius: var(--raio-sm); border: 1px solid #e0c766; }
+
+/* --------------------------------------------------------------- Visão lista + detalhe */
+.split { display: block; }
+.split__detalhe { display: none; }
+.cartao--ativo { outline: 2px solid var(--cor-primaria); outline-offset: -1px; }
+
+@media (min-width: 900px) {
+  .split {
+    display: grid;
+    grid-template-columns: minmax(320px, 30rem) 1fr;
+    gap: var(--gap);
+    align-items: start;
+  }
+  .split__lista { min-width: 0; }
+  .split__detalhe {
+    display: block;
+    position: sticky;
+    top: 3.6rem;                         /* abaixo da barra de navegação (topo no desktop) */
+    height: calc(100vh - 4.4rem);
+  }
+  .split__frame {
+    width: 100%; height: 100%; border: 0;
+    border-radius: var(--raio); background: #fff; box-shadow: var(--sombra);
+  }
+  .split__vazio {
+    height: 100%; display: flex; align-items: center; justify-content: center;
+    text-align: center; padding: 1rem;
+    border: 1px dashed var(--cinza-300); border-radius: var(--raio);
+  }
+}
+
+/* Modo embed: a tela da demanda dentro do painel de detalhe (sem cabeçalho/menu). */
+body.embed .app-header,
+body.embed .nav-principal,
+body.embed .troca-teste { display: none !important; }
+body.embed.com-nav { padding-bottom: 0; }
+body.embed .pagina { padding-top: .6rem; }

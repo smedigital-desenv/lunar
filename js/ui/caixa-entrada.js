@@ -61,3 +61,7 @@ iniciarSessao();
 // Barra de navegação principal.
 import { montarNavegacao } from './navegacao.js';
 montarNavegacao('entrada');
+
+// Visão lista + detalhe (desktop).
+import { habilitarDetalheLateral } from './detalhe-lado.js';
+habilitarDetalheLateral();

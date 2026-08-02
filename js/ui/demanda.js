@@ -282,14 +282,17 @@ iniciar().catch(err => {
   document.getElementById('carregando').textContent = 'Erro ao carregar a demanda.';
 });
 
-// Sino de notificações no cabeçalho (Sessão 9).
 import { montarSino } from './notificacoes.js';
-montarSino('sino-notificacoes');
-
-// Sessão e guarda de rota (Sessão 3).
 import { iniciarSessao } from './sessao.js';
-iniciarSessao();
-
-// Barra de navegação principal.
 import { montarNavegacao } from './navegacao.js';
-montarNavegacao();
+
+// Modo "embed": a tela é aberta dentro do painel de detalhe de uma lista.
+// Esconde cabeçalho/navegação (via CSS) e não monta sino/sessão/menu.
+const EMBED = new URLSearchParams(location.search).get('embed') === '1';
+if (EMBED) {
+  document.body.classList.add('embed');
+} else {
+  montarSino('sino-notificacoes');
+  iniciarSessao();
+  montarNavegacao();
+}
