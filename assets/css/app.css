@@ -489,6 +489,21 @@ a.cartao:active { transform: translateY(0); }
   box-shadow: var(--sombra-forte);
   z-index: 1030;
 }
+
+/* No celular o sino fica no MEIO do cabeçalho, então ancorar o painel pela
+   borda direita dele jogava a maior parte para fora da tela à esquerda.
+   Tornando .notif estático, o bloco de contenção passa a ser .app-header
+   (posicionado), e o painel se estende de margem a margem. */
+@media (max-width: 575.98px) {
+  .notif { position: static; }
+  .notif__painel {
+    left: .5rem;
+    right: .5rem;
+    width: auto;
+    top: calc(100% + .35rem);
+    max-height: 70vh;
+  }
+}
 .notif__cabecalho {
   display: flex;
   align-items: center;
