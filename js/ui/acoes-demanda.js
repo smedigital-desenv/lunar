@@ -28,9 +28,10 @@ export function camposDaAcao(chave, ctx) {
     case 'reencaminhar': return { titulo: 'Trocar destinatário', textoConfirmar: 'Trocar', campos: [
       { nome: 'destinatario', rotulo: 'Novo destinatário', tipo: 'select', opcoes: usuarios, obrigatorio: true },
       { nome: 'texto', rotulo: 'Observação (opcional)', tipo: 'textarea' } ] };
-    case 'devolutiva': return { titulo: 'Registrar devolutiva', textoConfirmar: 'Registrar', campos: [
-      { nome: 'texto', rotulo: 'Texto da devolutiva', tipo: 'textarea', obrigatorio: true },
-      { nome: 'anexos', rotulo: 'Anexos (PDF, Word, Excel, imagem — até 20 MB)', tipo: 'file' },
+    case 'devolutiva': return { titulo: 'Devolver tarefa', textoConfirmar: 'Devolver', campos: [
+      { tipo: 'aviso', texto: 'Devolver significa que você NÃO vai executar esta tarefa — ela volta para quem delegou.' },
+      { nome: 'texto', rotulo: 'Motivo da devolução', tipo: 'textarea', obrigatorio: true },
+      { nome: 'anexos', rotulo: 'Anexos (opcional)', tipo: 'file' },
       { nome: 'link', rotulo: 'Link do Google Drive (opcional)', tipo: 'url',
         placeholder: 'https://drive.google.com/...' } ] };
     case 'complementacao': return { titulo: 'Solicitar complementação', textoConfirmar: 'Solicitar', campos: [
