@@ -27,6 +27,9 @@ export function habilitarDetalheLateral() {
   split.appendChild(colDetalhe);
   main.appendChild(split);
 
+  // Nas telas com lista+detalhe, o layout usa uma largura maior.
+  document.body.classList.add('layout-largo');
+
   const mq = window.matchMedia(LARGO);
 
   colLista.addEventListener('click', (e) => {

@@ -537,3 +537,10 @@ body.embed .nav-principal,
 body.embed .troca-teste { display: none !important; }
 body.embed.com-nav { padding-bottom: 0; }
 body.embed .pagina { padding-top: .6rem; }
+
+/* Largura ampliada nas telas com lista + detalhe (desktop) */
+@media (min-width: 900px) {
+  body.layout-largo .app-header__barra,
+  body.layout-largo .pagina { max-width: min(1560px, 95vw); }
+  body.layout-largo .split { grid-template-columns: minmax(340px, 32rem) 1fr; }
+}
