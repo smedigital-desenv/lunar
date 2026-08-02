@@ -479,3 +479,15 @@ body.com-nav { padding-bottom: 4rem; }
   .nav-principal__item--destaque .nav-principal__icone { width: 1.5rem; height: 1.5rem; font-size: 1.1rem; }
   body.com-nav { padding-bottom: 0; }
 }
+
+/* --------------------------------------------------------------- Equipes */
+.equipe-area { border-left: 3px solid var(--cor-primaria-clara); padding: .45rem .7rem; margin: .45rem 0; background: #fff; border-radius: var(--raio-sm); box-shadow: var(--sombra); }
+.equipe-area--subsecretaria { border-left-color: var(--cor-primaria); }
+.equipe-area--gerencia { border-left-color: var(--cor-acento); }
+.equipe-area__cabecalho { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; margin-bottom: .35rem; }
+.equipe-membro { display: flex; align-items: center; justify-content: space-between; gap: .6rem; padding: .3rem 0; border-top: 1px solid var(--cinza-100); }
+.equipe-membro__mover { max-width: 17rem; flex: 0 0 auto; }
+@media (max-width: 520px) {
+  .equipe-membro { flex-direction: column; align-items: stretch; }
+  .equipe-membro__mover { max-width: none; }
+}

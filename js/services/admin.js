@@ -40,6 +40,20 @@ export async function listarUnidades() {
   return data;
 }
 
+// Organograma completo (com parent_id) para montar a árvore de equipes.
+export async function listarOrganograma() {
+  const { data, error } = await supabase
+    .from('unidades_organizacionais')
+    .select('id, nome, sigla, tipo, parent_id, ativo').eq('ativo', true).order('nome');
+  if (error) throw error;
+  return data;
+}
+
+// Move uma pessoa para outra unidade (define/edita a equipe). Admin only (banco valida).
+export function definirUnidadeUsuario(usuarioId, unidadeId) {
+  return rpc('fn_definir_unidade_usuario', { p_usuario_id: usuarioId, p_unidade_id: unidadeId });
+}
+
 // --- Escrita (RPC) ----------------------------------------------------
 
 // Cria ou ajusta o acesso de uma conta (idempotente). Retorna o id.
