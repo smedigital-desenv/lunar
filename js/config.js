@@ -5,6 +5,10 @@
 export const SUPABASE_URL = 'https://iqldovwttomkjkoakosc.supabase.co';
 export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxbGRvdnd0dG9ta2prb2Frb3NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MDU4NzksImV4cCI6MjA5NjA4MTg3OX0.4dYeK5iIEgSD7CEWyLoaqXEXvuITVNVpTlfdmCyJCI0';
 
+// ⚠️ TESTE: mostra o seletor "Testar como…" (login rápido nos usuários do
+// seed). DEIXE false EM PRODUÇÃO — é um atalho de login e não deve ficar no ar.
+export const MODO_TESTE = true;
+
 export const CONFIG = {
   dominioPermitido: '@educacao.pmrp.sp.gov.br',
   timezone: 'America/Sao_Paulo',

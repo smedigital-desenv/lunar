@@ -5,6 +5,10 @@
 export const SUPABASE_URL = 'https://SEU-PROJETO.supabase.co';
 export const SUPABASE_ANON_KEY = 'COLE_AQUI_A_ANON_KEY';
 
+// Atalho de teste "Testar como…" (login rápido nos usuários do seed).
+// Mantenha false em produção.
+export const MODO_TESTE = false;
+
 export const CONFIG = {
   dominioPermitido: '@educacao.pmrp.sp.gov.br',
   timezone: 'America/Sao_Paulo',
