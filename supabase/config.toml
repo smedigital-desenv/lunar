@@ -1,0 +1,23 @@
+# =====================================================================
+# config.toml — configuração do Supabase CLI.
+# Sistema de Gestão de Demandas — SME Ribeirão Preto.
+# =====================================================================
+
+# ---------------------------------------------------------------------
+# Edge Function `relatorios`.
+#
+# verify_jwt = false é OBRIGATÓRIO aqui. Com a verificação de JWT ligada
+# (padrão), o gateway do Supabase rejeita a requisição de preflight CORS
+# (OPTIONS) — que, por definição do navegador, não carrega o cabeçalho
+# Authorization. O navegador então bloqueia a chamada com
+# "Response to preflight request doesn't pass access control check:
+#  It does not have HTTP ok status", e o POST nunca chega à função.
+#
+# Desligar aqui NÃO abre a função: a autenticação é feita dentro do
+# próprio index.ts, que exige o cabeçalho Authorization no POST (401 sem
+# ele) e usa o JWT do usuário nas chamadas RPC — portanto a RLS e o
+# fn_pode_ver_demanda continuam valendo. A rota GET (validação por
+# código) é pública por especificação (seção 14 do ESPEC).
+# ---------------------------------------------------------------------
+[functions.relatorios]
+verify_jwt = false
