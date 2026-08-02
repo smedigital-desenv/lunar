@@ -51,6 +51,26 @@ function paraBase64(bytes: Uint8Array): string {
   return btoa(bin);
 }
 
+// As fontes padrão do pdf-lib (Helvetica) usam codificação WinAnsi, que NÃO
+// cobre todo o Unicode: desenhar um caractere de fora (uma seta "→", um
+// emoji digitado num comentário, aspas curvas de um "copiar e colar" do
+// Word) faz a pdf-lib lançar exceção e derruba a emissão inteira.
+// Aqui trocamos o que dá para traduzir e substituímos o resto por "?".
+const EQUIVALENTES: Record<string, string> = {
+  "→": "->", "←": "<-", "↔": "<->", "⇒": "=>", "≤": "<=", "≥": ">=",
+  "✔": "OK", "✓": "OK", "✘": "X", "✗": "X", "≠": "!=",
+};
+// Caracteres acima de 0xFF que a WinAnsi ainda representa (faixa 0x80–0x9F).
+const EXTRAS_WINANSI = "€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ";
+
+function sanitizar(texto: string): string {
+  let s = String(texto ?? "");
+  for (const [de, para] of Object.entries(EQUIVALENTES)) s = s.replaceAll(de, para);
+  return Array.from(s)
+    .map((c) => (c.codePointAt(0)! <= 0xff || EXTRAS_WINANSI.includes(c) ? c : "?"))
+    .join("");
+}
+
 function gerarCodigo(): string {
   const n = new Uint8Array(6);
   crypto.getRandomValues(n);
@@ -108,7 +128,7 @@ class Documento {
   // Quebra o texto em linhas que cabem na largura dada.
   private quebrar(texto: string, fonte: any, tam: number, largura: number): string[] {
     const linhas: string[] = [];
-    for (const bruto of String(texto ?? "").split("\n")) {
+    for (const bruto of sanitizar(texto).split("\n")) {
       let atual = "";
       for (const palavra of bruto.split(/\s+/)) {
         const teste = atual ? `${atual} ${palavra}` : palavra;
@@ -165,8 +185,8 @@ function rodape(d: Documento, codigo: string, hash: string, urlValidacao: string
   paginas.forEach((p, i) => {
     const y = MARGEM - 18;
     p.drawLine({ start: { x: MARGEM, y: y + 22 }, end: { x: MARGEM + LARGURA, y: y + 22 }, thickness: 0.5, color: rgb(0.8, 0.85, 0.9) });
-    const linha1 = `Código de verificação: ${codigo}  ·  Hash SHA-256: ${hash.slice(0, 32)}…`;
-    const linha2 = `Valide em: ${urlValidacao}?codigo=${codigo}`;
+    const linha1 = sanitizar(`Código de verificação: ${codigo}  ·  Hash SHA-256: ${hash.slice(0, 32)}…`);
+    const linha2 = sanitizar(`Valide em: ${urlValidacao}?codigo=${codigo}`);
     p.drawText(linha1, { x: MARGEM, y: y + 12, size: 7, font: d.fonte, color: rgb(0.35, 0.4, 0.45) });
     p.drawText(linha2, { x: MARGEM, y: y + 3, size: 7, font: d.fonte, color: rgb(0.35, 0.4, 0.45) });
     const pag = `Página ${i + 1} de ${total}`;
@@ -246,6 +266,19 @@ async function gerarPdf(tipo: string, dados: any, codigo: string, hash: string, 
 
 // ------------------------------------------------------------ Handler
 Deno.serve(async (req) => {
+  // Sem este try/catch, uma exceção não tratada vira um 500 gerado pelo
+  // runtime — SEM os cabeçalhos CORS. O navegador então esconde o motivo
+  // real atrás de "No 'Access-Control-Allow-Origin' header is present",
+  // que foi exatamente o que mascarou a falha de codificação do PDF.
+  try {
+    return await atender(req);
+  } catch (e) {
+    console.error("Erro não tratado:", e);
+    return json({ erro: `Erro interno: ${(e as Error)?.message ?? e}` }, 500);
+  }
+});
+
+async function atender(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
 
   const url = new URL(req.url);
@@ -302,7 +335,7 @@ Deno.serve(async (req) => {
   }
 
   return json({ erro: "Método não suportado." }, 405);
-});
+}
 
 // Página HTML mínima para validação humana.
 function paginaValidacao(codigo: string, d: any): string {
