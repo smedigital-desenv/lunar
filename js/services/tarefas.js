@@ -88,26 +88,11 @@ function filtroCaixa(q, filtro) {
   }
 }
 
-// Caixa de ENTRADA: tarefas PENDENTES atribuídas ao usuário corrente.
-// Exclui tarefas concluídas e tarefas de demandas concluídas/inativas —
-// o que já foi resolvido não polui a "a fazer".
+// Caixa de ENTRADA (baseada na demanda): demandas em que sou o responsável
+// atual OU tenho subtarefa ativa. Uma demanda por item; exclui concluídas.
 export async function listarCaixaEntrada({ filtro = 'todos', pagina = 1, porPagina = 10 } = {}) {
-  const { data: sess } = await supabase.auth.getUser();
-  const uid = sess?.user?.id;
-  if (!uid) throw new Error('Sem sessão autenticada.');
-
-  let q = supabase.from('tarefas')
-    .select('id, demanda_id, titulo, situacao, prioridade, prazo, demandas!inner(numero, titulo, situacao, ativo)',
-            { count: 'exact' })
-    .eq('responsavel_id', uid).eq('ativo', true)
-    .neq('situacao', 'concluida')
-    .eq('demandas.ativo', true)
-    .neq('demandas.situacao', 'concluida');
-  q = filtroCaixa(q, filtro);
-
-  const de = (pagina - 1) * porPagina;
-  const { data, count, error } = await q
-    .order('criado_em', { ascending: false }).range(de, de + porPagina - 1);
-  if (error) throw error;
-  return { itens: data ?? [], total: count ?? 0 };
+  const dados = await rpc('fn_caixa_entrada', {
+    p_filtro: filtro, p_pagina: pagina, p_por_pagina: porPagina
+  });
+  return { itens: dados?.itens ?? [], total: dados?.total ?? 0 };
 }

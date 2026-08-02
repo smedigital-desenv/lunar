@@ -19,10 +19,12 @@ const EXEMPLO = [
 async function carregarReal(filtro, pagina, porPagina) {
   const { listarCaixaEntrada } = await import('../services/tarefas.js');
   const { itens, total } = await listarCaixaEntrada({ filtro, pagina, porPagina });
-  const mapeados = itens.map(t => ({
-    demanda_id: t.demanda_id,
-    demanda_numero: t.demandas?.numero ?? '—',
-    titulo: t.titulo, situacao: t.situacao, prioridade: t.prioridade, prazo: t.prazo
+  // Agora cada item é uma DEMANDA (sou responsável atual ou tenho subtarefa).
+  const mapeados = itens.map(d => ({
+    demanda_id: d.id,
+    demanda_numero: d.numero,
+    titulo: d.titulo, situacao: d.situacao, prioridade: d.prioridade,
+    sigilo: d.sigilo, prazo: d.prazo
   }));
   return { itens: mapeados, total, demo: false };
 }
@@ -46,6 +48,7 @@ iniciarCaixa({
     titulo: t.titulo,
     situacao: t.situacao,
     prioridade: t.prioridade,
+    sigilo: t.sigilo,
     meta: `Prazo: ${fmtPrazo(t.prazo)}`
   })
 });
