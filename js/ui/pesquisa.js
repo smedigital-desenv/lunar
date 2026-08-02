@@ -97,3 +97,7 @@ montarSino('sino-notificacoes');
 // Sessão e guarda de rota (Sessão 3).
 import { iniciarSessao } from './sessao.js';
 iniciarSessao();
+
+// Barra de navegação principal.
+import { montarNavegacao } from './navegacao.js';
+montarNavegacao('buscar');

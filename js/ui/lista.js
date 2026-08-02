@@ -10,6 +10,7 @@ import { fmtPrazo } from './componentes.js';
 const POR_PAGINA = 20;
 
 const TITULOS = {
+  todos: 'Todas as demandas',
   abertas: 'Demandas abertas',
   em_andamento: 'Em andamento',
   atrasadas: 'Atrasadas',
@@ -28,6 +29,7 @@ const EXEMPLO = [
 ];
 
 const PREDICADOS = {
+  todos: () => true,
   abertas: d => d.situacao === 'aberta',
   em_andamento: d => ['em_andamento', 'reaberta'].includes(d.situacao),
   concluidas: d => d.situacao === 'concluida',
@@ -101,3 +103,7 @@ import { montarSino } from './notificacoes.js';
 import { iniciarSessao } from './sessao.js';
 montarSino('sino-notificacoes');
 iniciarSessao();
+
+// Barra de navegação principal (aba "Todos" quando kpi=todos; senão veio do Painel).
+import { montarNavegacao } from './navegacao.js';
+montarNavegacao(kpi === 'todos' ? 'todos' : 'painel');

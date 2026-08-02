@@ -439,3 +439,43 @@ body {
 /* KPIs clicáveis (drill-down para a lista do indicador) */
 .kpi--link { display: block; text-decoration: none; color: inherit; cursor: pointer; transition: box-shadow .15s, transform .15s; }
 .kpi--link:hover { box-shadow: var(--sombra-forte); transform: translateY(-1px); }
+
+/* --------------------------------------------------------------- Navegação principal */
+.nav-principal {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 1040;
+  display: flex; justify-content: space-around; align-items: stretch;
+  background: #fff; border-top: 1px solid var(--cinza-200);
+  box-shadow: 0 -2px 12px rgba(20, 30, 45, .08);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.nav-principal__item {
+  flex: 1 1 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px; padding: .35rem .2rem; min-height: 3.2rem;
+  color: var(--cinza-500); text-decoration: none; font-size: .66rem; text-align: center;
+}
+.nav-principal__icone { font-size: 1.2rem; line-height: 1; }
+.nav-principal__item--ativo { color: var(--cor-primaria); font-weight: 700; }
+.nav-principal__item--destaque .nav-principal__icone {
+  width: 2rem; height: 2rem; border-radius: 50%;
+  background: var(--cor-primaria); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; font-weight: 700; box-shadow: var(--sombra);
+}
+body.com-nav { padding-bottom: 4rem; }
+
+@media (min-width: 720px) {
+  .app-header { position: static; }            /* no desktop, a barra de navegação é que fixa */
+  .nav-principal {
+    position: sticky; top: 0; bottom: auto;
+    justify-content: center; gap: .25rem;
+    border-top: 0; border-bottom: 1px solid var(--cinza-200);
+    box-shadow: var(--sombra);
+  }
+  .nav-principal__item {
+    flex: 0 0 auto; flex-direction: row; gap: .45rem; min-height: 0;
+    padding: .55rem 1rem; font-size: .9rem;
+  }
+  .nav-principal__icone { font-size: 1.05rem; }
+  .nav-principal__item--destaque .nav-principal__icone { width: 1.5rem; height: 1.5rem; font-size: 1.1rem; }
+  body.com-nav { padding-bottom: 0; }
+}

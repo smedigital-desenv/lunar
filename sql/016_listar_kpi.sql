@@ -30,6 +30,7 @@ begin
       from gestao.demandas d
      where d.ativo and (
        case p_kpi
+         when 'todos'          then true
          when 'abertas'        then d.situacao = 'aberta'
          when 'em_andamento'   then d.situacao in ('em_andamento', 'reaberta')
          when 'concluidas'     then d.situacao = 'concluida'

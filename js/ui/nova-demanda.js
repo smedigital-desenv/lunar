@@ -131,3 +131,7 @@ import { montarSino } from './notificacoes.js';
 import { iniciarSessao } from './sessao.js';
 montarSino('sino-notificacoes');
 iniciarSessao();
+
+// Barra de navegação principal.
+import { montarNavegacao } from './navegacao.js';
+montarNavegacao('nova');
