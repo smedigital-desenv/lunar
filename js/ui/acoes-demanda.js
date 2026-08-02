@@ -40,6 +40,8 @@ export function camposDaAcao(chave, ctx) {
         placeholder: 'https://drive.google.com/...' } ] };
     case 'complementacao': return { titulo: 'Solicitar complementação', textoConfirmar: 'Solicitar', campos: [
       { nome: 'texto', rotulo: 'O que falta / motivo', tipo: 'textarea', obrigatorio: true } ] };
+    case 'comentario': return { titulo: 'Comentar', textoConfirmar: 'Registrar', campos: [
+      { nome: 'texto', rotulo: 'Informação / observação', tipo: 'textarea', obrigatorio: true } ] };
     case 'concluir': {
       const abertas = (ctx.tarefas || []).filter(t => t.ativo !== false && t.situacao !== 'concluida').length;
       const campos = [];
@@ -72,9 +74,10 @@ export function camposDaAcao(chave, ctx) {
 }
 
 async function executar(chave, vals, ctx) {
-  const [dem, tar, mov, anx] = await Promise.all([
+  const [dem, tar, mov, anx, com] = await Promise.all([
     import('../services/demandas.js'), import('../services/tarefas.js'),
-    import('../services/movimentacoes.js'), import('../services/anexos.js')
+    import('../services/movimentacoes.js'), import('../services/anexos.js'),
+    import('../services/comentarios.js')
   ]);
   const id = ctx.demanda.id;
   switch (chave) {
@@ -94,6 +97,7 @@ async function executar(chave, vals, ctx) {
       return tar.concluirTarefa(ctx.tarefaId, vals.texto, metadados);
     }
     case 'complementacao': return dem.solicitarComplementacao(id, vals.texto);
+    case 'comentario': return com.criarComentario({ demandaId: id, texto: vals.texto });
     case 'concluir': return dem.concluir(id, vals.conclusao);
     case 'reabrir': return dem.reabrir(id, vals.justificativa);
     case 'editar': {

@@ -214,6 +214,10 @@ function acoesDisponiveis(d, usuario) {
     acoes.push(['encaminhar', 'Encaminhar'], ['subtarefa', 'Nova subtarefa'],
                ['complementacao', 'Solicitar complementação'], ['concluir', 'Concluir']);
   }
+  // Comentar: registrar uma informação/observação sem tramitar. Disponível
+  // mesmo em demanda concluída (mas não inativa — fn_criar_comentario exige
+  // demanda ativa, igual às demais ações de escrita).
+  if (ativa) acoes.push(['comentario', 'Comentar']);
   if (ativa && gerenteMais) acoes.push(['editar', 'Editar']);
   if (ativa && d.situacao === 'concluida' && gerenteMais) acoes.push(['reabrir', 'Reabrir']);
   if (ativa && gerenteMais) acoes.push(['inativar', 'Inativar']);
