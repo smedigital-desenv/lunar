@@ -53,6 +53,14 @@ export function solicitarComplementacao(id, texto) {
   return rpc('fn_solicitar_complementacao', { p_demanda_id: id, p_texto: texto });
 }
 
+// Presta a complementação pedida: registra texto + anexos, retoma a
+// contagem de prazo e devolve a demanda a 'em_andamento'.
+export function responderComplementacao(id, texto, anexos = []) {
+  return rpc('fn_responder_complementacao', {
+    p_demanda_id: id, p_texto: texto, p_anexos: anexos
+  });
+}
+
 export function inativarDemanda(id, motivo) {
   return rpc('fn_inativar', { p_entidade: 'demanda', p_id: id, p_motivo: motivo });
 }

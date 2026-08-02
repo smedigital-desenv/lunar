@@ -42,6 +42,12 @@ export function camposDaAcao(chave, ctx) {
       { nome: 'texto', rotulo: 'O que falta / motivo', tipo: 'textarea', obrigatorio: true } ] };
     case 'comentario': return { titulo: 'Comentar', textoConfirmar: 'Registrar', campos: [
       { nome: 'texto', rotulo: 'Informação / observação', tipo: 'textarea', obrigatorio: true } ] };
+    case 'complementar': return { titulo: 'Prestar complementação', textoConfirmar: 'Enviar', campos: [
+      { tipo: 'aviso', texto: 'Informe o que foi solicitado. A demanda volta a "Em andamento" e a contagem de prazo é retomada.' },
+      { nome: 'texto', rotulo: 'Complementação', tipo: 'textarea', obrigatorio: true },
+      { nome: 'anexos', rotulo: 'Anexos (PDF, Word, Excel, imagem — até 20 MB)', tipo: 'file' },
+      { nome: 'link', rotulo: 'Link do Google Drive (opcional)', tipo: 'url',
+        placeholder: 'https://drive.google.com/...' } ] };
     case 'concluir': {
       const abertas = (ctx.tarefas || []).filter(t => t.ativo !== false && t.situacao !== 'concluida').length;
       const campos = [];
@@ -98,6 +104,12 @@ async function executar(chave, vals, ctx) {
     }
     case 'complementacao': return dem.solicitarComplementacao(id, vals.texto);
     case 'comentario': return com.criarComentario({ demandaId: id, texto: vals.texto });
+    case 'complementar': {
+      const metadados = [];
+      for (const f of (vals.anexos || [])) metadados.push(await anx.subirAnexo(f, { pasta: `demanda/${id}` }));
+      if (vals.link) metadados.push({ nome_original: 'Link do Google Drive', link_externo: vals.link });
+      return dem.responderComplementacao(id, vals.texto, metadados);
+    }
     case 'concluir': return dem.concluir(id, vals.conclusao);
     case 'reabrir': return dem.reabrir(id, vals.justificativa);
     case 'editar': {

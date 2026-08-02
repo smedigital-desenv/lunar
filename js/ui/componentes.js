@@ -57,6 +57,7 @@ const TIPO_MOV = {
   comentario:                 { rotulo: 'Comentário', icone: '❝' },
   alteracao_situacao:         { rotulo: 'Mudança de situação', icone: '⇄' },
   solicitacao_complementacao: { rotulo: 'Solicitação de complementação', icone: '?' },
+  complementacao:             { rotulo: 'Complementação prestada', icone: '↵' },
   conclusao:                  { rotulo: 'Conclusão', icone: '✓' },
   reabertura:                 { rotulo: 'Reabertura', icone: '↺' },
   edicao:                     { rotulo: 'Edição', icone: '✎' },

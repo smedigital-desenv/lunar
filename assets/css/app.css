@@ -556,3 +556,12 @@ body.embed .pagina { padding-top: .6rem; }
   }
   .split-demanda__conteudo { min-width: 0; }
 }
+
+/* Visualizador de PDF (conferência do relatório antes de baixar) */
+.visualizador-pdf { padding: 0; }
+.visualizador-pdf__quadro {
+  display: block; width: 100%; height: 70vh; border: 0; background: #f2f4f7;
+}
+@media (max-width: 991.98px) {
+  .visualizador-pdf__quadro { height: calc(100vh - 11rem); }
+}

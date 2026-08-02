@@ -96,6 +96,7 @@ const ROTULO_TIPO: Record<string, string> = {
   criacao: "Criação", encaminhamento: "Encaminhamento", subtarefa: "Subtarefa",
   devolutiva: "Devolutiva", despacho: "Despacho", comentario: "Comentário",
   alteracao_situacao: "Mudança de situação", solicitacao_complementacao: "Solicitação de complementação",
+  complementacao: "Complementação prestada",
   conclusao: "Conclusão", reabertura: "Reabertura", edicao: "Edição", retificacao: "Retificação",
   ressalva: "Ressalva", inativacao: "Inativação", reativacao: "Reativação", emissao_relatorio: "Emissão de relatório",
 };

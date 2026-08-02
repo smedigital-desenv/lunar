@@ -210,6 +210,11 @@ function acoesDisponiveis(d, usuario) {
   const gerenteMais = nivel >= NIVEL.gerente || usuario?.perfil === 'admin_ti';
   const ativa = d.ativo !== false && d.situacao !== 'inativa';
   const acoes = [];
+  // Prestar a complementação pedida: só faz sentido enquanto a demanda
+  // está parada aguardando essa resposta (e é o que retoma o prazo).
+  if (ativa && d.situacao === 'aguardando_complementacao') {
+    acoes.push(['complementar', 'Prestar complementação']);
+  }
   if (ativa && d.situacao !== 'concluida') {
     acoes.push(['encaminhar', 'Encaminhar'], ['subtarefa', 'Nova subtarefa'],
                ['complementacao', 'Solicitar complementação'], ['concluir', 'Concluir']);
@@ -242,7 +247,14 @@ async function emitirRelatorio(acao, demanda, demo) {
     const svc = await import('../services/relatorios.js');
     toast('Gerando relatório…', 'info');
     const r = await svc.emitirRelatorio(demanda.id, tipo, anon);
-    svc.baixarPdf(r.pdf_base64, `${demanda.numero}-${tipo}${anon ? '-anon' : ''}.pdf`);
+    const nome = `${demanda.numero}-${tipo}${anon ? '-anon' : ''}.pdf`;
+    const { visualizarPdf } = await import('./visualizador-pdf.js');
+    visualizarPdf({
+      titulo: `${acao.includes('inteiro') ? 'Inteiro teor' : 'Relatório-resumo'} — ${demanda.numero}`,
+      blob: svc.pdfBlob(r.pdf_base64),
+      nomeArquivo: nome,
+      codigo: r.codigo
+    });
     toast(`Relatório emitido. Código ${r.codigo}.`, 'sucesso');
   } catch (e) {
     console.error('Falha ao emitir relatório:', e);
