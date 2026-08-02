@@ -30,6 +30,10 @@ function campoHtml(c) {
   if (c.tipo === 'file') {
     return `<div class="mb-3">${rotulo}<input type="file" class="form-control" name="${nome}" multiple></div>`;
   }
+  if (c.tipo === 'url') {
+    const ph = c.placeholder ? ` placeholder="${escapeHtml(c.placeholder)}"` : '';
+    return `<div class="mb-3">${rotulo}<input type="url" class="form-control" name="${nome}"${ph}></div>`;
+  }
   return `<div class="mb-3">${rotulo}<input type="text" class="form-control" name="${nome}"></div>`;
 }
 

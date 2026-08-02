@@ -30,7 +30,9 @@ export function camposDaAcao(chave, ctx) {
       { nome: 'texto', rotulo: 'Observação (opcional)', tipo: 'textarea' } ] };
     case 'devolutiva': return { titulo: 'Registrar devolutiva', textoConfirmar: 'Registrar', campos: [
       { nome: 'texto', rotulo: 'Texto da devolutiva', tipo: 'textarea', obrigatorio: true },
-      { nome: 'anexos', rotulo: 'Anexos (PDF, Word, Excel, imagem — até 20 MB)', tipo: 'file' } ] };
+      { nome: 'anexos', rotulo: 'Anexos (PDF, Word, Excel, imagem — até 20 MB)', tipo: 'file' },
+      { nome: 'link', rotulo: 'Link do Google Drive (opcional)', tipo: 'url',
+        placeholder: 'https://drive.google.com/...' } ] };
     case 'complementacao': return { titulo: 'Solicitar complementação', textoConfirmar: 'Solicitar', campos: [
       { nome: 'texto', rotulo: 'O que falta / motivo', tipo: 'textarea', obrigatorio: true } ] };
     case 'concluir': return { titulo: 'Concluir demanda', textoConfirmar: 'Concluir', campos: [
@@ -72,6 +74,8 @@ async function executar(chave, vals, ctx) {
     case 'devolutiva': {
       const metadados = [];
       for (const f of (vals.anexos || [])) metadados.push(await anx.subirAnexo(f, { pasta: `demanda/${id}` }));
+      // Link do Google Drive: anexo só com link_externo (sem upload).
+      if (vals.link) metadados.push({ nome_original: 'Link do Google Drive', link_externo: vals.link });
       return tar.registrarDevolutiva(ctx.tarefaId, vals.texto, metadados);
     }
     case 'complementacao': return dem.solicitarComplementacao(id, vals.texto);
