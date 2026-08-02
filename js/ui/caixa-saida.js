@@ -26,7 +26,7 @@ async function carregar(filtro, pagina, porPagina) {
   try {
     const r = await carregarReal(filtro, pagina, porPagina);
     if (r) return r;
-  } catch (_) { /* sem config/sessão → exemplo */ }
+  } catch (e) { console.error('Falha ao carregar caixa de saída real:', e); }
   const { itens, total } = filtrarPaginar(EXEMPLO, filtro, pagina, porPagina);
   return { itens, total, demo: true };
 }
