@@ -544,3 +544,15 @@ body.embed .pagina { padding-top: .6rem; }
   body.layout-largo .pagina { max-width: min(1560px, 95vw); }
   body.layout-largo .split { grid-template-columns: minmax(340px, 32rem) 1fr; }
 }
+
+/* Sidebar na tela da demanda (lista à esquerda, conteúdo à direita) */
+.split-demanda { display: block; }
+.split-demanda__lista { display: none; }
+@media (min-width: 900px) {
+  .split-demanda { display: grid; grid-template-columns: minmax(300px, 26rem) 1fr; gap: var(--gap); align-items: start; }
+  .split-demanda__lista {
+    display: block; position: sticky; top: 3.6rem;
+    height: calc(100vh - 4.4rem); overflow-y: auto; padding-right: .25rem;
+  }
+  .split-demanda__conteudo { min-width: 0; }
+}

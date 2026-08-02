@@ -57,3 +57,59 @@ export function habilitarDetalheLateral() {
     }
   });
 }
+
+const EXEMPLO_SIDEBAR = [
+  { id: 'd1', numero: 'DEM-2026-000042', titulo: 'Falta de merenda na EMEF João da Silva', situacao: 'em_andamento', prioridade: 'alta', sigilo: 'normal', prazo: '2026-08-05' },
+  { id: 'd2', numero: 'DEM-2026-000051', titulo: 'Emitir parecer sobre transferência', situacao: 'aberta', prioridade: 'normal', sigilo: 'normal', prazo: '2026-08-12' },
+  { id: 'd3', numero: 'DEM-2026-000058', titulo: 'Vazamento no telhado — vistoria', situacao: 'aberta', prioridade: 'urgente', sigilo: 'normal', prazo: '2026-07-30' }
+];
+
+// Sidebar na TELA DA DEMANDA (desktop): lista "Todos" à esquerda, o conteúdo
+// da demanda à direita. Assim não se perde a lista ao abrir uma demanda.
+// Os cartões navegam (recarrega a página com a nova demanda). No celular não
+// monta (tela cheia). Chamada só quando a página NÃO está em modo embed.
+export function montarSidebarDemanda(ativoId) {
+  const mq = window.matchMedia(LARGO);
+  if (!mq.matches) return;                         // celular → tela cheia
+  const main = document.querySelector('main.pagina');
+  if (!main || main.querySelector('.split-demanda')) return;
+
+  const split = document.createElement('div');
+  split.className = 'split-demanda';
+  const colLista = document.createElement('div');
+  colLista.className = 'split-demanda__lista';
+  colLista.innerHTML = '<div class="texto-silencioso small p-1">Carregando lista…</div>';
+  const colConteudo = document.createElement('div');
+  colConteudo.className = 'split-demanda__conteudo';
+
+  while (main.firstChild) colConteudo.appendChild(main.firstChild);   // move o conteúdo da demanda
+  split.appendChild(colLista);
+  split.appendChild(colConteudo);
+  main.appendChild(split);
+  document.body.classList.add('layout-largo');
+
+  preencherSidebar(colLista, ativoId);
+}
+
+async function preencherSidebar(colLista, ativoId) {
+  const [caixa, comp] = await Promise.all([import('./caixa.js'), import('./componentes.js')]);
+  let itens = null;
+  try {
+    const { listarPorKpi } = await import('../services/painel.js');
+    const dados = await listarPorKpi('todos', 1, 50);
+    itens = dados?.itens || [];
+  } catch (_) {
+    itens = EXEMPLO_SIDEBAR;
+  }
+  colLista.innerHTML = itens.length
+    ? itens.map(d => caixa.cartaoLista({
+        href: `./demanda.html?id=${encodeURIComponent(d.id)}`,
+        numero: d.numero, titulo: d.titulo, situacao: d.situacao,
+        prioridade: d.prioridade, sigilo: d.sigilo,
+        meta: d.prazo ? `Prazo: ${comp.fmtPrazo(d.prazo)}` : null
+      })).join('')
+    : '<p class="texto-silencioso small p-1">Nenhuma demanda.</p>';
+  colLista.querySelectorAll('a.cartao').forEach(a => {
+    if (a.getAttribute('href').includes(`id=${ativoId}`)) a.classList.add('cartao--ativo');
+  });
+}

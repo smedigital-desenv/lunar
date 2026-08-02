@@ -295,4 +295,9 @@ if (EMBED) {
   montarSino('sino-notificacoes');
   iniciarSessao();
   montarNavegacao();
+  // Barra lateral com a lista (desktop): não se perde a lista ao abrir a demanda.
+  const idAtual = new URLSearchParams(location.search).get('id');
+  if (idAtual) {
+    import('./detalhe-lado.js').then(m => m.montarSidebarDemanda(idAtual));
+  }
 }
