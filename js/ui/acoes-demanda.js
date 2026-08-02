@@ -108,6 +108,13 @@ export async function abrirEExecutar(chave, ctx) {
   try {
     await executar(chave, vals, ctx);
     toast('Registrado com sucesso.', 'sucesso');
+    // Se estamos no painel de detalhe (iframe), pede à lista da esquerda para
+    // recarregar — assim a tarefa devolvida/tramitada some da caixa sem F5.
+    if (window.self !== window.top) {
+      try {
+        if (typeof window.parent.recarregarLista === 'function') window.parent.recarregarLista();
+      } catch (_) { /* origem diferente: ignora */ }
+    }
     setTimeout(() => location.reload(), 800);
   } catch (e) {
     toast(e.message || 'Falha ao registrar.', 'erro');

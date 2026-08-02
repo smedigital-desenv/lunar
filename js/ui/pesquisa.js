@@ -90,6 +90,9 @@ elPag.addEventListener('click', (e) => {
 
 renderizar();
 
+// Permite ao painel de detalhe (iframe) atualizar os resultados após uma ação.
+window.recarregarLista = () => renderizar();
+
 // Sino de notificações no cabeçalho (Sessão 9).
 import { montarSino } from './notificacoes.js';
 montarSino('sino-notificacoes');

@@ -98,6 +98,9 @@ document.getElementById('paginacao').addEventListener('click', (e) => {
 
 atualizar();
 
+// Permite ao painel de detalhe (iframe) atualizar a lista após uma ação.
+window.recarregarLista = () => atualizar();
+
 // Sino de notificações e sessão no cabeçalho.
 import { montarSino } from './notificacoes.js';
 import { iniciarSessao } from './sessao.js';

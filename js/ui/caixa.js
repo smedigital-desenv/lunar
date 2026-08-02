@@ -100,6 +100,10 @@ export async function iniciarCaixa(config) {
     atualizar();
   });
 
+  // Permite que o painel de detalhe (iframe) peça a atualização da lista
+  // após uma tramitação, sem precisar de F5.
+  window.recarregarLista = () => atualizar();
+
   renderFiltros();
   await atualizar();
 }
