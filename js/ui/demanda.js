@@ -245,8 +245,8 @@ async function emitirRelatorio(acao, demanda, demo) {
     svc.baixarPdf(r.pdf_base64, `${demanda.numero}-${tipo}${anon ? '-anon' : ''}.pdf`);
     toast(`Relatório emitido. Código ${r.codigo}.`, 'sucesso');
   } catch (e) {
-    console.error(e);
-    toast('Falha ao emitir relatório.', 'erro');
+    console.error('Falha ao emitir relatório:', e);
+    toast(`Falha ao emitir relatório: ${e.message || e}`, 'erro');
   }
 }
 function renderAcoes(d, usuario) {

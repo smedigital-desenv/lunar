@@ -10,13 +10,25 @@
 import { supabase } from './supabaseClient.js';
 import { SUPABASE_URL } from '../config.js';
 
+// Quando a Edge Function responde com status de erro, o supabase-js entrega
+// só uma mensagem genérica ("non-2xx status code"); o motivo real vem no
+// corpo da resposta (error.context). Aqui extraímos esse motivo.
+async function detalharErro(error) {
+  try {
+    const corpo = await error?.context?.json?.();
+    if (corpo?.erro) return corpo.erro;
+    if (corpo?.message) return corpo.message;
+  } catch (_) { /* corpo vazio ou não-JSON: fica a mensagem genérica */ }
+  return error?.message || 'Falha ao emitir relatório.';
+}
+
 // Emite um relatório. tipo: 'resumo' | 'inteiro_teor'.
 // Retorna { id, codigo, hash, caminho, pdf_base64 }.
 export async function emitirRelatorio(demandaId, tipo, anonimizado = false) {
   const { data, error } = await supabase.functions.invoke('relatorios', {
     body: { demanda_id: demandaId, tipo, anonimizado }
   });
-  if (error) throw error;
+  if (error) throw new Error(await detalharErro(error));
   if (data?.erro) throw new Error(data.erro);
   return data;
 }
