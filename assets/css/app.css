@@ -428,3 +428,10 @@ body {
 @media (min-width: 640px) {
   .pessoa-linha { grid-template-columns: 1.3fr 1fr 1.4fr auto; align-items: center; }
 }
+
+/* --------------------------------------------------------------- Painel gerencial */
+.graficos { display: grid; grid-template-columns: 1fr; gap: var(--gap); }
+@media (min-width: 720px) { .graficos { grid-template-columns: 1fr 1fr; } }
+.cartao--largo { grid-column: 1 / -1; }
+.grafico { position: relative; height: 240px; }
+.grafico--largo { height: 300px; }

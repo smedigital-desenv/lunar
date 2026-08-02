@@ -7,11 +7,13 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
         rel="stylesheet" crossorigin="anonymous">
   <link rel="stylesheet" href="../assets/css/app.css">
+  <!-- Chart.js (CDN, sem build step). Se indisponível, o painel cai em barras. -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
   <header class="app-header">
     <div class="app-header__barra">
-      <h1 class="app-header__titulo">Painel</h1>
+      <h1 class="app-header__titulo">Painel gerencial</h1>
       <a href="./pesquisa.html">Pesquisa &#8594;</a>
       <div id="sino-notificacoes" class="app-header__sino"></div>
       <div id="usuario-sessao" class="app-header__sessao"></div>
@@ -27,22 +29,43 @@
     <div id="conteudo" hidden>
       <div class="kpis" id="kpis"></div>
 
-      <section class="cartao">
-        <h2 class="cartao__titulo">Por prioridade</h2>
-        <div id="por-prioridade"></div>
-      </section>
-      <section class="cartao">
-        <h2 class="cartao__titulo">Por setor</h2>
-        <div id="por-setor"></div>
-      </section>
-      <section class="cartao">
-        <h2 class="cartao__titulo">Por responsável</h2>
-        <div id="por-responsavel"></div>
-      </section>
-      <section class="cartao">
-        <h2 class="cartao__titulo">Tempo médio de atendimento</h2>
-        <div id="tempo-medio" class="kpi__valor"></div>
-      </section>
+      <div class="graficos">
+        <section class="cartao">
+          <h2 class="cartao__titulo">Por situação</h2>
+          <div class="grafico"><canvas id="g-situacao"></canvas></div>
+        </section>
+        <section class="cartao">
+          <h2 class="cartao__titulo">Por prioridade</h2>
+          <div class="grafico"><canvas id="g-prioridade"></canvas></div>
+        </section>
+
+        <section class="cartao cartao--largo">
+          <h2 class="cartao__titulo">Evolução mensal (criadas × concluídas)</h2>
+          <div class="grafico grafico--largo"><canvas id="g-evolucao"></canvas></div>
+        </section>
+
+        <section class="cartao">
+          <h2 class="cartao__titulo">Por setor</h2>
+          <div class="grafico"><canvas id="g-setor"></canvas></div>
+        </section>
+        <section class="cartao">
+          <h2 class="cartao__titulo">Por responsável</h2>
+          <div class="grafico"><canvas id="g-responsavel"></canvas></div>
+        </section>
+        <section class="cartao">
+          <h2 class="cartao__titulo">Por unidade</h2>
+          <div class="grafico"><canvas id="g-unidade"></canvas></div>
+        </section>
+        <section class="cartao">
+          <h2 class="cartao__titulo">Por tipo</h2>
+          <div class="grafico"><canvas id="g-tipo"></canvas></div>
+        </section>
+
+        <section class="cartao">
+          <h2 class="cartao__titulo">Tempo médio de atendimento</h2>
+          <div id="tempo-medio" class="kpi__valor"></div>
+        </section>
+      </div>
     </div>
   </main>
 

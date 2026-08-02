@@ -10,6 +10,11 @@ export function obterDashboard() {
   return rpc('fn_dashboard', {});
 }
 
+// Métricas gerenciais adicionais (por situação, unidade, tipo, evolução mensal).
+export function obterGerencial() {
+  return rpc('fn_dashboard_gerencial', {});
+}
+
 // Busca textual + filtros, paginada. Retorna { total, itens }.
 export function pesquisar({ termo, situacao, prioridade, setor, de, ate,
                             pagina = 1, porPagina = 10 } = {}) {
