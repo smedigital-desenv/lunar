@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Como usar o sistema — SME Ribeirão Preto</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet" crossorigin="anonymous">
+  <link rel="stylesheet" href="../assets/css/app.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="app-header__barra">
+      <h1 class="app-header__titulo">Como usar o sistema</h1>
+      <div id="sino-notificacoes" class="app-header__sino"></div>
+      <div id="usuario-sessao" class="app-header__sessao"></div>
+    </div>
+  </header>
+
+  <main class="pagina ajuda">
+
+    <p class="ajuda__abertura">
+      Guia rápido das funções do dia a dia. Cada tela abaixo é a que você vê no
+      celular. Se ficar em dúvida em algum ponto, procure a Gerência de
+      Tecnologia da Informação.
+    </p>
+
+    <nav class="cartao ajuda__indice" aria-label="Conteúdo">
+      <h2 class="cartao__titulo">Neste guia</h2>
+      <ol>
+        <li><a href="#conceitos">Antes de começar: demanda e subtarefa</a></li>
+        <li><a href="#navegacao">Como circular pelo sistema</a></li>
+        <li><a href="#entrada">Caixa de entrada</a></li>
+        <li><a href="#saida">Caixa de saída</a></li>
+        <li><a href="#nova">Abrir uma nova demanda</a></li>
+        <li><a href="#movimentos">Movimentar uma demanda</a>
+          <ul>
+            <li><a href="#encaminhar">Encaminhar</a></li>
+            <li><a href="#subtarefa">Nova subtarefa</a></li>
+            <li><a href="#concluir-tarefa">Concluir tarefa</a></li>
+            <li><a href="#devolver">Devolver tarefa</a></li>
+            <li><a href="#comentar">Comentar</a></li>
+            <li><a href="#complementacao">Complementação</a></li>
+            <li><a href="#concluir">Concluir a demanda</a></li>
+          </ul>
+        </li>
+        <li><a href="#regras">O que o sistema não deixa fazer</a></li>
+      </ol>
+    </nav>
+
+    <!-- ------------------------------------------------ Conceitos -->
+    <section class="cartao" id="conceitos">
+      <h2 class="ajuda__titulo">1. Antes de começar: demanda e subtarefa</h2>
+      <p>
+        A <strong>demanda</strong> é o assunto inteiro — por exemplo, "falta de
+        merenda na EMEF João da Silva". Ela tem um número próprio
+        (<span class="ajuda__exemplo">DEM-2026-000042</span>), gerado pelo
+        sistema, e <strong>um responsável atual</strong>: a pessoa que responde
+        por ela naquele momento.
+      </p>
+      <p>
+        A <strong>subtarefa</strong> é um pedaço do trabalho que você entrega a
+        outra pessoa sem deixar de responder pela demanda. Uma demanda pode ter
+        várias subtarefas, inclusive subtarefas dentro de subtarefas.
+      </p>
+      <p class="ajuda__nota">
+        A diferença entre <strong>encaminhar</strong> e <strong>criar
+        subtarefa</strong> é a que mais gera dúvida, e está explicada no
+        item 6.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------ Navegação -->
+    <section class="cartao" id="navegacao">
+      <h2 class="ajuda__titulo">2. Como circular pelo sistema</h2>
+      <p>
+        No celular, a barra fica no rodapé da tela. No computador, no topo.
+      </p>
+      <figure class="ajuda__figura">
+        <img src="../assets/img/tutorial/navegacao.png" alt="Barra de navegação com as opções Entrada, Saída, Todos, Nova, Painel e Buscar" loading="lazy">
+      </figure>
+      <ul class="ajuda__lista">
+        <li><strong>Entrada</strong> — o que está com você para fazer.</li>
+        <li><strong>Saída</strong> — o que você abriu ou encaminhou.</li>
+        <li><strong>Todos</strong> — tudo que você tem permissão de ver.</li>
+        <li><strong>Nova</strong> — abrir uma demanda.</li>
+        <li><strong>Painel</strong> — números e gráficos.</li>
+        <li><strong>Buscar</strong> — procurar por número, título ou processo.</li>
+      </ul>
+      <p>
+        O sino <span aria-hidden="true">🔔</span> no alto da tela avisa quando
+        algo chega para você.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------ Entrada -->
+    <section class="cartao" id="entrada">
+      <h2 class="ajuda__titulo">3. Caixa de entrada</h2>
+      <p>
+        É a sua lista de trabalho. Aparece aqui toda demanda em que você
+        <strong>é o responsável atual</strong> ou em que <strong>tem uma
+        subtarefa em aberto</strong>. Demandas concluídas saem da lista
+        sozinhas.
+      </p>
+      <figure class="ajuda__figura">
+        <img src="../assets/img/tutorial/caixa-entrada.png" alt="Caixa de entrada mostrando a lista de demandas com número, título, situação e prazo" loading="lazy">
+      </figure>
+      <p>Em cada item da lista você lê, de relance:</p>
+      <ul class="ajuda__lista">
+        <li>o <strong>número</strong> da demanda;</li>
+        <li>o <strong>título</strong>;</li>
+        <li>a <strong>situação</strong> (Aberta, Em andamento, Aguardando complementação…);</li>
+        <li>a <strong>prioridade</strong> (Normal, Alta, Urgente);</li>
+        <li>o <strong>prazo</strong>.</li>
+      </ul>
+      <p>
+        Os botões no alto filtram a lista: <strong>Pendentes</strong>,
+        <strong>Em andamento</strong>, <strong>Urgentes</strong>. Toque em
+        qualquer item para abrir a demanda.
+      </p>
+      <p class="ajuda__nota">
+        Se uma demanda sumiu daqui, quase sempre é porque ela foi concluída ou
+        porque a responsabilidade passou para outra pessoa. Ela continua
+        visível em <strong>Todos</strong> e na <strong>Busca</strong>.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------ Saída -->
+    <section class="cartao" id="saida">
+      <h2 class="ajuda__titulo">4. Caixa de saída</h2>
+      <p>
+        É o acompanhamento do que <strong>saiu das suas mãos</strong>: as
+        demandas que você abriu ou encaminhou. Serve para cobrar andamento sem
+        precisar procurar uma por uma.
+      </p>
+      <figure class="ajuda__figura">
+        <img src="../assets/img/tutorial/caixa-saida.png" alt="Caixa de saída com as demandas abertas ou encaminhadas pelo usuário" loading="lazy">
+      </figure>
+      <p>
+        Diferente da entrada, aqui <strong>aparecem também as concluídas</strong>
+        (filtro <strong>Encerrados</strong>) — é o seu histórico.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------ Nova -->
+    <section class="cartao" id="nova">
+      <h2 class="ajuda__titulo">5. Abrir uma nova demanda</h2>
+      <p>Toque em <strong>Nova</strong> na barra de navegação.</p>
+      <figure class="ajuda__figura">
+        <img src="../assets/img/tutorial/nova-demanda.png" alt="Formulário de nova demanda com os campos título, objeto/queixa e demais informações" loading="lazy">
+      </figure>
+      <p>Dois campos são <strong>obrigatórios</strong>:</p>
+      <ul class="ajuda__lista">
+        <li>
+          <strong>Título</strong> — uma frase curta que identifique o assunto.
+          Escreva algo que outra pessoa entenda sem abrir a demanda.
+        </li>
+        <li>
+          <strong>Objeto / queixa</strong> — o relato do que aconteceu. É este
+          campo que alimenta o relatório enviado ao processo, então descreva
+          com clareza.
+        </li>
+      </ul>
+      <p>Os demais ajudam a organizar e cobrar:</p>
+      <ul class="ajuda__lista">
+        <li><strong>Prioridade</strong> — use <em>Urgente</em> com parcimônia, senão perde o sentido.</li>
+        <li><strong>Prazo</strong> — contado em dias úteis, considerando feriados.</li>
+        <li><strong>Escola</strong> e <strong>pessoas envolvidas</strong>, quando o caso pedir.</li>
+        <li>
+          <strong>Sigilo restrito</strong> — marque quando houver dado de aluno
+          ou de família. Isso limita quem pode ver a demanda.
+        </li>
+        <li>
+          <strong>Nº do processo Solar</strong> — se já existir, preencha; é o
+          que permite achar a demanda a partir do processo.
+        </li>
+      </ul>
+      <p class="ajuda__nota">
+        O número da demanda é gerado pelo sistema ao salvar. Você não precisa
+        (nem consegue) escolher.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------ Movimentos -->
+    <section class="cartao" id="movimentos">
+      <h2 class="ajuda__titulo">6. Movimentar uma demanda</h2>
+      <p>
+        Abra a demanda e desça até a barra de ações. O botão <strong>azul
+        cheio</strong> é o próximo passo mais provável; os demais ficam ao
+        lado, e as ações menos usadas ficam no botão <strong>Mais</strong>.
+      </p>
+      <figure class="ajuda__figura">
+        <img src="../assets/img/tutorial/acoes.png" alt="Barra de ações da demanda com os botões Concluir, Encaminhar, Nova subtarefa e Solicitar complementação" loading="lazy">
+      </figure>
+
+      <h3 class="ajuda__subtitulo" id="encaminhar">Encaminhar</h3>
+      <p>
+        <strong>Passa a demanda para outra pessoa.</strong> Ela deixa de ser
+        sua: quem receber vira o responsável atual e a demanda entra na caixa de
+        entrada dele. Use quando o assunto todo é de outro setor.
+      </p>
+      <figure class="ajuda__figura ajuda__figura--media">
+        <img src="../assets/img/tutorial/modal-encaminhar.png" alt="Janela de encaminhamento com destinatário, mensagem, prioridade e prazo" loading="lazy">
+      </figure>
+      <p>
+        O <strong>despacho</strong> é obrigatório: escreva o que a pessoa
+        precisa fazer. Pode ajustar prioridade e prazo no mesmo passo.
+      </p>
+
+      <h3 class="ajuda__subtitulo" id="subtarefa">Nova subtarefa</h3>
+      <p>
+        <strong>Entrega um pedaço do trabalho, sem passar a demanda.</strong>
+        Você continua responsável pelo conjunto. É a diferença para o
+        encaminhamento:
+      </p>
+      <div class="ajuda__comparacao">
+        <div class="ajuda__coluna">
+          <h4>Encaminhar</h4>
+          <p>A demanda inteira muda de dono. Sai da sua caixa de entrada.</p>
+        </div>
+        <div class="ajuda__coluna">
+          <h4>Nova subtarefa</h4>
+          <p>Só um pedaço vai para outra pessoa. A demanda continua com você.</p>
+        </div>
+      </div>
+      <figure class="ajuda__figura ajuda__figura--media">
+        <img src="../assets/img/tutorial/modal-subtarefa.png" alt="Janela de nova subtarefa com tarefa-mãe, responsável, título, descrição e prazo" loading="lazy">
+      </figure>
+      <p>
+        Em <strong>Tarefa-mãe</strong>, deixe
+        <span class="ajuda__exemplo">(diretamente na demanda)</span> para criar
+        uma tarefa solta na demanda. Escolha uma tarefa existente apenas quando
+        a nova for um desdobramento dela.
+      </p>
+      <p>As subtarefas aparecem em árvore, com situação e responsável:</p>
+      <figure class="ajuda__figura ajuda__figura--media">
+        <img src="../assets/img/tutorial/subtarefas.png" alt="Árvore de subtarefas mostrando situação e responsável de cada uma" loading="lazy">
+      </figure>
+
+      <h3 class="ajuda__subtitulo" id="concluir-tarefa">Concluir tarefa</h3>
+      <p>
+        Use quando <strong>você fez o que foi pedido</strong>. Registre a
+        resposta e anexe o que produziu (PDF, planilha, foto) ou informe um link
+        do Google Drive. Quem delegou é avisado.
+      </p>
+
+      <h3 class="ajuda__subtitulo" id="devolver">Devolver tarefa</h3>
+      <p class="ajuda__alerta">
+        <strong>Devolver não significa "já fiz".</strong> Significa que você
+        <strong>não vai executar</strong> a tarefa — não é do seu setor, falta
+        informação, foi enviada por engano. Ela volta para quem delegou.
+      </p>
+      <p>
+        Se você executou o serviço, o botão certo é <strong>Concluir
+        tarefa</strong>. Em ambos os casos é obrigatório explicar o motivo.
+      </p>
+
+      <h3 class="ajuda__subtitulo" id="comentar">Comentar</h3>
+      <p>
+        Registra uma informação na demanda <strong>sem mudar nada</strong>: não
+        troca o responsável, não altera a situação, não mexe no prazo. Serve
+        para anotar um telefonema, uma orientação, um combinado.
+      </p>
+      <figure class="ajuda__figura ajuda__figura--media">
+        <img src="../assets/img/tutorial/modal-comentar.png" alt="Janela de comentário com o campo de informação ou observação" loading="lazy">
+      </figure>
+
+      <h3 class="ajuda__subtitulo" id="complementacao">Complementação</h3>
+      <p>
+        <strong>Solicitar complementação</strong> é para quando falta
+        informação para trabalhar. A demanda volta para quem agiu antes, entra
+        em <em>Aguardando complementação</em> e <strong>o prazo fica
+        suspenso</strong> — o tempo de espera não conta contra você.
+      </p>
+      <p>
+        Quem recebe o pedido responde pelo botão <strong>Prestar
+        complementação</strong>, que aparece nessa situação. Ao enviar (com
+        anexos, se for o caso), a demanda volta a <em>Em andamento</em> e a
+        contagem do prazo é retomada.
+      </p>
+
+      <h3 class="ajuda__subtitulo" id="concluir">Concluir a demanda</h3>
+      <p>
+        Encerra o assunto. A <strong>conclusão/desfecho é obrigatória</strong>:
+        sem ela o sistema não conclui. Esse texto vai para o relatório do
+        processo, então descreva o que foi resolvido.
+      </p>
+      <figure class="ajuda__figura ajuda__figura--media">
+        <img src="../assets/img/tutorial/modal-concluir.png" alt="Janela de conclusão da demanda com o campo de conclusão e desfecho" loading="lazy">
+      </figure>
+      <p class="ajuda__nota">
+        Se ainda houver subtarefas em aberto, o sistema avisa. Concluir a
+        demanda não encerra as subtarefas automaticamente.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------ Regras -->
+    <section class="cartao" id="regras">
+      <h2 class="ajuda__titulo">7. O que o sistema não deixa fazer</h2>
+      <p>
+        Estas travas existem porque a demanda pode virar processo
+        administrativo, e o histórico precisa ser confiável.
+      </p>
+      <ul class="ajuda__lista">
+        <li>
+          <strong>Nada é apagado.</strong> Não existe excluir. O que sai de uso
+          é inativado, sempre com justificativa e com registro de quem fez.
+        </li>
+        <li>
+          <strong>O histórico não se altera.</strong> Movimentações,
+          comentários e anexos não podem ser editados nem removidos depois de
+          gravados — nem pelo administrador.
+        </li>
+        <li>
+          <strong>Errou no texto?</strong> Enquanto ninguém tiver agido depois
+          de você, dá para <strong>retificar</strong>. Depois disso, resta
+          registrar uma <strong>ressalva</strong>: o texto errado continua
+          visível, com a correção ao lado. Nos dois casos, vale o que estiver
+          registrado — nada é apagado.
+        </li>
+        <li>
+          <strong>Toda alteração exige justificativa.</strong> Editar,
+          inativar, retificar e ressalvar pedem um motivo escrito.
+        </li>
+        <li>
+          <strong>Você só vê o que lhe compete.</strong> A visibilidade segue o
+          organograma e a sua participação na tramitação. Demandas de sigilo
+          restrito são mais fechadas ainda.
+        </li>
+      </ul>
+    </section>
+
+    <p class="ajuda__rodape">
+      Sistema de Gestão de Demandas — Secretaria Municipal de Educação de
+      Ribeirão Preto.
+    </p>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+          crossorigin="anonymous"></script>
+  <script type="module" src="../js/ui/ajuda.js"></script>
+</body>
+</html>

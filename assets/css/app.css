@@ -301,6 +301,12 @@ a.cartao:active { transform: translateY(0); }
 }
 .tarefa-no:hover { border-color: var(--cor-primaria-borda); box-shadow: var(--sombra); }
 .tarefa-no__titulo { flex: 1 1 auto; font-weight: 600; }
+/* Em tela estreita, título, situação e responsável não cabem lado a lado:
+   o título ficava espremido em várias linhas. Passa a ocupar a linha toda. */
+@media (max-width: 560px) {
+  .tarefa-no { flex-wrap: wrap; }
+  .tarefa-no__titulo { flex: 1 1 100%; }
+}
 .tarefa-no--inativa { opacity: .55; }
 
 /* --------------------------------------------------------------- Timeline */
@@ -761,4 +767,69 @@ body.embed .pagina { padding-top: .6rem; }
 }
 @media (max-width: 991.98px) {
   .visualizador-pdf__quadro { height: calc(100vh - 11rem); }
+}
+
+/* --------------------------------------------------------------- Ajuda (tutorial) */
+.ajuda { max-width: 46rem; }
+.ajuda__abertura { color: var(--cinza-700); margin-bottom: var(--gap); }
+.ajuda__titulo {
+  font-size: 1.2rem; font-weight: 700; letter-spacing: -.02em;
+  color: var(--cor-primaria); margin: 0 0 .8rem;
+}
+.ajuda__subtitulo {
+  font-size: 1rem; font-weight: 700; letter-spacing: -.01em;
+  margin: 1.6rem 0 .5rem; padding-top: 1rem;
+  border-top: 1px solid var(--cinza-100);
+}
+.ajuda p { margin-bottom: .7rem; }
+.ajuda__lista { padding-left: 1.1rem; margin-bottom: .8rem; }
+.ajuda__lista li { margin-bottom: .35rem; }
+
+/* Índice */
+.ajuda__indice ol { padding-left: 1.2rem; margin: 0; }
+.ajuda__indice li { margin-bottom: .25rem; }
+.ajuda__indice ul { padding-left: 1.1rem; margin: .25rem 0; }
+.ajuda__indice a { color: var(--cor-primaria); text-decoration: none; }
+.ajuda__indice a:hover { text-decoration: underline; }
+
+/* Ilustrações: capturas reais do sistema */
+.ajuda__figura { margin: .9rem 0 1rem; text-align: center; }
+.ajuda__figura img {
+  max-width: 100%; height: auto;
+  border: 1px solid var(--cinza-200); border-radius: var(--raio-sm);
+  box-shadow: var(--sombra);
+}
+/* Telas inteiras de celular ficariam enormes no desktop: limita a altura. */
+.ajuda__figura > img { max-height: 34rem; width: auto; }
+.ajuda__figura--media > img { max-height: 26rem; }
+
+/* Destaques de texto */
+.ajuda__exemplo {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .88em; background: var(--cinza-100);
+  padding: .05rem .35rem; border-radius: 4px;
+}
+.ajuda__nota, .ajuda__alerta {
+  border-left: 3px solid var(--cor-primaria);
+  background: var(--cor-primaria-clara);
+  padding: .6rem .8rem; border-radius: 0 var(--raio-sm) var(--raio-sm) 0;
+  margin: .8rem 0;
+}
+.ajuda__alerta { border-left-color: var(--pri-urgente); background: #fdecee; }
+
+/* Encaminhar x subtarefa, lado a lado */
+.ajuda__comparacao { display: grid; grid-template-columns: 1fr; gap: .6rem; margin: .8rem 0; }
+@media (min-width: 560px) { .ajuda__comparacao { grid-template-columns: 1fr 1fr; } }
+.ajuda__coluna {
+  border: 1px solid var(--cinza-200); border-radius: var(--raio-sm);
+  padding: .7rem .8rem; background: var(--cinza-50);
+}
+.ajuda__coluna h4 {
+  font-size: .9rem; font-weight: 700; margin: 0 0 .3rem; color: var(--cor-primaria);
+}
+.ajuda__coluna p { margin: 0; font-size: .9rem; }
+
+.ajuda__rodape {
+  text-align: center; color: var(--cinza-500);
+  font-size: .82rem; margin: 1.5rem 0 0;
 }

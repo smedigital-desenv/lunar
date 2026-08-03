@@ -77,6 +77,7 @@ export async function iniciarSessao(elId = 'usuario-sessao') {
       + `<span class="sessao__perfil">${escapeHtml(usuario.perfil_nome)}`
       + (usuario.unidade_sigla ? ` · ${escapeHtml(usuario.unidade_sigla)}` : '')
       + `</span></span>`
+      + `<a class="sessao__admin" href="./ajuda.html" title="Como usar o sistema">Ajuda</a>`
       + (usuario.pode_administrar
           ? `<a class="sessao__admin" href="./admin.html">Admin</a>`
             + `<a class="sessao__admin" href="./equipes.html">Equipes</a>` : '')
