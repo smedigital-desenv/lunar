@@ -89,31 +89,12 @@ export async function obterDemanda(id) {
   };
 }
 
-// Aplica o filtro do painel a uma query (situação/prioridade).
-function filtroCaixa(q, filtro) {
-  switch (filtro) {
-    case 'pendentes':    return q.in('situacao', ['aberta', 'aguardando_complementacao', 'devolvida']);
-    case 'em_andamento': return q.in('situacao', ['em_andamento', 'reaberta']);
-    case 'urgentes':     return q.eq('prioridade', 'urgente');
-    case 'encerrados':   return q.eq('situacao', 'concluida');
-    default:             return q; // todos
-  }
-}
-
-// Caixa de SAÍDA: demandas criadas pelo usuário corrente, paginadas.
+// Caixa de SAÍDA: demandas que o usuário criou OU encaminhou (mesmo que
+// hoje não seja mais o criador nem o responsável) — o que ele acompanha
+// "de fora". Inclui concluídas (filtro "Encerrados"): é o seu histórico.
 export async function listarCaixaSaida({ filtro = 'todos', pagina = 1, porPagina = 10 } = {}) {
-  const { data: sess } = await supabase.auth.getUser();
-  const uid = sess?.user?.id;
-  if (!uid) throw new Error('Sem sessão autenticada.');
-
-  let q = supabase.from('demandas')
-    .select('id, numero, titulo, situacao, prioridade, sigilo, prazo', { count: 'exact' })
-    .eq('criado_por', uid).eq('ativo', true);
-  q = filtroCaixa(q, filtro);
-
-  const de = (pagina - 1) * porPagina;
-  const { data, count, error } = await q
-    .order('criado_em', { ascending: false }).range(de, de + porPagina - 1);
-  if (error) throw error;
-  return { itens: data ?? [], total: count ?? 0 };
+  const dados = await rpc('fn_caixa_saida', {
+    p_filtro: filtro, p_pagina: pagina, p_por_pagina: porPagina
+  });
+  return { itens: dados?.itens ?? [], total: dados?.total ?? 0 };
 }
