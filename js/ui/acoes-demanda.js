@@ -53,7 +53,7 @@ export function camposDaAcao(chave, ctx) {
       const campos = [];
       if (abertas > 0) {
         campos.push({ tipo: 'aviso',
-          texto: `Atenção: há ${abertas} subtarefa(s) em aberto. Concluir a demanda não as encerra.` });
+          texto: `Atenção: há ${abertas} subtarefa(s) em aberto. Ao concluir, elas serão encerradas automaticamente.` });
       }
       campos.push({ nome: 'conclusao', rotulo: 'Conclusão / desfecho', tipo: 'textarea', obrigatorio: true });
       return { titulo: 'Concluir demanda', textoConfirmar: 'Concluir', campos };
