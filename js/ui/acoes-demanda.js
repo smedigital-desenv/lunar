@@ -7,8 +7,6 @@
 import { abrirFormulario, PRIORIDADES } from './modais.js';
 import { toast } from './componentes.js';
 
-const MANTER = { valor: '', rotulo: '(manter)' };
-
 // Retorna { titulo, textoConfirmar, campos } para a ação, ou null.
 export function camposDaAcao(chave, ctx) {
   const usuarios = ctx.usuarios || [];
@@ -73,19 +71,36 @@ export function camposDaAcao(chave, ctx) {
     case 'reabrir': return { titulo: 'Reabrir demanda', textoConfirmar: 'Reabrir', campos: [
       { nome: 'justificativa', rotulo: 'Justificativa', tipo: 'textarea', obrigatorio: true } ] };
     case 'editar': {
-      // Chefia edita qualquer campo; quem é só dono da demanda (sem ser
-      // chefia) só pode corrigir o responsável por aqui — os demais
-      // campos continuam exigindo gerente/superior no escopo (sql/034).
+      // Chefia edita qualquer campo (todos pré-preenchidos com o valor
+      // atual — corrigir um texto longo não deveria exigir retypar tudo).
+      // Quem é só dono da demanda (sem ser chefia) só pode corrigir o
+      // responsável por aqui — os demais campos continuam exigindo
+      // gerente/superior no escopo (sql/034/035).
+      const d = ctx.demanda || {};
+      const tipos = (ctx.tipos || []).map(t => ({ valor: t.id, rotulo: t.nome }));
+      const escolas = (ctx.escolas || []).map(e => ({ valor: e.id, rotulo: e.nome }));
+      const SEM_TIPO = { valor: '', rotulo: '— selecione —' };
+      const SEM_ESCOLA = { valor: '', rotulo: '— nenhuma —' };
+      const SIGILO = [{ valor: 'normal', rotulo: 'Normal' }, { valor: 'restrito', rotulo: 'Restrito' }];
       const campos = [];
       if (ctx.podeEditarGeral) {
         campos.push(
-          { nome: 'titulo', rotulo: 'Título', tipo: 'text' },
-          { nome: 'prioridade', rotulo: 'Prioridade', tipo: 'select', opcoes: [MANTER, ...PRIORIDADES] },
-          { nome: 'prazo', rotulo: 'Prazo', tipo: 'date' }
+          { nome: 'titulo', rotulo: 'Título', tipo: 'text', valor: d.titulo, obrigatorio: true },
+          { nome: 'objeto_queixa', rotulo: 'Objeto / queixa', tipo: 'textarea', valor: d.objeto_queixa, obrigatorio: true },
+          { nome: 'descricao', rotulo: 'Descrição', tipo: 'textarea', valor: d.descricao },
+          { nome: 'tipo_id', rotulo: 'Tipo', tipo: 'select', opcoes: [SEM_TIPO, ...tipos], valor: d.tipo_id },
+          { nome: 'prioridade', rotulo: 'Prioridade', tipo: 'select', opcoes: PRIORIDADES, valor: d.prioridade },
+          { nome: 'categoria', rotulo: 'Categoria', tipo: 'text', valor: d.categoria },
+          { nome: 'setor', rotulo: 'Setor', tipo: 'text', valor: d.setor },
+          { nome: 'prazo', rotulo: 'Prazo', tipo: 'date', valor: d.prazo },
+          { nome: 'escola_id', rotulo: 'Escola', tipo: 'select', opcoes: [SEM_ESCOLA, ...escolas], valor: d.escola_id },
+          { nome: 'aluno_nome', rotulo: 'Aluno', tipo: 'text', valor: d.aluno_nome },
+          { nome: 'numero_processo_solar', rotulo: 'Nº processo Solar', tipo: 'text', valor: d.numero_processo_solar },
+          { nome: 'sigilo', rotulo: 'Sigilo', tipo: 'select', opcoes: SIGILO, valor: d.sigilo }
         );
       }
       if (ctx.souDono) {
-        campos.push({ nome: 'responsavel', rotulo: 'Responsável', tipo: 'select', opcoes: [MANTER, ...usuarios] });
+        campos.push({ nome: 'responsavel', rotulo: 'Responsável', tipo: 'select', opcoes: usuarios, valor: d.responsavel_atual_id });
       }
       campos.push({ nome: 'justificativa', rotulo: 'Justificativa', tipo: 'textarea', obrigatorio: true });
       return { titulo: 'Editar demanda', textoConfirmar: 'Salvar', campos };
@@ -138,11 +153,28 @@ async function executar(chave, vals, ctx) {
     case 'concluir': return dem.concluir(id, vals.conclusao);
     case 'reabrir': return dem.reabrir(id, vals.justificativa);
     case 'editar': {
+      // Campos gerais vêm pré-preenchidos (modais.js): reenviar o mesmo
+      // valor é inofensivo (fn_editar_demanda só reaplica o que já era).
       const campos = {};
-      if (vals.titulo) campos.titulo = vals.titulo;
-      if (vals.prioridade) campos.prioridade = vals.prioridade;
-      if (vals.prazo) campos.prazo = vals.prazo;
-      if (vals.responsavel) campos.responsavel_id = vals.responsavel;
+      if (ctx.podeEditarGeral) {
+        campos.titulo = vals.titulo;
+        campos.objeto_queixa = vals.objeto_queixa;
+        campos.descricao = vals.descricao;
+        campos.tipo_id = vals.tipo_id || null;
+        campos.prioridade = vals.prioridade;
+        campos.categoria = vals.categoria;
+        campos.setor = vals.setor;
+        campos.prazo = vals.prazo || null;
+        campos.escola_id = vals.escola_id || null;
+        campos.aluno_nome = vals.aluno_nome;
+        campos.numero_processo_solar = vals.numero_processo_solar;
+        campos.sigilo = vals.sigilo;
+      }
+      // Responsável: só envia se realmente mudou — reenviar o valor
+      // pré-preenchido sem alterar geraria notificação/movimentação à toa.
+      if (vals.responsavel && vals.responsavel !== ctx.demanda?.responsavel_atual_id) {
+        campos.responsavel_id = vals.responsavel;
+      }
       return dem.editarDemanda(id, campos, vals.justificativa);
     }
     case 'inativar': return dem.inativarDemanda(id, vals.motivo);

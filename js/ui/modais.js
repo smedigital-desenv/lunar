@@ -19,25 +19,28 @@ function campoHtml(c) {
   const req = c.obrigatorio ? ' <span class="text-danger">*</span>' : '';
   const rotulo = `<label class="form-label">${escapeHtml(c.rotulo)}${req}</label>`;
   const nome = escapeHtml(c.nome);
+  // c.valor pré-preenche o campo com o dado atual (telas de edição) — sem
+  // isso, corrigir um texto longo exigiria retypar tudo do zero.
+  const valor = c.valor ?? '';
   if (c.tipo === 'textarea') {
-    return `<div class="mb-3">${rotulo}<textarea class="form-control" name="${nome}" rows="3"></textarea></div>`;
+    return `<div class="mb-3">${rotulo}<textarea class="form-control" name="${nome}" rows="3">${escapeHtml(valor)}</textarea></div>`;
   }
   if (c.tipo === 'select') {
     const ops = (c.opcoes || []).map(o =>
-      `<option value="${escapeHtml(o.valor)}">${escapeHtml(o.rotulo)}</option>`).join('');
+      `<option value="${escapeHtml(o.valor)}"${String(o.valor) === String(valor) ? ' selected' : ''}>${escapeHtml(o.rotulo)}</option>`).join('');
     return `<div class="mb-3">${rotulo}<select class="form-select" name="${nome}">${ops}</select></div>`;
   }
   if (c.tipo === 'date') {
-    return `<div class="mb-3">${rotulo}<input type="date" class="form-control" name="${nome}"></div>`;
+    return `<div class="mb-3">${rotulo}<input type="date" class="form-control" name="${nome}" value="${escapeHtml(valor)}"></div>`;
   }
   if (c.tipo === 'file') {
     return `<div class="mb-3">${rotulo}<input type="file" class="form-control" name="${nome}" multiple></div>`;
   }
   if (c.tipo === 'url') {
     const ph = c.placeholder ? ` placeholder="${escapeHtml(c.placeholder)}"` : '';
-    return `<div class="mb-3">${rotulo}<input type="url" class="form-control" name="${nome}"${ph}></div>`;
+    return `<div class="mb-3">${rotulo}<input type="url" class="form-control" name="${nome}" value="${escapeHtml(valor)}"${ph}></div>`;
   }
-  return `<div class="mb-3">${rotulo}<input type="text" class="form-control" name="${nome}"></div>`;
+  return `<div class="mb-3">${rotulo}<input type="text" class="form-control" name="${nome}" value="${escapeHtml(valor)}"></div>`;
 }
 
 // Abre um formulário modal. Resolve com { campo: valor } ou null (cancelar).

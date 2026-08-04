@@ -17,6 +17,7 @@ const NIVEL = { agente_administrativo: 1, chefe_secao: 2, gerente: 3,
 
 // Lista de usuários para os selects dos modais (exemplo; virá de serviço com auth).
 const USUARIOS_EXEMPLO = [
+  { valor: 'u_edu', rotulo: 'Eduardo Gerente' },
   { valor: 'u_gustavo', rotulo: 'Gustavo Chefe' },
   { valor: 'u_igor', rotulo: 'Igor Agente' },
   { valor: 'u_julia', rotulo: 'Júlia Agente' },
@@ -84,14 +85,16 @@ async function carregarReal(id) {
   ]);
   const demanda = await dem.obterDemanda(id);
   if (!demanda) return null;
-  const [tarefas, movimentacoes, listaUsuarios, usuario] = await Promise.all([
+  const [tarefas, movimentacoes, listaUsuarios, listaTipos, listaEscolas, usuario] = await Promise.all([
     tar.listarPorDemanda(id), mov.listarPorDemanda(id),
-    ref.listarUsuariosAtivos(), auth.usuarioCorrente()
+    ref.listarUsuariosAtivos(), ref.listarTipos(), ref.listarEscolas(), auth.usuarioCorrente()
   ]);
   // Selects de destinatário/responsável precisam de UUIDs reais (não os
   // exemplos u_julia/…). valor = id da conta; rotulo = nome.
   const usuarios = (listaUsuarios || []).map(u => ({ valor: u.id, rotulo: u.nome }));
-  return { demanda, tarefas, movimentacoes, pessoas: [], usuario, usuarios };
+  const tipos = (listaTipos || []).map(t => ({ valor: t.id, rotulo: t.nome }));
+  const escolas = (listaEscolas || []).map(e => ({ valor: e.id, rotulo: e.nome }));
+  return { demanda, tarefas, movimentacoes, pessoas: [], usuario, usuarios, tipos, escolas };
 }
 
 // ---------------------------------------------------------------- Render
@@ -358,6 +361,7 @@ async function iniciar() {
 
   const ctxBase = {
     demanda, tarefas, usuarios: dados.usuarios || USUARIOS_EXEMPLO, demo, usuario,
+    tipos: dados.tipos || [], escolas: dados.escolas || [],
     souDono: ehDonoDaDemanda(demanda, usuario), podeEditarGeral: ehGerenteMais(usuario)
   };
 
