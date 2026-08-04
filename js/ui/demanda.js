@@ -228,15 +228,22 @@ function renderTimeline(movs, usuario, tarefas) {
   }).join('');
 }
 
+// Dono da demanda: quem a criou ou é o responsável atual. Só eles
+// encaminham, alteram responsável ou concluem — sem atalho de
+// chefia/gabinete (sql/033).
+function ehDonoDaDemanda(d, usuario) {
+  return !!usuario && (usuario.id === d.responsavel_atual_id || usuario.id === d.criado_por);
+}
+function ehGerenteMais(usuario) {
+  const nivel = NIVEL[usuario?.perfil] || 0;
+  return nivel >= NIVEL.gerente || usuario?.perfil === 'admin_ti';
+}
+
 // Ações da barra conforme perfil + situação (apenas UX; a segurança é o RLS/funções).
 function acoesDisponiveis(d, usuario, tarefas) {
-  const nivel = NIVEL[usuario?.perfil] || 0;
-  const gerenteMais = nivel >= NIVEL.gerente || usuario?.perfil === 'admin_ti';
+  const gerenteMais = ehGerenteMais(usuario);
   const ativa = d.ativo !== false && d.situacao !== 'inativa';
-  // Dono da demanda: quem a criou ou é o responsável atual. Só eles
-  // encaminham, alteram responsável ou concluem — sem atalho de
-  // chefia/gabinete.
-  const souDono = !!usuario && (usuario.id === d.responsavel_atual_id || usuario.id === d.criado_por);
+  const souDono = ehDonoDaDemanda(d, usuario);
   // Quem só recebeu uma tarefa (não é dono da demanda) pode criar
   // subtarefa a partir dela, nunca direto na raiz.
   const tenhoTarefaAtiva = !!usuario && (tarefas || []).some(t =>
@@ -256,7 +263,10 @@ function acoesDisponiveis(d, usuario, tarefas) {
   // mesmo em demanda concluída (mas não inativa — fn_criar_comentario exige
   // demanda ativa, igual às demais ações de escrita).
   if (ativa) acoes.push(['comentario', 'Comentar']);
-  if (ativa && gerenteMais) acoes.push(['editar', 'Editar']);
+  // Editar: chefia mexe em qualquer campo; quem é só dono (sem ser chefia)
+  // vê a tela para poder corrigir o responsável (sql/034) — o próprio
+  // modal restringe os campos conforme o caso (acoes-demanda.js).
+  if (ativa && (gerenteMais || souDono)) acoes.push(['editar', 'Editar']);
   if (ativa && d.situacao === 'concluida' && gerenteMais) acoes.push(['reabrir', 'Reabrir']);
   if (ativa && gerenteMais) acoes.push(['inativar', 'Inativar']);
   if (!ativa && gerenteMais) acoes.push(['reativar', 'Reativar']);
@@ -346,7 +356,10 @@ async function iniciar() {
   document.getElementById('timeline').innerHTML = renderTimeline(movimentacoes, usuario, tarefas);
   document.getElementById('acoes').innerHTML = renderAcoes(demanda, usuario, tarefas);
 
-  const ctxBase = { demanda, tarefas, usuarios: dados.usuarios || USUARIOS_EXEMPLO, demo, usuario };
+  const ctxBase = {
+    demanda, tarefas, usuarios: dados.usuarios || USUARIOS_EXEMPLO, demo, usuario,
+    souDono: ehDonoDaDemanda(demanda, usuario), podeEditarGeral: ehGerenteMais(usuario)
+  };
 
   document.getElementById('acoes').addEventListener('click', (e) => {
     const b = e.target.closest('[data-acao]');

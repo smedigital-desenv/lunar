@@ -72,11 +72,24 @@ export function camposDaAcao(chave, ctx) {
     }
     case 'reabrir': return { titulo: 'Reabrir demanda', textoConfirmar: 'Reabrir', campos: [
       { nome: 'justificativa', rotulo: 'Justificativa', tipo: 'textarea', obrigatorio: true } ] };
-    case 'editar': return { titulo: 'Editar demanda', textoConfirmar: 'Salvar', campos: [
-      { nome: 'titulo', rotulo: 'Título', tipo: 'text' },
-      { nome: 'prioridade', rotulo: 'Prioridade', tipo: 'select', opcoes: [MANTER, ...PRIORIDADES] },
-      { nome: 'prazo', rotulo: 'Prazo', tipo: 'date' },
-      { nome: 'justificativa', rotulo: 'Justificativa', tipo: 'textarea', obrigatorio: true } ] };
+    case 'editar': {
+      // Chefia edita qualquer campo; quem é só dono da demanda (sem ser
+      // chefia) só pode corrigir o responsável por aqui — os demais
+      // campos continuam exigindo gerente/superior no escopo (sql/034).
+      const campos = [];
+      if (ctx.podeEditarGeral) {
+        campos.push(
+          { nome: 'titulo', rotulo: 'Título', tipo: 'text' },
+          { nome: 'prioridade', rotulo: 'Prioridade', tipo: 'select', opcoes: [MANTER, ...PRIORIDADES] },
+          { nome: 'prazo', rotulo: 'Prazo', tipo: 'date' }
+        );
+      }
+      if (ctx.souDono) {
+        campos.push({ nome: 'responsavel', rotulo: 'Responsável', tipo: 'select', opcoes: [MANTER, ...usuarios] });
+      }
+      campos.push({ nome: 'justificativa', rotulo: 'Justificativa', tipo: 'textarea', obrigatorio: true });
+      return { titulo: 'Editar demanda', textoConfirmar: 'Salvar', campos };
+    }
     case 'inativar': return { titulo: 'Inativar demanda', textoConfirmar: 'Inativar', campos: [
       { nome: 'motivo', rotulo: 'Motivo', tipo: 'textarea', obrigatorio: true } ] };
     case 'reativar': return { titulo: 'Reativar demanda', textoConfirmar: 'Reativar', campos: [
@@ -129,6 +142,7 @@ async function executar(chave, vals, ctx) {
       if (vals.titulo) campos.titulo = vals.titulo;
       if (vals.prioridade) campos.prioridade = vals.prioridade;
       if (vals.prazo) campos.prazo = vals.prazo;
+      if (vals.responsavel) campos.responsavel_id = vals.responsavel;
       return dem.editarDemanda(id, campos, vals.justificativa);
     }
     case 'inativar': return dem.inativarDemanda(id, vals.motivo);
