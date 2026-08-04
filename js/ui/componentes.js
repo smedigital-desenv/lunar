@@ -96,7 +96,9 @@ export function iniciais(nome) {
 
 // ---------------------------------------------------------------- Timeline
 // mov: { tipo, texto, criado_em, autor_nome, destinatario_nome, situacao_nova }
-// opts: { retificadoPor: {autor_nome, texto}, ressalva: {autor_nome, texto} }
+// opts: { retificadoPor: {autor_nome, texto}, ressalva: {autor_nome, texto},
+//         caminho: string[] — ["Tarefa", "Subtarefa", ...] até a raiz;
+//         vazio/ausente = evento da própria demanda }
 export function itemTimeline(mov, opts = {}) {
   const retificado = !!opts.retificadoPor;
   const partes = [];
@@ -104,6 +106,12 @@ export function itemTimeline(mov, opts = {}) {
   const classeTipo = mov.tipo ? ` timeline__item--${mov.tipo}` : '';
   partes.push(`<li class="timeline__item${classeTipo}${retificado ? ' timeline__item--retificado' : ''}">`);
   partes.push(`<span class="timeline__marcador" title="${escapeHtml(rotuloTipo(mov.tipo))}">${iconeTipo(mov.tipo)}</span>`);
+  // Em qual tarefa/subtarefa isto aconteceu — deixa a hierarquia explícita
+  // numa timeline que mistura eventos da demanda com os de cada ramo.
+  if (opts.caminho && opts.caminho.length) {
+    partes.push(`<div class="timeline__caminho"><span aria-hidden="true">↳</span> `
+      + opts.caminho.map(escapeHtml).join(' <span aria-hidden="true">›</span> ') + `</div>`);
+  }
   partes.push('<div class="timeline__cabecalho">');
   partes.push(`<span class="timeline__autor">${escapeHtml(mov.autor_nome || '—')}</span>`);
   partes.push(`<span class="texto-silencioso">${escapeHtml(rotuloTipo(mov.tipo))}</span>`);

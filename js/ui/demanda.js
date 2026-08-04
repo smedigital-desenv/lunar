@@ -26,6 +26,10 @@ const USUARIOS_EXEMPLO = [
 // ---------------------------------------------------------------- Dados exemplo
 const DADOS_EXEMPLO = {
   usuario: { id: 'u_edu', nome: 'Eduardo Gerente', perfil: 'gerente' },
+  // responsavel_atual_id/criado_por (demanda) e responsavel_id/criado_por
+  // (tarefas) existem só para o exemplo exercitar a barra de ações "dono
+  // da demanda" sem sessão real — não precisam bater 100% com o texto da
+  // timeline de exemplo abaixo.
   demanda: {
     id: 'd1', numero: 'DEM-2026-000042',
     titulo: 'Falta de merenda na EMEF Prof. João da Silva',
@@ -34,7 +38,8 @@ const DADOS_EXEMPLO = {
     categoria: 'Alimentação escolar', setor: 'Suprimentos',
     prioridade: 'alta', situacao: 'em_andamento', sigilo: 'normal',
     prazo: '2026-08-05', numero_processo_solar: '2026.0001234',
-    solicitante_nome: 'Ana Secretária', responsavel_nome: 'Gustavo Chefe',
+    solicitante_nome: 'Ana Secretária', responsavel_nome: 'Eduardo Gerente',
+    responsavel_atual_id: 'u_edu', criado_por: 'u_edu',
     escola_nome: 'EMEF Prof. João da Silva', aluno_nome: null,
     criado_em: '2026-07-28T12:10:00-03:00', ativo: true
   },
@@ -43,16 +48,16 @@ const DADOS_EXEMPLO = {
     { nome: 'João Responsável', vinculo: 'responsavel', observacao: 'Presidente do conselho de escola' }
   ],
   tarefas: [
-    { id: 't1', parent_id: null, titulo: 'Verificar contrato de merenda', responsavel_nome: 'Gustavo Chefe', situacao: 'em_andamento', ativo: true },
-    { id: 't2', parent_id: 't1', titulo: 'Conferir empenho no financeiro', responsavel_nome: 'Júlia Agente', situacao: 'aberta', ativo: true },
-    { id: 't3', parent_id: 't1', titulo: 'Contatar fornecedor', responsavel_nome: 'Igor Agente', situacao: 'concluida', ativo: true }
+    { id: 't1', parent_id: null, titulo: 'Verificar contrato de merenda', responsavel_id: 'u_gustavo', responsavel_nome: 'Gustavo Chefe', criado_por: 'u_edu', situacao: 'em_andamento', ativo: true },
+    { id: 't2', parent_id: 't1', titulo: 'Conferir empenho no financeiro', responsavel_id: 'u_julia', responsavel_nome: 'Júlia Agente', criado_por: 'u_gustavo', situacao: 'aberta', ativo: true },
+    { id: 't3', parent_id: 't1', titulo: 'Contatar fornecedor', responsavel_id: 'u_igor', responsavel_nome: 'Igor Agente', criado_por: 'u_gustavo', situacao: 'concluida', ativo: true }
   ],
   movimentacoes: [
     { id: 'm1', tipo: 'criacao', texto: 'Demanda criada.', autor_id: 'u_ana', autor_nome: 'Ana Secretária', criado_em: '2026-07-28T12:10:00-03:00' },
-    { id: 'm2', tipo: 'encaminhamento', texto: 'Favor apurar com urgência.', autor_id: 'u_ana', autor_nome: 'Ana Secretária', destinatario_nome: 'Gustavo Chefe', criado_em: '2026-07-28T12:12:00-03:00' },
-    { id: 'm3', tipo: 'subtarefa', texto: 'Verificar contrato de merenda', autor_id: 'u_gustavo', autor_nome: 'Gustavo Chefe', criado_em: '2026-07-28T14:30:00-03:00' },
-    { id: 'm4', tipo: 'devolutiva', texto: 'Fornecedor confirma entrega para amanhã.', autor_id: 'u_igor', autor_nome: 'Igor Agente', criado_em: '2026-07-29T09:05:00-03:00' },
-    { id: 'm5', tipo: 'retificacao', texto: 'Fornecedor confirma entrega para depois de amanhã (correção).', autor_id: 'u_igor', autor_nome: 'Igor Agente', criado_em: '2026-07-29T09:20:00-03:00', movimentacao_retificada_id: 'm4' },
+    { id: 'm2', tipo: 'encaminhamento', texto: 'Favor apurar com urgência.', autor_id: 'u_ana', autor_nome: 'Ana Secretária', destinatario_nome: 'Gustavo Chefe', tarefa_id: 't1', criado_em: '2026-07-28T12:12:00-03:00' },
+    { id: 'm3', tipo: 'subtarefa', texto: 'Verificar contrato de merenda', autor_id: 'u_gustavo', autor_nome: 'Gustavo Chefe', tarefa_id: 't1', criado_em: '2026-07-28T14:30:00-03:00' },
+    { id: 'm4', tipo: 'devolutiva', texto: 'Fornecedor confirma entrega para amanhã.', autor_id: 'u_igor', autor_nome: 'Igor Agente', tarefa_id: 't3', criado_em: '2026-07-29T09:05:00-03:00' },
+    { id: 'm5', tipo: 'retificacao', texto: 'Fornecedor confirma entrega para depois de amanhã (correção).', autor_id: 'u_igor', autor_nome: 'Igor Agente', tarefa_id: 't3', criado_em: '2026-07-29T09:20:00-03:00', movimentacao_retificada_id: 'm4' },
     { id: 'm6', tipo: 'despacho', texto: 'Cobrar retorno do fornecedor até amanhã.', autor_id: 'u_edu', autor_nome: 'Eduardo Gerente', criado_em: '2026-07-29T10:00:00-03:00' }
   ]
 };
@@ -153,9 +158,11 @@ function renderArvore(tarefas, usuarioId) {
       const acaoDevolver = ativa && t.situacao !== 'devolvida' && ehResponsavel
         ? `<button class="btn btn-sm btn-link p-0 text-danger" data-tarefa-acao="devolutiva" data-tarefa-id="${escapeHtml(t.id)}">Devolver</button>`
         : '';
-      // "Trocar destino" só para quem encaminhou (criador) e tarefa ativa.
+      // "Trocar destino" só para quem encaminhou (criador), enquanto a
+      // tarefa não estiver concluída — inclusive quando foi devolvida
+      // (é o caso mais comum de querer redirecionar para outra pessoa).
       const souCriador = usuarioId && t.criado_por === usuarioId;
-      const acaoTrocar = souCriador && t.ativo !== false
+      const acaoTrocar = souCriador && ativa
         ? `<button class="btn btn-sm btn-link p-0" data-tarefa-acao="reencaminhar" data-tarefa-id="${escapeHtml(t.id)}">Trocar destino</button>`
         : '';
       return `
@@ -183,8 +190,22 @@ function janelaAberta(m, movs) {
     && ((m.tarefa_id && p.tarefa_id === m.tarefa_id) || (!m.tarefa_id && !p.tarefa_id)));
 }
 
-function renderTimeline(movs, usuario) {
+// Caminho da tarefa até a raiz (ex.: ["Verificar contrato", "Conferir empenho"]),
+// para a timeline mostrar a QUAL tarefa/subtarefa cada evento pertence.
+// Movimentação sem tarefa_id (tarefa_id nulo) é da demanda em si — [].
+function caminhoTarefa(tarefaId, tarefasPorId) {
+  const caminho = [];
+  let atual = tarefaId ? tarefasPorId.get(tarefaId) : null;
+  while (atual) {
+    caminho.unshift(atual.titulo);
+    atual = atual.parent_id ? tarefasPorId.get(atual.parent_id) : null;
+  }
+  return caminho;
+}
+
+function renderTimeline(movs, usuario, tarefas) {
   if (!movs || !movs.length) return '<li class="texto-silencioso">Sem eventos.</li>';
+  const tarefasPorId = new Map((tarefas || []).map(t => [t.id, t]));
   const ordenadas = [...movs].sort((a, b) => new Date(a.criado_em) - new Date(b.criado_em));
   const retificadoPorDe = {}, ressalvaDe = {};
   for (const m of ordenadas) {
@@ -200,15 +221,26 @@ function renderTimeline(movs, usuario) {
     if (m.texto && m.tipo !== 'ressalva') {
       acoes.push({ chave: 'ressalva', rotulo: 'Ressalva', movId: m.id });
     }
-    return itemTimeline(m, { retificadoPor: retificadoPorDe[m.id], ressalva: ressalvaDe[m.id], acoes });
+    return itemTimeline(m, {
+      retificadoPor: retificadoPorDe[m.id], ressalva: ressalvaDe[m.id], acoes,
+      caminho: caminhoTarefa(m.tarefa_id, tarefasPorId)
+    });
   }).join('');
 }
 
 // Ações da barra conforme perfil + situação (apenas UX; a segurança é o RLS/funções).
-function acoesDisponiveis(d, usuario) {
+function acoesDisponiveis(d, usuario, tarefas) {
   const nivel = NIVEL[usuario?.perfil] || 0;
   const gerenteMais = nivel >= NIVEL.gerente || usuario?.perfil === 'admin_ti';
   const ativa = d.ativo !== false && d.situacao !== 'inativa';
+  // Dono da demanda: quem a criou ou é o responsável atual. Só eles
+  // encaminham, alteram responsável ou concluem — sem atalho de
+  // chefia/gabinete.
+  const souDono = !!usuario && (usuario.id === d.responsavel_atual_id || usuario.id === d.criado_por);
+  // Quem só recebeu uma tarefa (não é dono da demanda) pode criar
+  // subtarefa a partir dela, nunca direto na raiz.
+  const tenhoTarefaAtiva = !!usuario && (tarefas || []).some(t =>
+    t.ativo !== false && t.situacao !== 'concluida' && t.responsavel_id === usuario.id);
   const acoes = [];
   // Prestar a complementação pedida: só faz sentido enquanto a demanda
   // está parada aguardando essa resposta (e é o que retoma o prazo).
@@ -216,8 +248,9 @@ function acoesDisponiveis(d, usuario) {
     acoes.push(['complementar', 'Prestar complementação']);
   }
   if (ativa && d.situacao !== 'concluida') {
-    acoes.push(['encaminhar', 'Encaminhar'], ['subtarefa', 'Nova subtarefa'],
-               ['complementacao', 'Solicitar complementação'], ['concluir', 'Concluir']);
+    if (souDono) acoes.push(['encaminhar', 'Encaminhar']);
+    if (souDono || tenhoTarefaAtiva) acoes.push(['subtarefa', 'Nova subtarefa']);
+    if (souDono) acoes.push(['complementacao', 'Solicitar complementação'], ['concluir', 'Concluir']);
   }
   // Comentar: registrar uma informação/observação sem tramitar. Disponível
   // mesmo em demanda concluída (mas não inativa — fn_criar_comentario exige
@@ -273,8 +306,8 @@ function botao(chave, rotulo, classe) {
   return `<button class="btn ${classe}" data-acao="${chave}">${escapeHtml(rotulo)}</button>`;
 }
 
-function renderAcoes(d, usuario) {
-  const acoes = acoesDisponiveis(d, usuario);
+function renderAcoes(d, usuario, tarefas) {
+  const acoes = acoesDisponiveis(d, usuario, tarefas);
   if (!acoes.length) return '<span class="texto-silencioso">Nenhuma ação disponível.</span>';
 
   const primaria = ACAO_PRIMARIA.map(c => acoes.find(([k]) => k === c)).find(Boolean);
@@ -310,10 +343,10 @@ async function iniciar() {
   document.getElementById('dados').innerHTML = renderDados(demanda);
   document.getElementById('pessoas').innerHTML = renderPessoas(pessoas);
   document.getElementById('arvore').innerHTML = renderArvore(tarefas, usuario.id);
-  document.getElementById('timeline').innerHTML = renderTimeline(movimentacoes, usuario);
-  document.getElementById('acoes').innerHTML = renderAcoes(demanda, usuario);
+  document.getElementById('timeline').innerHTML = renderTimeline(movimentacoes, usuario, tarefas);
+  document.getElementById('acoes').innerHTML = renderAcoes(demanda, usuario, tarefas);
 
-  const ctxBase = { demanda, tarefas, usuarios: dados.usuarios || USUARIOS_EXEMPLO, demo };
+  const ctxBase = { demanda, tarefas, usuarios: dados.usuarios || USUARIOS_EXEMPLO, demo, usuario };
 
   document.getElementById('acoes').addEventListener('click', (e) => {
     const b = e.target.closest('[data-acao]');

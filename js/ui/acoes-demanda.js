@@ -12,20 +12,32 @@ const MANTER = { valor: '', rotulo: '(manter)' };
 // Retorna { titulo, textoConfirmar, campos } para a ação, ou null.
 export function camposDaAcao(chave, ctx) {
   const usuarios = ctx.usuarios || [];
-  const tarefas = (ctx.tarefas || []).map(t => ({ valor: t.id, rotulo: t.titulo }));
   switch (chave) {
     case 'encaminhar': return { titulo: 'Encaminhar', textoConfirmar: 'Enviar', campos: [
       { nome: 'destinatario', rotulo: 'Destinatário', tipo: 'select', opcoes: usuarios, obrigatorio: true },
       { nome: 'texto', rotulo: 'Mensagem / despacho', tipo: 'textarea', obrigatorio: true },
       { nome: 'prioridade', rotulo: 'Prioridade', tipo: 'select', opcoes: PRIORIDADES },
       { nome: 'prazo', rotulo: 'Prazo (opcional)', tipo: 'date' } ] };
-    case 'subtarefa': return { titulo: 'Nova subtarefa', textoConfirmar: 'Criar', campos: [
-      { nome: 'parent', rotulo: 'Tarefa-mãe', tipo: 'select', obrigatorio: false,
-        opcoes: [{ valor: '', rotulo: '(diretamente na demanda)' }, ...tarefas] },
-      { nome: 'responsavel', rotulo: 'Responsável', tipo: 'select', opcoes: usuarios, obrigatorio: true },
-      { nome: 'titulo', rotulo: 'Título', tipo: 'text', obrigatorio: true },
-      { nome: 'descricao', rotulo: 'Descrição', tipo: 'textarea' },
-      { nome: 'prazo', rotulo: 'Prazo (opcional)', tipo: 'date' } ] };
+    case 'subtarefa': {
+      // Dono da demanda (criador ou responsável atual) cria onde quiser;
+      // quem só recebeu uma tarefa só cria a partir dela — nunca na raiz.
+      const usuarioId = ctx.usuario?.id;
+      const souDonoDemanda = !!usuarioId
+        && (usuarioId === ctx.demanda?.responsavel_atual_id || usuarioId === ctx.demanda?.criado_por);
+      const minhasTarefas = (ctx.tarefas || [])
+        .filter(t => t.ativo !== false && t.situacao !== 'concluida' && t.responsavel_id === usuarioId)
+        .map(t => ({ valor: t.id, rotulo: t.titulo }));
+      const opcoesPai = souDonoDemanda
+        ? [{ valor: '', rotulo: '(diretamente na demanda)' }, ...minhasTarefas]
+        : minhasTarefas;
+      return { titulo: 'Nova subtarefa', textoConfirmar: 'Criar', campos: [
+        { nome: 'parent', rotulo: 'Tarefa-mãe', tipo: 'select', obrigatorio: !souDonoDemanda,
+          opcoes: opcoesPai },
+        { nome: 'responsavel', rotulo: 'Responsável', tipo: 'select', opcoes: usuarios, obrigatorio: true },
+        { nome: 'titulo', rotulo: 'Título', tipo: 'text', obrigatorio: true },
+        { nome: 'descricao', rotulo: 'Descrição', tipo: 'textarea' },
+        { nome: 'prazo', rotulo: 'Prazo (opcional)', tipo: 'date' } ] };
+    }
     case 'reencaminhar': return { titulo: 'Trocar destinatário', textoConfirmar: 'Trocar', campos: [
       { nome: 'destinatario', rotulo: 'Novo destinatário', tipo: 'select', opcoes: usuarios, obrigatorio: true },
       { nome: 'texto', rotulo: 'Observação (opcional)', tipo: 'textarea' } ] };

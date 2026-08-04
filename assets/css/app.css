@@ -336,6 +336,12 @@ a.cartao:active { transform: translateY(0); }
 .timeline__item--ressalva .timeline__marcador { background: #fdecee; color: var(--pri-urgente); }
 .timeline__item--complementacao .timeline__marcador,
 .timeline__item--solicitacao_complementacao .timeline__marcador { background: #fdf1e3; color: var(--sit-complementacao); }
+/* A qual tarefa/subtarefa o evento pertence — a timeline mistura eventos
+   da demanda com os de cada ramo, então isto precisa ficar explícito. */
+.timeline__caminho {
+  font-size: .72rem; font-weight: 600; color: var(--cinza-500);
+  margin-bottom: .2rem; display: flex; flex-wrap: wrap; gap: .3rem; align-items: center;
+}
 .timeline__cabecalho { display: flex; flex-wrap: wrap; gap: .4rem; align-items: baseline; }
 .timeline__autor { font-weight: 600; }
 .timeline__data { color: var(--cinza-500); font-size: .8rem; font-variant-numeric: tabular-nums; }
