@@ -4,10 +4,11 @@
 // (que criam NOVAS linhas vinculadas à original).
 // =====================================================================
 
-import { supabase, rpc } from './supabaseClient.js';
+import { supabase, rpc, aguardarSessao } from './supabaseClient.js';
 
 // Timeline cronológica completa da demanda (inclui movimentações de tarefas).
 export async function listarPorDemanda(demandaId) {
+  await aguardarSessao();
   const { data, error } = await supabase
     .from('movimentacoes')
     .select('*, autor:usuarios!autor_id(nome), destinatario:usuarios!destinatario_id(nome)')

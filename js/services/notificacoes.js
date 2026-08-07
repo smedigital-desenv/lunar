@@ -5,10 +5,13 @@
 // por RPC SECURITY DEFINER (notificacoes não tem grant de UPDATE ao front).
 // =====================================================================
 
-import { supabase } from './supabaseClient.js';
+import { supabase, aguardarSessao } from './supabaseClient.js';
 
 // Lista as notificações do usuário (RLS já restringe às próprias).
+// `aguardarSessao()` porque o sino é montado no topo do módulo da página,
+// antes de a guarda terminar — sem isso a consulta sai como `anon` e volta 401.
 export async function listar({ limite = 50 } = {}) {
+  await aguardarSessao();
   const { data, error } = await supabase
     .from('notificacoes').select('*')
     .order('criado_em', { ascending: false })
@@ -19,6 +22,7 @@ export async function listar({ limite = 50 } = {}) {
 
 // Contagem de não lidas (para o badge do cabeçalho).
 export async function contarNaoLidas() {
+  await aguardarSessao();
   const { count, error } = await supabase
     .from('notificacoes')
     .select('*', { count: 'exact', head: true })
