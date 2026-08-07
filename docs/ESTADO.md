@@ -27,11 +27,14 @@
 - **Nova demanda (destrava testes):** o roteiro nunca previu tela de criação e o seed não traz demandas. Criados `pages/nova-demanda.html` + `js/ui/nova-demanda.js` (form: título/objeto obrigatórios, tipo/escola/responsável via `js/services/referencias.js`, pessoas envolvidas dinâmicas → `fn_criar_demanda`) e link "+ Nova" nas caixas. Verificado em demo.
 - **Sessão 3 — Admin de usuários:** `sql/013_admin_usuarios.sql` (`fn_listar_contas_pendentes`, `fn_inativar_usuario`, `fn_reativar_usuario`, todas admin; inativar/reativar auditam). `js/services/admin.js`. `pages/admin.html` + `js/ui/admin.js`: libera contas pendentes (nome+perfil+unidade → `fn_provisionar_usuario`), inativa/reativa usuários, com modo demo. Link "Admin" no cabeçalho só p/ `pode_administrar` (RLS é o gate real). **Verificado no navegador (mobile)**.
 
+- **Controle de acesso central (catálogo):** definido o cadastro do lunar no **central da rede** (`smedigital-desenv.github.io/central/`) — sistema `lunar`, 10 telas (slug = nome do arquivo sem `.html`; `login` fora), 6 papéis espelhando `gestao.perfis` e a matriz padrão ver/editar/exportar. O SQL do catálogo é **aplicado direto no SQL Editor do Supabase e não é versionado** (como o resto do esquema do central). **Só o catálogo**: nenhum usuário liberado — os vínculos reais são feitos em `/central/admin.html`. O front do lunar ainda **não** foi ligado ao central.
+
 ## Próximo passo
 
 - **Ligar o real:** rodar `sql/011`+`sql/012`+`sql/013`, preencher `js/config.js`, habilitar provider Email (login de teste com usuários do seed, senha `dev-123456`) e/ou Google OAuth, deploy da Edge Function `relatorios` + bucket. Aí as telas saem do modo demo.
 - Telas usam **dados de exemplo** até haver config/sessão; `carregarReal()`/`listarCaixa*` já prontos. `listarCaixa*` e o fluxo autenticado ainda **não testados com Supabase real** (sem acesso ao `esm.sh`/banco aqui).
 - Pendências de banco: views/joins p/ nomes (autor/responsável); comentar; CRUD admin de **unidades/tipos/escolas/feriados** (a admin de **usuários** já está pronta via `sql/013`+`admin.html`).
+- **Ligar o lunar ao central** (fase seguinte, já decidida): o login passa a ser `/central/login.html`; será preciso um `js/auth-central.js` espelhando o `auth.js` do MAPA e uma Edge Function `central-bridge` **no projeto do lunar** (valida o JWT ES256 do central pelo JWKS, confere acesso ao sistema `lunar`, emite magic link aqui). A autorização real continua sendo a RLS: a conta ainda precisa de linha em `gestao.usuarios` via `fn_provisionar_usuario`.
 
 ## Decisões do usuário aplicadas (2026-07-31)
 
