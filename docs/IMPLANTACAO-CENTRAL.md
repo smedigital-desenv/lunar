@@ -8,6 +8,32 @@
 > (`fn_provisionar_super_admin`) foi entregue na sessão do Claude Code e deve
 > ser colado direto no SQL Editor do Supabase, como o restante do esquema.
 
+## ⚠️ O projeto Supabase é compartilhado
+
+Este sistema **não tem projeto Supabase só dele**. O projeto
+`iqldovwttomkjkoakosc` (que no painel aparece com o nome de outro sistema)
+hospeda mais de um sistema, cada um no seu esquema; o do lunar é `gestao`.
+
+Duas consequências que valem para sempre:
+
+- **`auth.users` é comum a todos.** A contagem de contas ali não diz nada
+  sobre quantas pessoas usam este sistema — em fevereiro/2026 eram 104 contas
+  no projeto para 11 usuários em `gestao.usuarios`. A lista de "contas
+  pendentes" de `pages/admin.html` inclui gente de outros sistemas.
+- **Qualquer trigger em `auth.users` afeta os outros sistemas.** Foi o que
+  aconteceu com `trg_bloquear_dominio` (sql/012): escrito para o lunar,
+  passou a recusar o cadastro de contas fora do domínio no projeto inteiro,
+  inclusive fornecedores de outro sistema. Removido por isso.
+
+A trava de domínio do lunar continua inteira sem ele: o CHECK
+`chk_email_dominio` em `gestao.usuarios`, a validação em
+`fn_provisionar_usuario` e em `fn_provisionar_super_admin`, e a recusa na
+própria `central-bridge` antes de criar a conta. Conta fora do domínio pode
+existir no projeto; usuária do lunar, não.
+
+**Antes de escrever qualquer objeto fora do esquema `gestao`, pense se ele
+não vai atingir os vizinhos.**
+
 ## Como o acesso passa a funcionar
 
 ```
