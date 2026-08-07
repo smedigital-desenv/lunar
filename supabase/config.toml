@@ -21,3 +21,24 @@
 # ---------------------------------------------------------------------
 [functions.relatorios]
 verify_jwt = false
+
+# ---------------------------------------------------------------------
+# Edge Function `central-bridge` (Fase 4).
+#
+# verify_jwt = false é OBRIGATÓRIO aqui, por dois motivos independentes:
+#
+#  1. O token que chega é emitido pelo projeto CENTRAL da rede, não por
+#     este. Com a verificação ligada, o gateway do Supabase o rejeita
+#     antes de a função rodar — e o erro não diz o motivo.
+#  2. O mesmo problema de preflight da `relatorios`: o OPTIONS não leva
+#     cabeçalho Authorization, então seria recusado e o navegador
+#     bloquearia o POST.
+#
+# Desligar aqui NÃO abre a função. A validação é feita dentro do
+# index.ts, e é mais estrita que a do gateway: confere a assinatura
+# ES256 do token contra o JWKS do central, o domínio institucional do
+# e-mail e, no próprio central, se a pessoa tem acesso ao sistema
+# `lunar`. Sem token válido, 401.
+# ---------------------------------------------------------------------
+[functions.central-bridge]
+verify_jwt = false
