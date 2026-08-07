@@ -6,51 +6,58 @@
    ===================================================================== */
 
 /* Fonte de interface. Importada aqui (e não em cada <head>) para haver um
-   único ponto de manutenção; system-ui cobre a falha de rede. */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+   único ponto de manutenção; system-ui cobre a falha de rede. Pesos até
+   900 porque o padrão visual usa rótulos em caixa alta bem encorpados. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");
 
 :root {
-  /* Cores institucionais — rampa completa a partir do azul da SME */
-  --cor-primaria: #14539a;
-  --cor-primaria-escura: #0e3d75;
-  --cor-primaria-clara: #eaf1fa;
-  --cor-primaria-borda: #cfe0f2;
-  --cor-acento: #0e8ea8;
+  /* Padrão visual moderno da organização: azul-marinho + ciano "neon". */
+  --cor-primaria: #002b5e;
+  --cor-primaria-escura: #001d40;
+  --cor-primaria-clara: #e8f2fa;
+  --cor-primaria-borda: #c9def0;
+  --cor-acento: #00e5ff;
+  /* Gradiente diagonal usado nas superfícies "ativas/em destaque"
+     (cabeçalho, item de navegação selecionado, botão primário em hover). */
+  --gradiente-primario: linear-gradient(135deg, #002b5e 0%, #063f70 58%, #057f95 100%);
 
   /* Neutros — levemente frios, para o branco dos cartões "saltar" */
   --cinza-50:  #f7f9fc;
   --cinza-100: #eff2f7;
   --cinza-200: #e2e8f0;
   --cinza-300: #cbd4e1;
-  --cinza-500: #667487;
-  --cinza-700: #38424f;
-  --cinza-900: #161c24;
+  --cinza-500: #64748b;
+  --cinza-700: #334155;
+  --cinza-900: #0f172a;
 
   /* Situações */
   --sit-aberta: #1a6fd4;
   --sit-andamento: #a16207;
   --sit-complementacao: #c2620c;
   --sit-devolvida: #6d43d4;
-  --sit-concluida: #15803d;
+  --sit-concluida: #15873f;
   --sit-reaberta: #0e8ea8;
   --sit-inativa: #6b7280;
 
   /* Prioridades */
   --pri-baixa: #6b7280;
-  --pri-normal: #14539a;
+  --pri-normal: #002b5e;
   --pri-alta: #c2620c;
-  --pri-urgente: #c92a37;
+  --pri-urgente: #dc2626;
 
-  /* Layout */
-  --raio: 14px;
-  --raio-sm: 9px;
-  --raio-lg: 20px;
+  /* Layout — cantos generosos e sombras em camadas mais amplas, como no
+     padrão de referência (cartões "flutuam" mais). */
+  --raio: 18px;
+  --raio-sm: 12px;
+  --raio-lg: 22px;
 
-  /* Sombras em camadas: contorno curto + difusão longa */
-  --sombra-xs: 0 1px 2px rgba(16, 26, 42, .06);
-  --sombra: 0 1px 2px rgba(16, 26, 42, .05), 0 2px 8px -2px rgba(16, 26, 42, .08);
-  --sombra-media: 0 2px 4px rgba(16, 26, 42, .05), 0 8px 20px -6px rgba(16, 26, 42, .12);
-  --sombra-forte: 0 4px 8px rgba(16, 26, 42, .06), 0 18px 40px -12px rgba(16, 26, 42, .20);
+  --sombra-xs: 0 1px 2px rgba(15, 23, 42, .05);
+  --sombra: 0 1px 2px rgba(15, 23, 42, .04), 0 8px 22px -8px rgba(15, 23, 42, .12);
+  --sombra-media: 0 2px 4px rgba(15, 23, 42, .05), 0 14px 32px -10px rgba(15, 23, 42, .16);
+  --sombra-forte: 0 4px 8px rgba(15, 23, 42, .06), 0 22px 48px -12px rgba(15, 23, 42, .24);
+  /* Brilho ciano — só para estados de destaque (ativo/selecionado), com
+     moderação: o padrão usa isso como acento, não como regra geral. */
+  --brilho-acento: 0 0 0 1px rgba(0, 229, 255, .18), 0 0 18px rgba(0, 229, 255, .35);
 
   --gap: 1rem;
   --largura-max: 1040px;
@@ -101,6 +108,12 @@ body {
   --bs-btn-hover-bg: var(--cor-primaria-escura);
   --bs-btn-hover-border-color: var(--cor-primaria-escura);
   --bs-btn-active-bg: var(--cor-primaria-escura);
+  /* background-image pinta por cima do background-color do Bootstrap. */
+  background-image: var(--gradiente-primario);
+  border-color: transparent;
+}
+.btn-primary:hover, .btn-primary:focus-visible {
+  box-shadow: var(--brilho-acento);
 }
 .btn-outline-primary {
   --bs-btn-color: var(--cor-primaria);
@@ -146,10 +159,10 @@ body {
   position: sticky;
   top: 0;
   z-index: 1020;
-  /* Leve profundidade no azul institucional, em vez de chapado. */
-  background: linear-gradient(180deg, #1a5ea9 0%, var(--cor-primaria) 55%, #114a8b 100%);
+  background: var(--gradiente-primario);
+  border-bottom: 3px solid var(--cor-acento);
   color: #fff;
-  box-shadow: var(--sombra-media);
+  box-shadow: 0 12px 30px rgba(0, 43, 94, .22);
 }
 .app-header__barra {
   max-width: var(--largura-max);
@@ -189,7 +202,7 @@ body {
 }
 .cartao__titulo {
   font-size: .7rem;
-  font-weight: 700;
+  font-weight: 900;
   text-transform: uppercase;
   letter-spacing: .07em;
   color: var(--cinza-500);
@@ -214,10 +227,10 @@ a.cartao:active { transform: translateY(0); }
   gap: .35rem;
   padding: .2rem .6rem .2rem .5rem;
   border-radius: 999px;
-  font-size: .73rem;
-  font-weight: 600;
+  font-size: .71rem;
+  font-weight: 800;
   line-height: 1.45;
-  letter-spacing: -.005em;
+  letter-spacing: .01em;
   border: 1px solid transparent;
   white-space: nowrap;
 }
@@ -280,9 +293,9 @@ a.cartao:active { transform: translateY(0); }
 }
 .meta-item__rotulo {
   font-size: .66rem; color: var(--cinza-500);
-  text-transform: uppercase; letter-spacing: .07em; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .07em; font-weight: 900;
 }
-.meta-item__valor { font-weight: 600; }
+.meta-item__valor { font-weight: 700; }
 
 /* --------------------------------------------------------------- Árvore de tarefas */
 .arvore { list-style: none; margin: 0; padding: 0; }
@@ -339,7 +352,7 @@ a.cartao:active { transform: translateY(0); }
 /* A qual tarefa/subtarefa o evento pertence — a timeline mistura eventos
    da demanda com os de cada ramo, então isto precisa ficar explícito. */
 .timeline__caminho {
-  font-size: .72rem; font-weight: 600; color: var(--cinza-500);
+  font-size: .72rem; font-weight: 800; color: var(--cinza-500);
   margin-bottom: .2rem; display: flex; flex-wrap: wrap; gap: .3rem; align-items: center;
 }
 .timeline__cabecalho { display: flex; flex-wrap: wrap; gap: .4rem; align-items: baseline; }
@@ -395,28 +408,40 @@ a.cartao:active { transform: translateY(0); }
 }
 @media (max-width: 520px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
 .kpi {
+  --kpi-cor: var(--cor-primaria);
   position: relative;
   overflow: hidden;
+  isolation: isolate;
   background: #fff;
   border: 1px solid var(--cinza-200);
   border-radius: var(--raio);
   box-shadow: var(--sombra);
   padding: 1rem 1.1rem;
+  transition: transform var(--transicao), box-shadow var(--transicao), border-color var(--transicao);
+}
+/* Brilho radial discreto no canto, cor do indicador — mesma assinatura dos
+   cartões do padrão visual, sem pesar no conteúdo. */
+.kpi::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 96% 6%, var(--kpi-cor), transparent 38%);
+  opacity: .10;
+  z-index: -1;
 }
 /* Filete de cor no topo: identifica o indicador sem poluir o número. */
 .kpi::after {
   content: "";
   position: absolute; inset: 0 0 auto 0; height: 3px;
-  background: var(--kpi-cor, var(--cor-primaria));
+  background: var(--kpi-cor);
   opacity: .9;
 }
 .kpi__valor {
-  font-size: 2.05rem; font-weight: 700; line-height: 1.05;
+  font-size: 2.05rem; font-weight: 800; line-height: 1.05;
   letter-spacing: -.03em; margin-top: .15rem;
 }
 .kpi__rotulo {
   font-size: .7rem; color: var(--cinza-500);
-  text-transform: uppercase; letter-spacing: .07em; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .07em; font-weight: 900;
 }
 .kpi--alerta { --kpi-cor: var(--pri-urgente); }
 .kpi--alerta .kpi__valor { color: var(--pri-urgente); }
@@ -572,13 +597,23 @@ a.cartao:active { transform: translateY(0); }
 .sessao__nome { font-size: .82rem; font-weight: 600; color: #fff; max-width: 9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sessao__perfil { font-size: .68rem; color: rgba(255, 255, 255, .8); }
 .sessao__sair {
-  background: transparent; border: 1px solid rgba(255, 255, 255, .5); color: #fff;
-  font-size: .75rem; padding: .15rem .5rem; border-radius: var(--raio-sm); cursor: pointer;
+  background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .22); color: #cbd5e1;
+  font-size: .72rem; font-weight: 800; letter-spacing: .01em;
+  padding: .3rem .7rem; border-radius: 999px; cursor: pointer;
+  transition: color var(--transicao), background var(--transicao), border-color var(--transicao);
 }
-.sessao__sair:hover { background: rgba(255, 255, 255, .16); }
+.sessao__sair:hover { color: #fff; background: rgba(0, 229, 255, .12); border-color: rgba(0, 229, 255, .6); }
 
 /* --------------------------------------------------------------- Tela de login */
-.tela-login { background: linear-gradient(160deg, var(--cor-primaria) 0%, var(--cor-primaria-escura) 100%); min-height: 100vh; }
+.tela-login {
+  /* Mesmo brilho ciano de canto que marca as superfícies do padrão,
+     sobre o gradiente diagonal — sem isso, navy sobre navy fica monótono
+     numa área cheia como esta. */
+  background:
+    radial-gradient(circle at 12% 8%, rgba(0, 229, 255, .16), transparent 42%),
+    var(--gradiente-primario);
+  min-height: 100vh;
+}
 .login { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.2rem; }
 .login__cartao {
   width: 100%; max-width: 22rem; background: #fff; border-radius: var(--raio);
@@ -608,7 +643,13 @@ a.cartao:active { transform: translateY(0); }
 .admin-usuario__info .texto-silencioso { font-size: .8rem; }
 .admin-usuario__acoes { display: flex; align-items: center; gap: .4rem; flex: 0 0 auto; }
 .admin-usuario--inativo .admin-usuario__info strong { color: var(--cinza-500); text-decoration: line-through; }
-.sessao__admin { color: #fff; font-size: .75rem; text-decoration: underline; }
+.sessao__admin {
+  color: #cbd5e1; font-size: .72rem; font-weight: 800; letter-spacing: .01em;
+  text-decoration: none; padding: .3rem .6rem; border-radius: 999px;
+  border: 1px solid transparent;
+  transition: color var(--transicao), background var(--transicao), border-color var(--transicao);
+}
+.sessao__admin:hover { color: #fff; background: rgba(0, 229, 255, .10); border-color: rgba(0, 229, 255, .5); }
 
 /* --------------------------------------------------------------- Formulário nova demanda */
 .form-grade { display: grid; grid-template-columns: 1fr; gap: 0 1rem; }
@@ -659,9 +700,9 @@ a.cartao:active { transform: translateY(0); }
 }
 .nav-principal__item--destaque .nav-principal__icone {
   width: 2rem; height: 2rem; border-radius: 50%;
-  background: var(--cor-primaria); color: #fff;
+  background: var(--gradiente-primario); color: #fff;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.4rem; font-weight: 700; box-shadow: var(--sombra);
+  font-size: 1.4rem; font-weight: 700; box-shadow: var(--sombra-media);
 }
 body.com-nav { padding-bottom: 4rem; }
 
@@ -679,7 +720,13 @@ body.com-nav { padding-bottom: 4rem; }
     border-radius: var(--raio-sm);
   }
   .nav-principal__item:hover { background: var(--cor-primaria-clara); }
-  .nav-principal__item--ativo::after { top: auto; bottom: 0; border-radius: 3px 3px 0 0; }
+  /* Item ativo: pílula em gradiente com brilho, como o padrão marca o
+     estado selecionado (barra de navegação, filtros, menus). */
+  .nav-principal__item--ativo {
+    background: var(--gradiente-primario); color: #fff;
+    box-shadow: var(--brilho-acento);
+  }
+  .nav-principal__item--ativo::after { display: none; }
   .nav-principal__icone { font-size: 1.05rem; }
   .nav-principal__item--destaque .nav-principal__icone { width: 1.5rem; height: 1.5rem; font-size: 1.1rem; }
   body.com-nav { padding-bottom: 0; }
