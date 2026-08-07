@@ -70,17 +70,90 @@ login falha em `falha_ao_gerar_sessao`.
 
 ## Passo 3 — Publicar a Edge Function
 
+Não é preciso configurar segredo nenhum: `SUPABASE_URL` e
+`SUPABASE_SERVICE_ROLE_KEY` já existem no ambiente das funções. A
+`service_role` nunca é versionada (regra 10).
+
+O `verify_jwt = false` já está fixado em `supabase/config.toml`, junto com o
+motivo. Fixar ali é melhor do que passar a flag na linha de comando: a flag
+vale só para aquele deploy, e o próximo publicado por outra pessoa voltaria ao
+padrão, quebrando o login sem aviso.
+
+### Caminho A — Supabase CLI (recomendado)
+
+Uma vez por máquina:
+
+```bash
+npm install -g supabase          # ou: brew install supabase/tap/supabase
+supabase login                   # abre o navegador
+```
+
+Na raiz do repositório do LUNAR:
+
+```bash
+supabase link --project-ref iqldovwttomkjkoakosc
+supabase functions deploy central-bridge
+```
+
+O `link` pede a senha do banco — é a que foi definida quando o projeto foi
+criado (Settings → Database → *Database password*; dá para redefinir ali sem
+perder dados).
+
+O deploy lê o `config.toml`, então **não precisa** de `--no-verify-jwt`. Se a
+sua versão do CLI for antiga e ignorar o arquivo, acrescente a flag:
+
 ```bash
 supabase functions deploy central-bridge --no-verify-jwt
 ```
 
-O `--no-verify-jwt` **não é opcional**. O token que chega é do projeto
-CENTRAL; com a verificação embutida ligada, o Supabase o rejeita antes de a
-função rodar, e o erro não diz o motivo.
+### Caminho B — pelo painel, sem instalar nada
 
-Não é preciso configurar segredo nenhum: `SUPABASE_URL` e
-`SUPABASE_SERVICE_ROLE_KEY` já existem no ambiente das funções. A
-`service_role` nunca é versionada (regra 10).
+Dashboard → **Edge Functions** → *Deploy a new function* → *Via editor*.
+
+1. Nome exatamente `central-bridge` (o front chama esse caminho).
+2. Cole o conteúdo de `supabase/functions/central-bridge/index.ts`.
+3. **Desligue "Verify JWT"** antes de publicar. Se publicar com ele ligado,
+   volte em *Function settings* e desligue depois — sem isso nada funciona.
+
+### Conferir se subiu certo
+
+```bash
+curl -i -X POST \
+  'https://iqldovwttomkjkoakosc.supabase.co/functions/v1/central-bridge' \
+  -H 'Content-Type: application/json' -d '{}'
+```
+
+O esperado é **401 com o corpo `{"erro":"sem_token"}`**. Parece erro, mas é o
+resultado certo: a requisição chegou até a função, que recusou por falta de
+token. Isso prova as duas coisas de uma vez — a função está publicada e o
+`verify_jwt` está desligado.
+
+Como distinguir os dois 401 possíveis:
+
+| Corpo da resposta | O que significa |
+|---|---|
+| `{"erro":"sem_token"}` | ✅ tudo certo — a função rodou |
+| `{"code":401,"message":"Missing authorization header"}` | ❌ `verify_jwt` ainda ligado; parou no gateway |
+| `404` | ❌ função não publicada, ou nome diferente de `central-bridge` |
+
+Para conferir o preflight de CORS, que é o que o navegador faz antes do POST:
+
+```bash
+curl -i -X OPTIONS \
+  'https://iqldovwttomkjkoakosc.supabase.co/functions/v1/central-bridge' \
+  -H 'Origin: https://smedigital.com.br' \
+  -H 'Access-Control-Request-Method: POST'
+```
+
+Tem que voltar **200**, com `Access-Control-Allow-Origin: https://smedigital.com.br`.
+Se voltar 401, o `verify_jwt` continua ligado.
+
+### Se precisar investigar
+
+Dashboard → Edge Functions → `central-bridge` → **Logs**. Todo erro da função
+sai com um código curto (`token_invalido`, `sem_acesso_ao_lunar`,
+`falha_ao_gerar_sessao`), e o provisionamento do super admin, quando falha,
+escreve `provisionamento do super admin falhou:` seguido da mensagem do banco.
 
 ## Passo 4 — Publicar o sistema na mesma origem do central
 
