@@ -63,7 +63,7 @@ export async function iniciarSessao(elId = 'usuario-sessao') {
   }
   if (!auth.estaConfigurado()) return null;      // sem config → demo
 
-  const usuario = await auth.protegerRota();     // redireciona ao login se preciso
+  const usuario = await auth.protegerRota();     // guarda (delegada ao central)
   if (!usuario) return null;
 
   montarTrocaTeste(auth, usuario.email);         // seletor de teste (se ligado)

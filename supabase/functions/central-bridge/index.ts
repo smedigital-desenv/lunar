@@ -176,6 +176,22 @@ Deno.serve(async (req) => {
     const hash = link.data?.properties?.hashed_token;
     if (!hash) return json({ erro: "sem_hash" }, 500);
 
+    // ── 5) Super admin da rede entra como admin_ti ────────────────────────
+    // Sem isto ninguém consegue o primeiro acesso: `fn_provisionar_usuario`
+    // exige um admin já cadastrado, e não existe nenhum. A função abaixo é a
+    // exceção estreita — só service_role executa, só cria `admin_ti`, audita,
+    // e continua sujeita ao CHECK de domínio da tabela.
+    // Falha aqui não impede a sessão: a pessoa entra e vê "cadastro
+    // pendente", que é um estado tratado e reversível.
+    const uid = link.data?.user?.id;
+    if (uid && perms?.perfil?.is_super_admin) {
+      const { error } = await admin.schema("gestao").rpc("fn_provisionar_super_admin", {
+        p_auth_id: uid,
+        p_nome: perms?.perfil?.nome || null,
+      });
+      if (error) console.error("[central-bridge] provisionamento do super admin falhou:", error.message);
+    }
+
     // Devolve também o tipo de verificação: o verifyOtp do navegador precisa
     // usar exatamente este valor, senão o Supabase recusa com
     // "Email link is invalid or has expired".

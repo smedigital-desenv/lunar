@@ -462,6 +462,16 @@ a.cartao:active { transform: translateY(0); }
   margin-bottom: var(--gap);
 }
 
+/* Bloqueio de acesso (auth-central.js): substitui a página inteira quando o
+   central autoriza mas o banco ainda não reconhece a pessoa. */
+.aviso-bloqueio {
+  max-width: 34rem; margin: 3rem auto; text-align: center;
+  background: #fff; border: 1px solid var(--cinza-200);
+  border-radius: var(--raio); box-shadow: var(--sombra); padding: 2rem 1.5rem;
+}
+.aviso-bloqueio h1 { font-size: 1.25rem; margin-bottom: .75rem; }
+.aviso-bloqueio p { font-size: .95rem; line-height: 1.5; }
+
 /* --------------------------------------------------------------- Responsivo */
 @media (min-width: 768px) {
   .meta-grade { grid-template-columns: repeat(3, 1fr); }

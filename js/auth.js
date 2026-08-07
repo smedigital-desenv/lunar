@@ -1,7 +1,11 @@
 // =====================================================================
-// auth.js — autenticação (Sessão 3).
-// Login Google (OAuth) e e-mail/senha (acesso de teste), logout, guarda de
-// rota e obtenção do usuário corrente com perfil e unidade.
+// auth.js — autenticação (Sessão 3; guarda delegada ao central na Fase 4).
+// Obtenção do usuário corrente com perfil e unidade, logout e guarda de rota.
+//
+// A GUARDA e o LOGIN passaram para o Controle de Acesso central da rede
+// (js/auth-central.js). `loginGoogle`/`loginSenha` continuam aqui apenas para
+// o MODO_TESTE de desenvolvimento — em produção o único caminho de entrada é
+// /central/login.html.
 //
 // Acesso restrito ao domínio @educacao.pmrp.sp.gov.br (front + banco). Sem
 // linha em gestao.usuarios, o login é RECUSADO ("não autorizado"): a conta
@@ -27,9 +31,6 @@ export function emailNoDominio(email) {
 }
 
 // Resolve caminhos relativos independentemente de estarmos em /pages/.
-function paginaLogin() {
-  return location.pathname.includes('/pages/') ? './login.html' : './pages/login.html';
-}
 function paginaInicial() {
   return location.pathname.includes('/pages/') ? './caixa-entrada.html' : './pages/caixa-entrada.html';
 }
@@ -57,9 +58,12 @@ export async function loginSenha(email, senha) {
   return await usuarioCorrente();
 }
 
+// Sair encerra as DUAS sessões: a deste projeto e a do central. Sem isso a
+// sessão local sobreviveria ao logout e a próxima pessoa no mesmo navegador
+// entraria com a conta anterior.
 export async function logout() {
-  await supabase.auth.signOut();
-  location.href = paginaLogin();
+  const central = await import('./auth-central.js');
+  return central.logoutCentral();
 }
 
 // ---------------------------------------------------------------- Sessão
@@ -110,18 +114,17 @@ export async function usuarioCorrente() {
 
 // ---------------------------------------------------------------- Guarda
 // Protege uma página. Em modo demo (sem config), NÃO redireciona — deixa a
-// página seguir com dados de exemplo. Com config: exige sessão válida e
-// usuário provisionado; caso contrário, manda ao login.
-// Retorna o usuário corrente, ou null em demo.
+// página seguir com dados de exemplo.
+//
+// Com config, a guarda é DELEGADA ao Controle de Acesso central da rede
+// (auth-central.js): é ele que confere a sessão da rede, libera ou bloqueia
+// esta tela e abre a sessão local pela ponte. O perfil e a unidade continuam
+// vindo de gestao.usuarios via usuarioCorrente() — a RLS é que manda nos
+// dados. O import é dinâmico de propósito: quebra o ciclo entre os dois
+// módulos e mantém a página de pé quando o central está fora do ar.
+// Retorna o usuário corrente, ou null em demo/bloqueio.
 export async function protegerRota() {
   if (!estaConfigurado()) return null;
-  const sessao = await sessaoAtual();
-  if (!sessao) { location.href = paginaLogin(); return null; }
-  try {
-    return await usuarioCorrente();
-  } catch (e) {
-    console.warn('Acesso negado:', e.message);
-    location.href = `${paginaLogin()}?erro=${encodeURIComponent(e.message)}`;
-    return null;
-  }
+  const central = await import('./auth-central.js');
+  return central.protegerRotaCentral();
 }

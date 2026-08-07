@@ -3,6 +3,11 @@
 // Liga os botões (Google / e-mail-senha) às funções de js/auth.js. O
 // acesso ao Supabase é carregado de forma preguiçosa: se o supabase-js não
 // carregar, ou não houver config, mostra o aviso de modo demonstração.
+//
+// ⚠️ FORA DE USO desde a Fase 4: `pages/login.html` virou redirecionamento
+// para /central/login.html e não carrega mais este módulo. Mantido porque é
+// a única interface de login própria que existe — se um dia o sistema
+// precisar rodar destacado do central, é daqui que se recomeça.
 // =====================================================================
 
 const alerta = document.getElementById('alerta');
