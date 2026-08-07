@@ -29,12 +29,17 @@
 
 - **Controle de acesso central (catálogo):** definido o cadastro do lunar no **central da rede** (`smedigital-desenv.github.io/central/`) — sistema `lunar`, 10 telas (slug = nome do arquivo sem `.html`; `login` fora), 6 papéis espelhando `gestao.perfis` e a matriz padrão ver/editar/exportar. O SQL do catálogo é **aplicado direto no SQL Editor do Supabase e não é versionado** (como o resto do esquema do central). **Só o catálogo**: nenhum usuário liberado — os vínculos reais são feitos em `/central/admin.html`. O front do lunar ainda **não** foi ligado ao central.
 
+- **Fase 4 — login pelo central (código pronto, falta implantar):** `supabase/functions/central-bridge/index.ts` (valida JWT ES256 do central pelo JWKS, confere domínio + acesso ao sistema `lunar`, emite magic link local); `js/auth-central.js` (carrega `/central/config.js`+`acesso-sme.js`, troca token por sessão, guarda memorizada por página); `js/auth.js` delega `protegerRota()`/`logout()` — por isso `admin.js`, `equipes.js` e `sessao.js` ficaram sem alteração; `pages/login.html` redireciona a `/central/login.html`; `MODO_TESTE` volta a `false`. **SQL da fase (`fn_provisionar_super_admin`, `036`) não é versionado** — entregue na sessão, aplicar no SQL Editor. Passo a passo em `docs/IMPLANTACAO-CENTRAL.md`. **Nada testado com o central real** (sem acesso à rede aqui): validei a função no Postgres 16 local (4 casos) e a sintaxe dos módulos.
+- **Decisão (Fase 4):** super admin do central com e-mail `@educacao` é provisionado como `admin_ti` no primeiro acesso, com auditoria — não existe administrador cadastrado no sistema hoje. As três camadas de domínio ficam intactas: super admin fora do domínio (`desenv.sme@gmail.com`) **não entra**.
+
 ## Próximo passo
 
 - **Ligar o real:** rodar `sql/011`+`sql/012`+`sql/013`, preencher `js/config.js`, habilitar provider Email (login de teste com usuários do seed, senha `dev-123456`) e/ou Google OAuth, deploy da Edge Function `relatorios` + bucket. Aí as telas saem do modo demo.
 - Telas usam **dados de exemplo** até haver config/sessão; `carregarReal()`/`listarCaixa*` já prontos. `listarCaixa*` e o fluxo autenticado ainda **não testados com Supabase real** (sem acesso ao `esm.sh`/banco aqui).
 - Pendências de banco: views/joins p/ nomes (autor/responsável); comentar; CRUD admin de **unidades/tipos/escolas/feriados** (a admin de **usuários** já está pronta via `sql/013`+`admin.html`).
-- **Ligar o lunar ao central** (fase seguinte, já decidida): o login passa a ser `/central/login.html`; será preciso um `js/auth-central.js` espelhando o `auth.js` do MAPA e uma Edge Function `central-bridge` **no projeto do lunar** (valida o JWT ES256 do central pelo JWKS, confere acesso ao sistema `lunar`, emite magic link aqui). A autorização real continua sendo a RLS: a conta ainda precisa de linha em `gestao.usuarios` via `fn_provisionar_usuario`.
+- **Implantar a Fase 4** (o código está pronto; falta o que só se faz no servidor): rodar o SQL `036`, habilitar o provider **Email** no Auth do lunar, publicar a Edge Function com `--no-verify-jwt`, e servir o sistema em `smedigital.com.br/lunar/` — **mesma origem do central**, senão não há SSO. Roteiro completo em `docs/IMPLANTACAO-CENTRAL.md`.
+- `js/ui/login.js` ficou **fora de uso** (a página virou redirecionamento). Mantido de propósito: é a única interface de login própria que existe.
+- **Antes de produção:** inativar os usuários do `sql/008_seed.sql` (senha `dev-123456`).
 
 ## Decisões do usuário aplicadas (2026-07-31)
 
