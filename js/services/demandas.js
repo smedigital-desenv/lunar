@@ -3,7 +3,7 @@
 // Nenhuma regra de negócio aqui: tudo é validado no banco.
 // =====================================================================
 
-import { supabase, rpc } from './supabaseClient.js';
+import { supabase, rpc, aguardarSessao } from './supabaseClient.js';
 
 // Cria uma demanda. `dados.pessoas` é um array [{nome, vinculo, observacao}].
 export function criarDemanda(dados = {}) {
@@ -72,6 +72,7 @@ export function reativarDemanda(id, motivo) {
 // Leitura de uma demanda por id (RLS decide a visibilidade), já com os
 // nomes de responsável, solicitante, escola e tipo.
 export async function obterDemanda(id) {
+  await aguardarSessao();
   const { data, error } = await supabase
     .from('demandas')
     .select('*, responsavel:usuarios!responsavel_atual_id(nome),'

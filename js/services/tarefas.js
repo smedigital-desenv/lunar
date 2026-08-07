@@ -2,7 +2,7 @@
 // tarefas.js — encaminhamento, subtarefas e devolutivas.
 // =====================================================================
 
-import { supabase, rpc } from './supabaseClient.js';
+import { supabase, rpc, aguardarSessao } from './supabaseClient.js';
 
 // Encaminha: informe demandaId (cria tarefa ao destinatário) OU tarefaId
 // (redistribui uma tarefa existente — redistribuir de terceiro exige chefia).
@@ -60,6 +60,7 @@ export function reativarTarefa(id, motivo) {
 
 // Árvore de tarefas de uma demanda (para montar a hierarquia no front).
 export async function listarPorDemanda(demandaId) {
+  await aguardarSessao();
   const { data, error } = await supabase
     .from('tarefas')
     .select('*, responsavel:usuarios!responsavel_id(nome)')

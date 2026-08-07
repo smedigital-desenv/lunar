@@ -8,7 +8,7 @@
 // preservado no banco (seção 13).
 // =====================================================================
 
-import { supabase } from './supabaseClient.js';
+import { supabase, aguardarSessao } from './supabaseClient.js';
 import { CONFIG } from '../config.js';
 
 // Remove acentos e caracteres problemáticos para uso como nome de arquivo.
@@ -42,6 +42,7 @@ export function validarArquivo(file) {
 // Sobe o arquivo e devolve os metadados no formato esperado pelas funções
 // do banco. `pasta` organiza o storage (ex.: `demanda/<id>`).
 export async function subirAnexo(file, { pasta = 'demandas' } = {}) {
+  await aguardarSessao();
   validarArquivo(file);
   const hash = await calcularHashSHA256(file);
   const nomeStorage = `${pasta}/${Date.now()}_${normalizarNome(file.name)}`;
@@ -63,6 +64,7 @@ export async function subirAnexo(file, { pasta = 'demandas' } = {}) {
 
 // URL assinada temporária para baixar/visualizar um anexo do storage.
 export async function urlAssinada(storagePath, segundos = 300) {
+  await aguardarSessao();
   const { data, error } = await supabase.storage
     .from(CONFIG.bucketAnexos).createSignedUrl(storagePath, segundos);
   if (error) throw error;

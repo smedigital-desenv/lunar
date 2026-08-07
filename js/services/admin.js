@@ -5,7 +5,7 @@
 // Só surte efeito para quem administra — o banco valida o perfil.
 // =====================================================================
 
-import { supabase, rpc } from './supabaseClient.js';
+import { supabase, rpc, aguardarSessao } from './supabaseClient.js';
 
 // --- Leitura de apoio -------------------------------------------------
 
@@ -16,6 +16,7 @@ export function listarContasPendentes() {
 
 // Usuários já provisionados, com nome de perfil e unidade.
 export async function listarUsuarios() {
+  await aguardarSessao();
   const { data, error } = await supabase
     .from('usuarios')
     .select('id, nome, email, perfil, unidade_id, ativo,'
@@ -26,6 +27,7 @@ export async function listarUsuarios() {
 }
 
 export async function listarPerfis() {
+  await aguardarSessao();
   const { data, error } = await supabase
     .from('perfis').select('codigo, nome, nivel').order('nivel');
   if (error) throw error;
@@ -33,6 +35,7 @@ export async function listarPerfis() {
 }
 
 export async function listarUnidades() {
+  await aguardarSessao();
   const { data, error } = await supabase
     .from('unidades_organizacionais')
     .select('id, nome, sigla, tipo, ativo').eq('ativo', true).order('nome');
@@ -42,6 +45,7 @@ export async function listarUnidades() {
 
 // Organograma completo (com parent_id) para montar a árvore de equipes.
 export async function listarOrganograma() {
+  await aguardarSessao();
   const { data, error } = await supabase
     .from('unidades_organizacionais')
     .select('id, nome, sigla, tipo, parent_id, ativo').eq('ativo', true).order('nome');
