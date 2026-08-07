@@ -1,0 +1,68 @@
+name: Publicar no GitHub Pages
+
+# Publica a `main` em https://smedigital.com.br/lunar/.
+#
+# O endereço sai desse formato sozinho: `smedigital.com.br` é o domínio
+# personalizado da conta (repositório smedigital-desenv.github.io), e o GitHub
+# serve os Pages de cada repositório em <domínio>/<nome-do-repo>/. É por isso
+# que a mesma origem do /central/ é garantida — requisito do login único.
+#
+# ⚠️ Antes do primeiro uso: Settings -> Pages -> Source = "GitHub Actions".
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:   # permite publicar manualmente pela aba Actions
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Evita que dois deploys rodem ao mesmo tempo e se atropelem.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar a main
+        uses: actions/checkout@v4
+
+      - name: Montar o site
+        # Tudo que fica de fora é conteúdo de servidor ou de projeto, que não
+        # tem por que ser servido ao navegador:
+        #   sql/      — inclui o seed com usuários de teste; publicado, ficaria
+        #               em https://smedigital.com.br/lunar/sql/008_seed.sql,
+        #               aberto a qualquer um.
+        #   supabase/ — código das Edge Functions, que roda no servidor.
+        #   docs/     — documentação interna de implantação.
+        run: |
+          mkdir -p _site
+          rsync -a \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='sql' \
+            --exclude='supabase' \
+            --exclude='docs' \
+            --exclude='CLAUDE.md' \
+            ./ _site/
+          touch _site/.nojekyll
+
+      - name: Enviar artefato do Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publicar no GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

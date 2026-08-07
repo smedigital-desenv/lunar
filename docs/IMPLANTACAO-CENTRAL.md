@@ -192,8 +192,46 @@ Mesma origem é requisito, não preferência:
   SSO simplesmente não existe;
 - o CORS da `central-bridge` libera só `https://smedigital.com.br`.
 
-Publicar em `smedigital-desenv.github.io/lunar/` **não funciona**. Replique o
-que já é feito para `/mapa-sme/`.
+### Como o endereço se resolve sozinho
+
+`smedigital.com.br` é o domínio personalizado da **conta**, configurado no
+repositório `smedigital-desenv.github.io`. O GitHub Pages serve o Pages de
+cada repositório em `<domínio-da-conta>/<nome-do-repositório>/`. É assim que
+`/mapa-sme/` e `/gom-sme/` chegam lá — cada um publica o próprio repositório
+por GitHub Actions.
+
+Como este repositório se chama **`lunar`**, ele cai em
+`https://smedigital.com.br/lunar/` sem nenhuma configuração de domínio, e a
+mesma origem do `/central/` vem de graça.
+
+> Não crie `CNAME` neste repositório. O domínio pertence ao
+> `smedigital-desenv.github.io`; um `CNAME` aqui brigaria com ele.
+
+### O que fazer
+
+O workflow já está no repositório: `.github/workflows/deploy-pages.yml`.
+Falta só ligar o Pages, uma vez:
+
+**Settings → Pages → Source: `GitHub Actions`.**
+
+A partir daí, todo push na `main` publica. Para publicar sem esperar um push,
+use a aba **Actions → Publicar no GitHub Pages → Run workflow**.
+
+O workflow **não publica** `sql/`, `supabase/`, `docs/` nem o `CLAUDE.md`.
+Isso importa: servido, o `sql/008_seed.sql` ficaria legível por qualquer um em
+`https://smedigital.com.br/lunar/sql/008_seed.sql`, com os usuários de teste
+lá dentro. Ao acrescentar pasta nova de conteúdo de servidor, lembre de
+excluí-la também.
+
+### Conferir
+
+Depois do primeiro deploy, `https://smedigital.com.br/lunar/pages/caixa-entrada.html`
+deve carregar. Sem sessão no central, o esperado é ser levado para
+`/central/login.html` — isso já é o controle de acesso funcionando.
+
+Confira também que `https://smedigital.com.br/lunar/sql/008_seed.sql`
+devolve **404**. Se devolver o arquivo, o `rsync` do workflow não excluiu o
+que devia.
 
 ## Passo 5 — Cadastrar as pessoas no central
 
