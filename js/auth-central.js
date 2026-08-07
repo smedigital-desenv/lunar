@@ -20,6 +20,10 @@ import { usuarioCorrente, estaConfigurado } from './auth.js';
 const SISTEMA = 'lunar';
 const LOGIN_CENTRAL = '/central/login.html';
 const BASE_CENTRAL = '/central/';
+// O acesso-sme.js espera o supabase-js como GLOBAL (window.supabase). O
+// cliente deste sistema vem do esm.sh como ES module — são cópias
+// independentes da biblioteca, e é assim mesmo.
+const CDN_SUPABASE = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
 
 // Carrega um script clássico (o central não é ES module).
 function carregarScript(src) {
@@ -53,6 +57,24 @@ function telaBloqueio(titulo, mensagem) {
     + '</div></main>';
 }
 
+// O `window.AcessoSME` não existe quando o acesso-sme.js termina de carregar:
+// ele é criado dentro de `montar()`, que só roda depois de o supabase-js
+// chegar do CDN (`carregarSupabaseJs().then(montar)`, no fim daquele arquivo).
+// Conferir logo após o `onload` acusaria "não carregou" sempre. Por isso
+// esperamos o objeto aparecer, em vez de testar uma vez só.
+function esperarAcessoSME(limiteMs = 15000) {
+  return new Promise((resolve, reject) => {
+    const inicio = Date.now();
+    (function tentar() {
+      if (window.AcessoSME?.pronto) return resolve(window.AcessoSME.pronto);
+      if (Date.now() - inicio > limiteMs) {
+        return reject(new Error('O módulo de acesso central não inicializou a tempo.'));
+      }
+      setTimeout(tentar, 50);
+    })();
+  });
+}
+
 // Carrega o módulo do central uma única vez por página.
 let modulosCentral = null;
 function carregarCentral() {
@@ -62,10 +84,12 @@ function carregarCentral() {
   window.ACESSO_SISTEMA = SISTEMA;
   window.ACESSO_LOGIN = LOGIN_CENTRAL;
   modulosCentral = (async () => {
+    // O supabase-js vem primeiro de propósito: o acesso-sme.js o buscaria
+    // sozinho, mas carregá-lo aqui encurta a espera do passo seguinte.
+    await carregarScript(CDN_SUPABASE);
     await carregarScript(`${BASE_CENTRAL}config.js`);
     await carregarScript(`${BASE_CENTRAL}acesso-sme.js`);
-    if (!window.AcessoSME?.pronto) throw new Error('Módulo de acesso central não carregou.');
-    return await window.AcessoSME.pronto;
+    return await esperarAcessoSME();
   })();
   return modulosCentral;
 }
