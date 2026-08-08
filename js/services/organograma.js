@@ -9,40 +9,38 @@ import { supabase, rpc, aguardarSessao } from './supabaseClient.js';
 
 // --- Leitura ----------------------------------------------------------
 
-// Estrutura inteira, ativas e inativas, com a contagem de pessoas de cada
-// unidade. A contagem importa na tela: inativar uma unidade com gente
-// dentro é recusado pelo banco, e é melhor avisar antes de a pessoa tentar.
+// Estrutura inteira, ativas e inativas, já com os TITULARES de cada
+// unidade — é o que um organograma precisa mostrar, e evita uma consulta
+// por unidade só para descobrir quem está lá.
+//
+// ⚠️ O join traz também quem foi inativado (os usuários do seed, por
+// exemplo). Filtrar por `ativo` aqui não é detalhe: sem isso a contagem
+// mente, e a tela recusa inativar uma unidade por causa de gente que já
+// não está mais nela.
 export async function listarUnidades() {
   await aguardarSessao();
   const { data, error } = await supabase
     .from('unidades_organizacionais')
     .select('id, parent_id, tipo, nome, sigla, ativo, motivo_inativacao,'
-      + ' usuarios ( id )')
+      + ' usuarios ( id, nome, perfil, ativo )')
     .order('nome');
   if (error) throw error;
-  return (data ?? []).map(u => ({
-    id: u.id,
-    parent_id: u.parent_id,
-    tipo: u.tipo,
-    nome: u.nome,
-    sigla: u.sigla,
-    ativo: u.ativo,
-    motivo_inativacao: u.motivo_inativacao,
-    pessoas: (u.usuarios ?? []).length
-  }));
-}
-
-// Titulares de uma unidade, para o painel de detalhe.
-export async function listarPessoas(unidadeId) {
-  await aguardarSessao();
-  const { data, error } = await supabase
-    .from('usuarios')
-    .select('id, nome, email, perfil, ativo')
-    .eq('unidade_id', unidadeId)
-    .eq('ativo', true)
-    .order('nome');
-  if (error) throw error;
-  return data ?? [];
+  return (data ?? []).map(u => {
+    const titulares = (u.usuarios ?? [])
+      .filter(p => p.ativo !== false)
+      .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+    return {
+      id: u.id,
+      parent_id: u.parent_id,
+      tipo: u.tipo,
+      nome: u.nome,
+      sigla: u.sigla,
+      ativo: u.ativo,
+      motivo_inativacao: u.motivo_inativacao,
+      titulares,
+      pessoas: titulares.length
+    };
+  });
 }
 
 // Se o perfil do usuário corrente pode editar a estrutura.
