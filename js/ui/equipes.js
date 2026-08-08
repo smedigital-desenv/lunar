@@ -79,12 +79,19 @@ function renderMembro(u) {
 function renderUnidade(unidade, filhosDe, membrosDe, nivel) {
   const membros = membrosDe.get(unidade.id) || [];
   const filhos = filhosDe.get(unidade.id) || [];
-  // O recuo vem de --nivel (CSS), não de margin inline: é o mesmo recurso
-  // da tela de Organograma, e permite a linha-guia que liga filha à mãe.
   const vazia = membros.length === 0;
-  const cls = `equipe-area equipe-area--${escapeHtml(unidade.tipo)}`
-    + (vazia ? ' equipe-area--vazia' : '');
-  let html = `<div class="${cls}" style="--nivel:${nivel}">
+
+  // As filhas ficam DENTRO da caixa da mãe, não ao lado deslocado. Antes,
+  // cada área era um cartão solto com margem à esquerda — deslocamento não
+  // é contenção, e a hierarquia não se lia. Agora a caixa envolve, e a
+  // espinha vertical de .equipe-area__filhas mostra até onde a mãe vai.
+  const filhasHtml = filhos.length
+    ? `<div class="equipe-area__filhas">
+         ${filhos.map(f => renderUnidade(f, filhosDe, membrosDe, nivel + 1)).join('')}
+       </div>`
+    : '';
+
+  return `<div class="equipe-area equipe-area--${escapeHtml(unidade.tipo)}${vazia ? ' equipe-area--vazia' : ''}">
       <div class="equipe-area__cabecalho">
         <strong class="equipe-area__nome">${escapeHtml(unidade.nome)}</strong>
         ${unidade.sigla ? `<span class="equipe-area__sigla">${escapeHtml(unidade.sigla)}</span>` : ''}
@@ -92,10 +99,9 @@ function renderUnidade(unidade, filhosDe, membrosDe, nivel) {
         <span class="equipe-area__contagem">${membros.length === 1 ? '1 pessoa' : `${membros.length} pessoas`}</span>
       </div>
       ${vazia ? '<p class="equipe-area__vazia">Sem pessoas nesta área.</p>'
-              : membros.map(renderMembro).join('')}
+              : `<div class="equipe-area__pessoas">${membros.map(renderMembro).join('')}</div>`}
+      ${filhasHtml}
     </div>`;
-  html += filhos.map(f => renderUnidade(f, filhosDe, membrosDe, nivel + 1)).join('');
-  return html;
 }
 
 function pintar() {

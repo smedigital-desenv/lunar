@@ -823,61 +823,58 @@ body.com-nav { padding-bottom: 4rem; }
 }
 
 /* --------------------------------------------------------------- Equipes */
-/* Equipes — mesma linguagem visual da tela de Organograma.
-   O recuo vem de --nivel e a linha-guia (::before) liga a unidade à mãe:
-   sem ela, 4 níveis com 12px de recuo viravam uma pilha achatada, e não
-   dava para ver quem está dentro de quem. */
+/* Equipes — a caixa da mãe ENVOLVE as filhas.
+   Antes cada área era um cartão solto com margem à esquerda: deslocamento
+   não é contenção, e a hierarquia não se lia ("as áreas parecem soltas").
+   Agora o aninhamento é real no DOM e .equipe-area__filhas desenha a
+   espinha vertical que mostra até onde a mãe vai. */
 .equipe-area {
-  position: relative;
-  margin: .4rem 0 .4rem calc(var(--nivel, 0) * .9rem);
-  padding: .55rem .8rem;
   background: #fff;
   border: 1px solid var(--cinza-200);
   border-left: 4px solid var(--cinza-300);
   border-radius: var(--raio-sm);
-  box-shadow: var(--sombra-xs);
+  padding: .6rem .8rem;
+  margin-bottom: .5rem;
 }
-.equipe-area::before {
-  content: ""; position: absolute; left: -.55rem; top: -.4rem; bottom: 50%;
-  border-left: 1px solid var(--cinza-300);
-  border-bottom: 1px solid var(--cinza-300);
-  border-bottom-left-radius: 8px; width: .5rem;
-}
-.equipe-area[style*="--nivel:0"]::before { display: none; }
 .equipe-area--gabinete      { border-left-color: #0f172a; }
 .equipe-area--subsecretaria { border-left-color: var(--cor-primaria); }
 .equipe-area--gerencia      { border-left-color: #0891b2; }
 .equipe-area--secao         { border-left-color: var(--cinza-300); }
-.equipe-area--vazia { background: var(--cinza-50); box-shadow: none; }
-/* Fundo levemente mais escuro a cada degrau: a contenção fica legível
-   mesmo quando a linha-guia sai da tela no celular. */
-.equipe-area[style*="--nivel:1"] { background: #fcfdff; }
-.equipe-area[style*="--nivel:2"] { background: #f9fbfe; }
-.equipe-area[style*="--nivel:3"] { background: #f6f9fd; }
+.equipe-area .equipe-area { background: #fdfeff; }
+.equipe-area .equipe-area .equipe-area { background: #fbfdff; }
+.equipe-area--vazia { background: var(--cinza-50); }
+
+/* A espinha: linha contínua ligando a mãe a todas as filhas. */
+.equipe-area__filhas {
+  margin: .5rem 0 0 .35rem;
+  padding-left: .75rem;
+  border-left: 2px solid var(--cinza-200);
+}
+.equipe-area__filhas > .equipe-area:last-child { margin-bottom: 0; }
 
 .equipe-area__cabecalho {
   display: flex; align-items: baseline; gap: .45rem; flex-wrap: wrap;
-  margin-bottom: .3rem;
 }
-/* O nome encolhe a cada degrau: reforça a hierarquia sem mais moldura. */
 .equipe-area__nome { font-size: 1rem; letter-spacing: -.01em; }
-.equipe-area--gerencia .equipe-area__nome { font-size: .94rem; }
-.equipe-area--secao .equipe-area__nome { font-size: .88rem; font-weight: 600; }
+.equipe-area--gerencia .equipe-area__nome { font-size: .93rem; }
+.equipe-area--secao .equipe-area__nome { font-size: .87rem; font-weight: 600; }
 .equipe-area__sigla { font-weight: 700; font-size: .78rem; color: var(--cor-primaria); }
 .equipe-area__tipo,
-.equipe-area__contagem { font-size: .75rem; color: var(--cinza-500); }
+.equipe-area__contagem { font-size: .74rem; color: var(--cinza-500); }
 .equipe-area__contagem::before { content: "· "; }
-.equipe-area__vazia { font-size: .8rem; color: var(--cinza-500); margin: 0; font-style: italic; }
+.equipe-area__vazia { font-size: .78rem; color: var(--cinza-500); margin: .2rem 0 0; font-style: italic; }
 
+.equipe-area__pessoas { margin-top: .35rem; }
 .equipe-membro {
   display: flex; align-items: center; justify-content: space-between;
-  gap: .6rem; padding: .35rem 0; border-top: 1px solid var(--cinza-100);
+  gap: .6rem; padding: .3rem 0; border-top: 1px solid var(--cinza-100);
 }
+.equipe-membro:first-child { border-top: 0; }
 .equipe-membro__nome { display: flex; flex-wrap: wrap; align-items: baseline; gap: .4rem; }
 .equipe-membro__lider { color: var(--cor-primaria); }
 .equipe-membro__perfil {
   background: var(--cinza-100); color: var(--cinza-700); border-radius: 999px;
-  padding: .05rem .5rem; font-size: .74rem; font-weight: 600;
+  padding: .05rem .5rem; font-size: .73rem; font-weight: 600;
 }
 .equipe-membro__mover {
   flex: 0 0 auto; border: 1px solid var(--cinza-300); background: #fff;
@@ -889,7 +886,7 @@ body.com-nav { padding-bottom: 4rem; }
   background: var(--cor-primaria-clara); border-color: var(--cor-primaria-borda);
 }
 @media (max-width: 520px) {
-  .equipe-area { margin-left: calc(var(--nivel, 0) * 1.75rem); }
+  .equipe-area__filhas { margin-left: .6rem; padding-left: 1.1rem; }
 }
 
 /* --------------------------------------------------------------- Modo teste ("Testar como…") */
