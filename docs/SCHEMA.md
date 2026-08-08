@@ -67,6 +67,7 @@
 - `fn_validar_relatorio(codigo) → jsonb` — rota **pública** (anon): confirma emissão e devolve metadados + hash.
 - **Notificações (S9):** `fn_marcar_notificacao_lida(id)` · `fn_marcar_todas_notificacoes_lidas() → int` (SECURITY DEFINER; tabela sem UPDATE ao front).
 - **Autenticação (S3):** trigger `trg_bloquear_dominio` em `auth.users` (via `fn_bloquear_dominio_auth`) barra e-mail fora do domínio · `fn_provisionar_usuario(auth_id, nome, perfil, unidade_id) → uuid` (admin; cria/ajusta acesso, idempotente). Login exige linha em `gestao.usuarios`.
+- **Organograma (`040`):** `fn_pode_gerir_organograma(uuid) → bool` (lê `perfis.pode_gerir_organograma`) · `fn_criar_unidade(parent_id, tipo, nome, sigla) → uuid` · `fn_editar_unidade(id, nome, sigla, justificativa)` · `fn_mover_unidade(id, novo_parent_id, justificativa)` · `fn_inativar_unidade(id, motivo)` · `fn_reativar_unidade(id, motivo)`. Todas SECURITY DEFINER, com auditoria; recusam ciclo, encaixe inválido de tipo, inativação com filha ativa ou com pessoa lotada, e reativação sob pai inativo. Encaixe: subsecretaria→gabinete, gerencia→subsecretaria, secao→gerencia **ou** gabinete (caso do NAA).
 - **Admin de usuários (S3):** `fn_listar_contas_pendentes() → table(id,email,criado_em)` (contas em `auth.users` sem acesso) · `fn_inativar_usuario(id, motivo)` · `fn_reativar_usuario(id, motivo)` (todas admin; inativar/reativar gravam em `auditoria`).
 
 ## Convenções de escrita do front

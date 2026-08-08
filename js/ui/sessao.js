@@ -80,7 +80,8 @@ export async function iniciarSessao(elId = 'usuario-sessao') {
       + `<a class="sessao__admin" href="./ajuda.html" title="Como usar o sistema">Ajuda</a>`
       + (usuario.pode_administrar
           ? `<a class="sessao__admin" href="./admin.html">Admin</a>`
-            + `<a class="sessao__admin" href="./equipes.html">Equipes</a>` : '')
+            + `<a class="sessao__admin" href="./equipes.html">Equipes</a>`
+            + `<a class="sessao__admin" href="./organograma.html">Organograma</a>` : '')
       + `<button type="button" id="btn-sair" class="sessao__sair" aria-label="Sair">Sair</button>`;
     document.getElementById('btn-sair').addEventListener('click', () => auth.logout());
   }
