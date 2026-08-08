@@ -104,6 +104,27 @@ function renderUnidade(unidade, filhosDe, membrosDe, nivel) {
   return cabeca + filhos.map(f => renderUnidade(f, filhosDe, membrosDe, nivel + 1)).join('');
 }
 
+function pintar() {
+  const filhosDe = new Map();
+  const idsUnidade = new Set(dados.unidades.map(u => u.id));
+  const raizes = [];
+  for (const u of dados.unidades) {
+    if (u.parent_id && idsUnidade.has(u.parent_id)) {
+      if (!filhosDe.has(u.parent_id)) filhosDe.set(u.parent_id, []);
+      filhosDe.get(u.parent_id).push(u);
+    } else {
+      raizes.push(u);
+    }
+  }
+  const membrosDe = new Map();
+  for (const u of dados.usuarios) {
+    if (!membrosDe.has(u.unidade_id)) membrosDe.set(u.unidade_id, []);
+    membrosDe.get(u.unidade_id).push(u);
+  }
+  document.getElementById('arvore-equipes').innerHTML =
+    raizes.map(r => renderUnidade(r, filhosDe, membrosDe, 0)).join('');
+}
+
 // ---------------------------------------------------------------- Ações
 
 // Modal com o nome inteiro de cada destino — era o que o select truncava.
