@@ -823,75 +823,22 @@ body.com-nav { padding-bottom: 4rem; }
 }
 
 /* --------------------------------------------------------------- Equipes */
-/* Equipes — contenção sem caixa dentro de caixa.
-   O aninhamento é real (a mãe envolve as filhas), mas só o nível raiz é
-   cartão: repetir borda, fundo, sombra e cantos a cada degrau deixava a
-   tela pesada. Dentro, a hierarquia vive da espinha e do recuo. */
-.equipe-area {
-  background: #fff;
-  border: 1px solid var(--cinza-200);
-  border-radius: var(--raio);
-  padding: .8rem 1rem;
-  margin-bottom: .6rem;
-  box-shadow: var(--sombra-xs);
+/* Equipes usa as classes .org-* do Organograma: mesma árvore, mesmo
+   desenho. Só o chip da pessoa muda — aqui ele é um botão que abre o
+   "Mover", então precisa parecer clicável. */
+.org-no__pessoa--acao {
+  border: 1px solid transparent; cursor: pointer;
+  display: inline-flex; align-items: baseline; gap: .3rem;
+  transition: background-color var(--transicao), border-color var(--transicao);
 }
-/* Níveis internos: sem moldura. Só respiro e a linha da mãe. */
-.equipe-area .equipe-area {
-  background: transparent; border: 0; border-radius: 0;
-  box-shadow: none; padding: .35rem 0 .1rem; margin-bottom: 0;
+.org-no__pessoa--acao small { font-weight: 500; color: var(--cinza-500); font-size: .68rem; }
+.org-no__pessoa--acao:hover {
+  background: var(--cor-primaria-clara); border-color: var(--cor-primaria-borda);
 }
-
-/* A espinha, fina e discreta: é ela que carrega a hierarquia agora. */
-.equipe-area__filhas {
-  margin-top: .3rem;
-  padding-left: .9rem;
-  border-left: 1px solid var(--cinza-200);
-}
-
-.equipe-area__cabecalho {
-  display: flex; align-items: baseline; gap: .4rem; flex-wrap: wrap;
-}
-/* O tipo vira um ponto colorido antes do nome — informação sem moldura. */
-.equipe-area__cabecalho::before {
-  content: ""; width: 7px; height: 7px; border-radius: 50%;
-  background: var(--cinza-300); flex: 0 0 auto; align-self: center;
-}
-.equipe-area--gabinete > .equipe-area__cabecalho::before      { background: #0f172a; }
-.equipe-area--subsecretaria > .equipe-area__cabecalho::before { background: var(--cor-primaria); }
-.equipe-area--gerencia > .equipe-area__cabecalho::before      { background: #0891b2; }
-
-.equipe-area__nome { font-size: .95rem; letter-spacing: -.01em; }
-.equipe-area--gerencia .equipe-area__nome,
-.equipe-area--secao .equipe-area__nome { font-size: .88rem; font-weight: 600; }
-.equipe-area--secao .equipe-area__nome { color: var(--cinza-700); }
-.equipe-area__sigla { font-weight: 700; font-size: .72rem; color: var(--cinza-500); }
-.equipe-area__tipo { display: none; }          /* o ponto já diz o tipo */
-.equipe-area__contagem { font-size: .73rem; color: var(--cinza-500); }
-.equipe-area__vazia { font-size: .76rem; color: var(--cinza-500); margin: .1rem 0 0; font-style: italic; }
-
-/* Pessoas: linhas leves, sem régua entre elas. */
-.equipe-area__pessoas { margin-top: .15rem; }
-.equipe-membro {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: .6rem; padding: .18rem 0;
-}
-.equipe-membro__nome { display: flex; flex-wrap: wrap; align-items: baseline; gap: .35rem; }
-.equipe-membro__nome strong { font-weight: 600; font-size: .9rem; }
-.equipe-membro__lider { color: var(--cor-primaria); }
-.equipe-membro__perfil { font-size: .72rem; color: var(--cinza-500); font-weight: 500; }
-/* Botão discreto: some no meio do texto até o ponteiro chegar. No toque
-   não há hover, então no celular ele fica sempre visível. */
-.equipe-membro__mover {
-  flex: 0 0 auto; border: 0; background: transparent;
-  color: var(--cor-primaria); border-radius: 999px; padding: .1rem .5rem;
-  font-size: .76rem; font-weight: 600; cursor: pointer; opacity: .55;
-  transition: opacity var(--transicao), background-color var(--transicao);
-}
-.equipe-membro:hover .equipe-membro__mover { opacity: 1; }
-.equipe-membro__mover:hover { background: var(--cor-primaria-clara); opacity: 1; }
-@media (hover: none) { .equipe-membro__mover { opacity: 1; } }
+/* O corpo do nó não é clicável nesta tela (quem age é o chip). */
+.org-no__corpo--estatico { cursor: default; }
+.org-no__corpo--estatico:hover { background: #fff; }
 @media (max-width: 520px) {
-  .equipe-area__filhas { padding-left: 1.25rem; }
 }
 
 /* --------------------------------------------------------------- Modo teste ("Testar como…") */

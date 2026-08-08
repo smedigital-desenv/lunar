@@ -16,7 +16,6 @@ const PERFIL_ROTULO = {
 const TIPO_ROTULO = {
   gabinete: 'Gabinete', subsecretaria: 'Subsecretaria', gerencia: 'Gerência', secao: 'Seção'
 };
-const LIDERANCA = new Set(['subsecretario', 'gerente', 'gabinete', 'chefe_secao']);
 
 const UNIDADES_EXEMPLO = [
   { id: 'u0', nome: 'Gabinete', sigla: 'GAB', tipo: 'gabinete', parent_id: null },
@@ -61,68 +60,48 @@ async function carregar() {
 }
 
 // ---------------------------------------------------------------- Render
-// O `select` inline foi trocado por um botão que abre o modal: com 53
-// unidades, a lista nativa truncava o nome ("Subsecretaria de Alimentação
-// Escola…") e, no celular, era o pior componente possível.
-function renderMembro(u) {
-  const lider = LIDERANCA.has(u.perfil);
-  return `<div class="equipe-membro">
-      <span class="equipe-membro__nome">
-        <strong class="${lider ? 'equipe-membro__lider' : ''}">${escapeHtml(u.nome)}</strong>
-        <span class="equipe-membro__perfil">${escapeHtml(PERFIL_ROTULO[u.perfil] || u.perfil)}</span>
-      </span>
-      <button type="button" class="equipe-membro__mover" data-usuario="${escapeHtml(u.id)}"
-              aria-label="Mover ${escapeHtml(u.nome)} de área">Mover</button>
-    </div>`;
+// Mesmo desenho da tela de Organograma (classes .org-*): cartão compacto
+// por unidade, recuo por --nivel e recolher. Duas linguagens visuais para
+// a mesma árvore era o que deixava esta tela pesada. A diferença é que
+// aqui o chip da pessoa é um BOTÃO — clicar abre o "Mover".
+const recolhidos = new Set();
+
+function chipsPessoas(membros) {
+  if (!membros.length) return '<span class="org-no__vago">sem pessoas</span>';
+  return `<span class="org-no__titulares">${membros.map(u => `
+    <button type="button" class="org-no__pessoa org-no__pessoa--acao"
+            data-usuario="${escapeHtml(u.id)}"
+            title="Mover ${escapeHtml(u.nome)} de área">
+      ${escapeHtml(u.nome)}
+      <small>${escapeHtml(PERFIL_ROTULO[u.perfil] || u.perfil)}</small>
+    </button>`).join('')}</span>`;
 }
 
 function renderUnidade(unidade, filhosDe, membrosDe, nivel) {
   const membros = membrosDe.get(unidade.id) || [];
   const filhos = filhosDe.get(unidade.id) || [];
-  const vazia = membros.length === 0;
+  const temFilhas = filhos.length > 0;
+  const recolhido = recolhidos.has(unidade.id);
 
-  // As filhas ficam DENTRO da caixa da mãe, não ao lado deslocado. Antes,
-  // cada área era um cartão solto com margem à esquerda — deslocamento não
-  // é contenção, e a hierarquia não se lia. Agora a caixa envolve, e a
-  // espinha vertical de .equipe-area__filhas mostra até onde a mãe vai.
-  const filhasHtml = filhos.length
-    ? `<div class="equipe-area__filhas">
-         ${filhos.map(f => renderUnidade(f, filhosDe, membrosDe, nivel + 1)).join('')}
-       </div>`
-    : '';
-
-  return `<div class="equipe-area equipe-area--${escapeHtml(unidade.tipo)}${vazia ? ' equipe-area--vazia' : ''}">
-      <div class="equipe-area__cabecalho">
-        <strong class="equipe-area__nome">${escapeHtml(unidade.nome)}</strong>
-        ${unidade.sigla ? `<span class="equipe-area__sigla">${escapeHtml(unidade.sigla)}</span>` : ''}
-        <span class="equipe-area__tipo">${escapeHtml(TIPO_ROTULO[unidade.tipo] || unidade.tipo)}</span>
-        <span class="equipe-area__contagem">${membros.length === 1 ? '1 pessoa' : `${membros.length} pessoas`}</span>
+  const cabeca = `
+    <div class="org-no org-no--${escapeHtml(unidade.tipo)}" style="--nivel:${nivel}">
+      <button type="button" class="org-no__toggle" data-toggle="${escapeHtml(unidade.id)}"
+              ${temFilhas ? '' : 'disabled'}
+              aria-label="${recolhido ? 'Expandir' : 'Recolher'}">
+        ${temFilhas ? (recolhido ? '▸' : '▾') : '·'}
+      </button>
+      <div class="org-no__corpo org-no__corpo--estatico">
+        <span class="org-no__nome">${escapeHtml(unidade.nome)}</span>
+        <span class="org-no__meta">
+          ${unidade.sigla ? `<span class="org-no__sigla">${escapeHtml(unidade.sigla)}</span>` : ''}
+          <span>${escapeHtml(TIPO_ROTULO[unidade.tipo] || unidade.tipo)}</span>
+        </span>
+        ${chipsPessoas(membros)}
       </div>
-      ${vazia ? '<p class="equipe-area__vazia">Sem pessoas nesta área.</p>'
-              : `<div class="equipe-area__pessoas">${membros.map(renderMembro).join('')}</div>`}
-      ${filhasHtml}
     </div>`;
-}
 
-function pintar() {
-  const filhosDe = new Map();
-  const idsUnidade = new Set(dados.unidades.map(u => u.id));
-  const raizes = [];
-  for (const u of dados.unidades) {
-    if (u.parent_id && idsUnidade.has(u.parent_id)) {
-      if (!filhosDe.has(u.parent_id)) filhosDe.set(u.parent_id, []);
-      filhosDe.get(u.parent_id).push(u);
-    } else {
-      raizes.push(u);
-    }
-  }
-  const membrosDe = new Map();
-  for (const u of dados.usuarios) {
-    if (!membrosDe.has(u.unidade_id)) membrosDe.set(u.unidade_id, []);
-    membrosDe.get(u.unidade_id).push(u);
-  }
-  document.getElementById('arvore-equipes').innerHTML =
-    raizes.map(r => renderUnidade(r, filhosDe, membrosDe, 0)).join('');
+  if (recolhido || !temFilhas) return cabeca;
+  return cabeca + filhos.map(f => renderUnidade(f, filhosDe, membrosDe, nivel + 1)).join('');
 }
 
 // ---------------------------------------------------------------- Ações
@@ -168,6 +147,13 @@ async function iniciar() {
 
   pintar();
   document.getElementById('arvore-equipes').addEventListener('click', (e) => {
+    const t = e.target.closest('[data-toggle]');
+    if (t) {
+      const id = t.dataset.toggle;
+      recolhidos.has(id) ? recolhidos.delete(id) : recolhidos.add(id);
+      pintar();
+      return;
+    }
     const b = e.target.closest('[data-usuario]');
     if (b) pedirDestino(b.dataset.usuario);
   });
