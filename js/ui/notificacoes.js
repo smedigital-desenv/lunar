@@ -6,6 +6,7 @@
 // =====================================================================
 
 import { escapeHtml, fmtDataHora, iconeTipo, toast } from './componentes.js';
+import * as demo from './demo.js';
 
 const INTERVALO_MS = 60000;
 
@@ -43,10 +44,14 @@ async function buscar() {
   const svc = await obterServico();
   if (!svc) return { lista: EXEMPLO.slice(), demo: true };
   try {
-    const lista = await svc.listar({ limite: 30 });
-    return { lista, demo: false };
-  } catch (_) {
-    return { lista: EXEMPLO.slice(), demo: true };
+    return await demo.carregar(
+      async () => ({ lista: await svc.listar({ limite: 30 }) }),
+      () => ({ lista: EXEMPLO.slice() })
+    );
+  } catch (e) {
+    // O sino não pode derrubar a página: registra e fica vazio.
+    console.error('Notificações:', e);
+    return { lista: [], demo: false, erro: e.message };
   }
 }
 

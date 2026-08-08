@@ -43,13 +43,18 @@ async function carregar() {
     if (!usuario) return null;
     ehAdmin = !!usuario.pode_administrar;
     if (!ehAdmin) return { demo: false, unidades: [], usuarios: [] };
-    svc = await import('../services/admin.js');
-    const [unidades, usuarios] = await Promise.all([svc.listarOrganograma(), svc.listarUsuarios()]);
-    return {
-      demo: false, unidades,
-      usuarios: (usuarios || []).filter(u => u.ativo !== false)
-        .map(u => ({ id: u.id, nome: u.nome, perfil: u.perfil, unidade_id: u.unidade_id }))
-    };
+    return demo.carregar(
+      async () => {
+        svc = await import('../services/admin.js');
+        const [unidades, usuarios] = await Promise.all([svc.listarOrganograma(), svc.listarUsuarios()]);
+        return {
+          unidades,
+          usuarios: (usuarios || []).filter(u => u.ativo !== false)
+            .map(u => ({ id: u.id, nome: u.nome, perfil: u.perfil, unidade_id: u.unidade_id }))
+        };
+      },
+      () => ({ unidades: UNIDADES_EXEMPLO, usuarios: USUARIOS_EXEMPLO })
+    );
   }
   return { demo: true, unidades: UNIDADES_EXEMPLO, usuarios: USUARIOS_EXEMPLO };
 }
@@ -153,6 +158,7 @@ iniciar().catch(err => {
 import { montarSino } from './notificacoes.js';
 import { iniciarSessao } from './sessao.js';
 import { montarNavegacao } from './navegacao.js';
+import * as demo from './demo.js';
 montarSino('sino-notificacoes');
 iniciarSessao();
 montarNavegacao();

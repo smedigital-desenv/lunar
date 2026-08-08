@@ -10,8 +10,11 @@ import { supabase, rpc, aguardarSessao } from './supabaseClient.js';
 // --- Leitura de apoio -------------------------------------------------
 
 // Contas de login ainda sem acesso ao sistema (auth.users sem gestao.usuarios).
-export function listarContasPendentes() {
-  return rpc('fn_listar_contas_pendentes', {});
+// Num projeto COMPARTILHADO, listar "toda conta sem acesso" traria os
+// usuários dos sistemas vizinhos — 66, na conferência de 2026-08-07.
+// Por isso a função só responde a uma busca por e-mail: sem termo, nada.
+export function listarContasPendentes(busca) {
+  return rpc('fn_listar_contas_pendentes', { p_busca: busca ?? null });
 }
 
 // Usuários já provisionados, com nome de perfil e unidade.
