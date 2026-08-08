@@ -462,6 +462,58 @@ a.cartao:active { transform: translateY(0); }
   margin-bottom: var(--gap);
 }
 
+/* --------------------------------------------------------------- Organograma
+   Árvore recolhível. A indentação vem de --nivel, calculada no JS, em vez de
+   aninhar <ul>: a lista fica plana e o recolher/expandir não precisa remontar
+   a estrutura inteira. No celular o recuo é menor, senão o nível 3 não cabe. */
+.org-barra {
+  display: flex; flex-wrap: wrap; gap: var(--gap); align-items: center;
+  justify-content: space-between; margin-bottom: var(--gap);
+}
+.org-barra input[type="search"] { max-width: 22rem; }
+.org-barra__acoes { display: flex; gap: var(--gap); align-items: center; }
+
+.org-arvore { display: flex; flex-direction: column; gap: .25rem; }
+
+.org-no {
+  display: flex; align-items: stretch; gap: .35rem;
+  margin-left: calc(var(--nivel, 0) * .9rem);
+}
+.org-no__toggle {
+  flex: 0 0 1.75rem; border: 1px solid var(--cinza-200); background: #fff;
+  border-radius: var(--raio-sm); color: var(--cinza-500); cursor: pointer;
+  font-size: .8rem; line-height: 1;
+}
+.org-no__toggle:disabled { opacity: .35; cursor: default; }
+.org-no__corpo {
+  flex: 1; text-align: left; border: 1px solid var(--cinza-200); background: #fff;
+  border-radius: var(--raio-sm); padding: .5rem .7rem; cursor: pointer;
+  border-left: 4px solid var(--cinza-200);
+}
+.org-no__corpo:hover { background: var(--cinza-50); }
+.org-no__nome { display: block; font-weight: 600; font-size: .95rem; }
+.org-no__meta {
+  display: flex; flex-wrap: wrap; gap: .4rem; align-items: center;
+  font-size: .78rem; color: var(--cinza-500);
+}
+.org-no__sigla {
+  font-weight: 700; letter-spacing: .02em; color: var(--cor-primaria);
+}
+.org-no__inativa {
+  background: #fee2e2; color: #b91c1c; border-radius: 999px;
+  padding: 0 .45rem; font-weight: 700;
+}
+/* A cor da borda esquerda dá o nível de relance, sem precisar contar recuos. */
+.org-no--gabinete .org-no__corpo      { border-left-color: #0f172a; }
+.org-no--subsecretaria .org-no__corpo { border-left-color: #14539a; }
+.org-no--gerencia .org-no__corpo      { border-left-color: #0891b2; }
+.org-no--secao .org-no__corpo         { border-left-color: #94a3b8; }
+.org-no--inativa .org-no__corpo { opacity: .6; }
+
+@media (min-width: 768px) {
+  .org-no { margin-left: calc(var(--nivel, 0) * 1.75rem); }
+}
+
 /* Bloqueio de acesso (auth-central.js): substitui a página inteira quando o
    central autoriza mas o banco ainda não reconhece a pessoa. */
 .aviso-bloqueio {
