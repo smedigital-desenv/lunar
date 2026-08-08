@@ -97,6 +97,8 @@ function renderUnidade(unidade, filhosDe, membrosDe, nivel) {
           <span>${escapeHtml(TIPO_ROTULO[unidade.tipo] || unidade.tipo)}</span>
         </span>
         ${chipsPessoas(membros)}
+        ${ehAdmin ? `<button type="button" class="org-no__incluir"
+             data-incluir="${escapeHtml(unidade.id)}">+ Incluir pessoa</button>` : ''}
       </div>
     </div>`;
 
@@ -147,6 +149,49 @@ async function pedirDestino(usuarioId) {
   await mover(usuarioId, v.unidade);
 }
 
+// Incluir alguém na área. A conta de login precisa JÁ existir: quem a
+// cria é a ponte do central, no primeiro acesso da pessoa. Aqui apenas
+// damos a ela perfil e unidade — o front não tem (nem deve ter) poder de
+// criar conta de autenticação.
+async function incluir(unidadeId) {
+  const unidade = dados.unidades.find(u => u.id === unidadeId);
+  const v = await abrirFormulario({
+    titulo: `Incluir pessoa em ${unidade?.nome ?? 'esta área'}`,
+    textoConfirmar: 'Incluir',
+    campos: [
+      { tipo: 'aviso',
+        texto: 'A pessoa precisa ter entrado ao menos uma vez em smedigital.com.br '
+          + 'com o e-mail institucional. É esse primeiro acesso que cria a conta.' },
+      { nome: 'email', rotulo: 'E-mail institucional', obrigatorio: true },
+      { nome: 'nome', rotulo: 'Nome completo', obrigatorio: true },
+      { nome: 'perfil', rotulo: 'Perfil', tipo: 'select',
+        opcoes: Object.entries(PERFIL_ROTULO).map(([valor, rotulo]) => ({ valor, rotulo })) }
+    ]
+  });
+  if (!v) return;
+
+  const email = v.email.trim().toLowerCase();
+  try {
+    // Acha a conta de login pelo e-mail (mesma função da tela de Admin).
+    const contas = await svc.listarContasPendentes(email);
+    const conta = (contas || []).find(c => c.email === email);
+    if (!conta) {
+      toast('Conta não encontrada. Ou a pessoa ainda não entrou pela primeira vez, '
+        + 'ou já tem acesso — nesse caso, use "Mover".', 'erro');
+      return;
+    }
+    await svc.provisionarUsuario({
+      authId: conta.id, nome: v.nome.trim(), perfil: v.perfil, unidadeId
+    });
+    toast('Pessoa incluída na área.', 'sucesso');
+    dados = await carregar();
+    if (dados) pintar();
+  } catch (e) {
+    console.error(e);
+    toast(e.message || 'Falha ao incluir.', 'erro');
+  }
+}
+
 async function mover(usuarioId, unidadeId) {
   if (dados.demo || !svc) { toast('Edição indisponível no modo demo.', 'aviso'); return; }
   try {
@@ -175,6 +220,8 @@ async function iniciar() {
       pintar();
       return;
     }
+    const inc = e.target.closest('[data-incluir]');
+    if (inc) { incluir(inc.dataset.incluir); return; }
     const b = e.target.closest('[data-usuario]');
     if (b) pedirDestino(b.dataset.usuario);
   });
