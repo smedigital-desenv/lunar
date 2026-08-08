@@ -823,15 +823,73 @@ body.com-nav { padding-bottom: 4rem; }
 }
 
 /* --------------------------------------------------------------- Equipes */
-.equipe-area { border-left: 3px solid var(--cor-primaria-clara); padding: .45rem .7rem; margin: .45rem 0; background: #fff; border-radius: var(--raio-sm); box-shadow: var(--sombra); }
+/* Equipes — mesma linguagem visual da tela de Organograma.
+   O recuo vem de --nivel e a linha-guia (::before) liga a unidade à mãe:
+   sem ela, 4 níveis com 12px de recuo viravam uma pilha achatada, e não
+   dava para ver quem está dentro de quem. */
+.equipe-area {
+  position: relative;
+  margin: .4rem 0 .4rem calc(var(--nivel, 0) * .9rem);
+  padding: .55rem .8rem;
+  background: #fff;
+  border: 1px solid var(--cinza-200);
+  border-left: 4px solid var(--cinza-300);
+  border-radius: var(--raio-sm);
+  box-shadow: var(--sombra-xs);
+}
+.equipe-area::before {
+  content: ""; position: absolute; left: -.55rem; top: -.4rem; bottom: 50%;
+  border-left: 1px solid var(--cinza-300);
+  border-bottom: 1px solid var(--cinza-300);
+  border-bottom-left-radius: 8px; width: .5rem;
+}
+.equipe-area[style*="--nivel:0"]::before { display: none; }
+.equipe-area--gabinete      { border-left-color: #0f172a; }
 .equipe-area--subsecretaria { border-left-color: var(--cor-primaria); }
-.equipe-area--gerencia { border-left-color: var(--cor-acento); }
-.equipe-area__cabecalho { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; margin-bottom: .35rem; }
-.equipe-membro { display: flex; align-items: center; justify-content: space-between; gap: .6rem; padding: .3rem 0; border-top: 1px solid var(--cinza-100); }
-.equipe-membro__mover { max-width: 17rem; flex: 0 0 auto; }
+.equipe-area--gerencia      { border-left-color: #0891b2; }
+.equipe-area--secao         { border-left-color: var(--cinza-300); }
+.equipe-area--vazia { background: var(--cinza-50); box-shadow: none; }
+/* Fundo levemente mais escuro a cada degrau: a contenção fica legível
+   mesmo quando a linha-guia sai da tela no celular. */
+.equipe-area[style*="--nivel:1"] { background: #fcfdff; }
+.equipe-area[style*="--nivel:2"] { background: #f9fbfe; }
+.equipe-area[style*="--nivel:3"] { background: #f6f9fd; }
+
+.equipe-area__cabecalho {
+  display: flex; align-items: baseline; gap: .45rem; flex-wrap: wrap;
+  margin-bottom: .3rem;
+}
+/* O nome encolhe a cada degrau: reforça a hierarquia sem mais moldura. */
+.equipe-area__nome { font-size: 1rem; letter-spacing: -.01em; }
+.equipe-area--gerencia .equipe-area__nome { font-size: .94rem; }
+.equipe-area--secao .equipe-area__nome { font-size: .88rem; font-weight: 600; }
+.equipe-area__sigla { font-weight: 700; font-size: .78rem; color: var(--cor-primaria); }
+.equipe-area__tipo,
+.equipe-area__contagem { font-size: .75rem; color: var(--cinza-500); }
+.equipe-area__contagem::before { content: "· "; }
+.equipe-area__vazia { font-size: .8rem; color: var(--cinza-500); margin: 0; font-style: italic; }
+
+.equipe-membro {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: .6rem; padding: .35rem 0; border-top: 1px solid var(--cinza-100);
+}
+.equipe-membro__nome { display: flex; flex-wrap: wrap; align-items: baseline; gap: .4rem; }
+.equipe-membro__lider { color: var(--cor-primaria); }
+.equipe-membro__perfil {
+  background: var(--cinza-100); color: var(--cinza-700); border-radius: 999px;
+  padding: .05rem .5rem; font-size: .74rem; font-weight: 600;
+}
+.equipe-membro__mover {
+  flex: 0 0 auto; border: 1px solid var(--cinza-300); background: #fff;
+  color: var(--cinza-700); border-radius: 999px; padding: .15rem .7rem;
+  font-size: .78rem; font-weight: 600; cursor: pointer;
+  transition: background-color var(--transicao), border-color var(--transicao);
+}
+.equipe-membro__mover:hover {
+  background: var(--cor-primaria-clara); border-color: var(--cor-primaria-borda);
+}
 @media (max-width: 520px) {
-  .equipe-membro { flex-direction: column; align-items: stretch; }
-  .equipe-membro__mover { max-width: none; }
+  .equipe-area { margin-left: calc(var(--nivel, 0) * 1.75rem); }
 }
 
 /* --------------------------------------------------------------- Modo teste ("Testar como…") */

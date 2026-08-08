@@ -6,6 +6,7 @@
 // =====================================================================
 
 import { escapeHtml, toast } from './componentes.js';
+import { abrirFormulario } from './modais.js';
 
 const PERFIL_ROTULO = {
   agente_administrativo: 'Agente', chefe_secao: 'Chefe de seção',
@@ -60,39 +61,38 @@ async function carregar() {
 }
 
 // ---------------------------------------------------------------- Render
-function opcoesUnidades(selecionada) {
-  return dados.unidades.map(u =>
-    `<option value="${escapeHtml(u.id)}"${u.id === selecionada ? ' selected' : ''}>`
-    + `${escapeHtml(u.nome)}${u.sigla ? ` (${escapeHtml(u.sigla)})` : ''}</option>`).join('');
-}
-
+// O `select` inline foi trocado por um botão que abre o modal: com 53
+// unidades, a lista nativa truncava o nome ("Subsecretaria de Alimentação
+// Escola…") e, no celular, era o pior componente possível.
 function renderMembro(u) {
   const lider = LIDERANCA.has(u.perfil);
   return `<div class="equipe-membro">
       <span class="equipe-membro__nome">
-        <strong class="${lider ? 'text-primary' : ''}">${escapeHtml(u.nome)}</strong>
-        <small class="texto-silencioso"> · ${escapeHtml(PERFIL_ROTULO[u.perfil] || u.perfil)}</small>
+        <strong class="${lider ? 'equipe-membro__lider' : ''}">${escapeHtml(u.nome)}</strong>
+        <span class="equipe-membro__perfil">${escapeHtml(PERFIL_ROTULO[u.perfil] || u.perfil)}</span>
       </span>
-      <select class="form-select form-select-sm equipe-membro__mover" data-usuario="${escapeHtml(u.id)}"
-              aria-label="Mover ${escapeHtml(u.nome)} de área">
-        ${opcoesUnidades(u.unidade_id)}
-      </select>
+      <button type="button" class="equipe-membro__mover" data-usuario="${escapeHtml(u.id)}"
+              aria-label="Mover ${escapeHtml(u.nome)} de área">Mover</button>
     </div>`;
 }
 
 function renderUnidade(unidade, filhosDe, membrosDe, nivel) {
   const membros = membrosDe.get(unidade.id) || [];
   const filhos = filhosDe.get(unidade.id) || [];
-  const cls = `equipe-area equipe-area--${escapeHtml(unidade.tipo)}`;
-  let html = `<div class="${cls}" style="margin-left:${nivel * 12}px">
+  // O recuo vem de --nivel (CSS), não de margin inline: é o mesmo recurso
+  // da tela de Organograma, e permite a linha-guia que liga filha à mãe.
+  const vazia = membros.length === 0;
+  const cls = `equipe-area equipe-area--${escapeHtml(unidade.tipo)}`
+    + (vazia ? ' equipe-area--vazia' : '');
+  let html = `<div class="${cls}" style="--nivel:${nivel}">
       <div class="equipe-area__cabecalho">
-        <span class="badge-chip">${escapeHtml(TIPO_ROTULO[unidade.tipo] || unidade.tipo)}</span>
-        <strong>${escapeHtml(unidade.nome)}</strong>
-        ${unidade.sigla ? `<span class="texto-silencioso">(${escapeHtml(unidade.sigla)})</span>` : ''}
-        <span class="texto-silencioso small">· ${membros.length} pessoa(s)</span>
+        <strong class="equipe-area__nome">${escapeHtml(unidade.nome)}</strong>
+        ${unidade.sigla ? `<span class="equipe-area__sigla">${escapeHtml(unidade.sigla)}</span>` : ''}
+        <span class="equipe-area__tipo">${escapeHtml(TIPO_ROTULO[unidade.tipo] || unidade.tipo)}</span>
+        <span class="equipe-area__contagem">${membros.length === 1 ? '1 pessoa' : `${membros.length} pessoas`}</span>
       </div>
-      ${membros.length ? membros.map(renderMembro).join('')
-                       : '<p class="texto-silencioso small mb-1">Sem pessoas nesta área.</p>'}
+      ${vazia ? '<p class="equipe-area__vazia">Sem pessoas nesta área.</p>'
+              : membros.map(renderMembro).join('')}
     </div>`;
   html += filhos.map(f => renderUnidade(f, filhosDe, membrosDe, nivel + 1)).join('');
   return html;
@@ -120,6 +120,27 @@ function pintar() {
 }
 
 // ---------------------------------------------------------------- Ações
+
+// Modal com o nome inteiro de cada destino — era o que o select truncava.
+async function pedirDestino(usuarioId) {
+  const pessoa = dados.usuarios.find(u => u.id === usuarioId);
+  if (!pessoa) return;
+  const destinos = dados.unidades
+    .filter(u => u.ativo !== false)
+    .map(u => ({ valor: u.id, rotulo: `${u.nome}${u.sigla ? ` (${u.sigla})` : ''}` }));
+
+  const v = await abrirFormulario({
+    titulo: `Mover ${pessoa.nome}`,
+    textoConfirmar: 'Mover',
+    campos: [{
+      nome: 'unidade', rotulo: 'Passa a ser lotado em', tipo: 'select',
+      valor: pessoa.unidade_id, opcoes: destinos
+    }]
+  });
+  if (!v || v.unidade === pessoa.unidade_id) return;
+  await mover(usuarioId, v.unidade);
+}
+
 async function mover(usuarioId, unidadeId) {
   if (dados.demo || !svc) { toast('Edição indisponível no modo demo.', 'aviso'); return; }
   try {
@@ -140,9 +161,9 @@ async function iniciar() {
   if (!dados.demo && !ehAdmin) { document.getElementById('carregando').hidden = true; return; }
 
   pintar();
-  document.getElementById('arvore-equipes').addEventListener('change', (e) => {
-    const s = e.target.closest('[data-usuario]');
-    if (s) mover(s.dataset.usuario, s.value);
+  document.getElementById('arvore-equipes').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-usuario]');
+    if (b) pedirDestino(b.dataset.usuario);
   });
 
   document.getElementById('carregando').hidden = true;

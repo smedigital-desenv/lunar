@@ -30,12 +30,16 @@
     <div id="conteudo" hidden>
       <p class="texto-silencioso">
         A equipe de cada subsecretário/gerente é quem está lotado na área (unidade) dele.
-        Use o seletor de cada pessoa para movê-la de área.
+        Use o botão <b>Mover</b> ao lado de cada pessoa para trocá-la de área.
       </p>
       <div id="arvore-equipes"></div>
     </div>
   </main>
 
+  <!-- Bundle obrigatório: equipes.js usa modais.js, que instancia
+       `new bootstrap.Modal(...)`. Só o CSS não basta. -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+          crossorigin="anonymous"></script>
   <script type="module" src="../js/ui/equipes.js"></script>
 </body>
 </html>
