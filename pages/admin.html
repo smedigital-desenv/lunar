@@ -32,6 +32,12 @@
       <section class="cartao">
         <h2 class="cartao__titulo">Contas aguardando liberação</h2>
         <p class="texto-silencioso">Contas que já fizeram login mas ainda não têm acesso. Defina perfil e unidade para liberar.</p>
+        <div class="input-group input-group-sm mb-2">
+          <input id="busca-pendente" class="form-control" type="search"
+                 placeholder="Digite o e-mail institucional de quem precisa de acesso…"
+                 aria-label="Buscar conta por e-mail">
+          <button id="btn-buscar-pendente" class="btn btn-outline-primary" type="button">Buscar</button>
+        </div>
         <div id="pendentes"></div>
       </section>
 

@@ -66,13 +66,16 @@ const DADOS_EXEMPLO = {
 // ---------------------------------------------------------------- Carregamento
 async function carregar() {
   const id = new URLSearchParams(location.search).get('id');
-  if (id) {
-    try {
+  // Sem id na URL não há o que buscar: é o exemplo, não erro.
+  if (!id) return { ...DADOS_EXEMPLO, demo: true };
+  return demo.carregar(
+    async () => {
       const dados = await carregarReal(id);
-      if (dados && dados.demanda) return { ...dados, demo: false };
-    } catch (_) { /* sem config/sessão → cai no exemplo */ }
-  }
-  return { ...DADOS_EXEMPLO, demo: true };
+      if (!dados?.demanda) throw new Error('Demanda não encontrada ou sem permissão de acesso.');
+      return dados;
+    },
+    () => ({ ...DADOS_EXEMPLO })
+  );
 }
 
 async function carregarReal(id) {
@@ -392,6 +395,7 @@ iniciar().catch(err => {
 import { montarSino } from './notificacoes.js';
 import { iniciarSessao } from './sessao.js';
 import { montarNavegacao } from './navegacao.js';
+import * as demo from './demo.js';
 
 // Modo "embed": a tela é aberta dentro do painel de detalhe de uma lista.
 // Esconde cabeçalho/navegação (via CSS) e não monta sino/sessão/menu.

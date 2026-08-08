@@ -50,12 +50,20 @@ async function carregar() {
     if (!usuario) return null;                   // (redirecionado)
     ehAdmin = !!usuario.pode_administrar;
     if (!ehAdmin) return { demo: false, perfis: [], unidades: [], pendentes: [], usuarios: [] };
-    svc = await import('../services/admin.js');
-    const [perfis, unidades, pendentes, usuarios] = await Promise.all([
-      svc.listarPerfis(), svc.listarUnidades(),
-      svc.listarContasPendentes(), svc.listarUsuarios()
-    ]);
-    return { demo: false, perfis, unidades, pendentes, usuarios: usuarios.map(normalizaUsuario) };
+    return demo.carregar(
+      async () => {
+        svc = await import('../services/admin.js');
+        const [perfis, unidades, usuarios] = await Promise.all([
+          svc.listarPerfis(), svc.listarUnidades(), svc.listarUsuarios()
+        ]);
+        // `pendentes` começa vazio de propósito: num projeto compartilhado
+        // a lista traria as contas dos sistemas vizinhos. Só a busca por
+        // e-mail traz resultado (ver buscarPendentes).
+        return { perfis, unidades, pendentes: [], usuarios: usuarios.map(normalizaUsuario) };
+      },
+      () => ({ perfis: PERFIS_EXEMPLO, unidades: UNIDADES_EXEMPLO,
+               pendentes: PENDENTES_EXEMPLO, usuarios: USUARIOS_EXEMPLO })
+    );
   }
 
   return { demo: true, perfis: PERFIS_EXEMPLO, unidades: UNIDADES_EXEMPLO,
@@ -68,9 +76,27 @@ function opcoes(lista, valor, rotulo) {
     `<option value="${escapeHtml(x[valor])}">${escapeHtml(x[rotulo])}</option>`).join('');
 }
 
+// A lista nasce vazia e só se preenche com a busca — ver carregar().
+async function buscarPendentes(termo) {
+  const alvo = document.getElementById('pendentes');
+  if (!termo || termo.trim().length < 3) {
+    dados.pendentes = [];
+    alvo.innerHTML = '<p class="texto-silencioso">Digite ao menos 3 letras do e-mail.</p>';
+    return;
+  }
+  alvo.innerHTML = '<p class="texto-silencioso">Buscando…</p>';
+  try {
+    dados.pendentes = svc ? await svc.listarContasPendentes(termo.trim()) : [];
+  } catch (e) {
+    alvo.innerHTML = `<p class="text-danger small">Erro na busca: ${escapeHtml(e.message || String(e))}</p>`;
+    return;
+  }
+  alvo.innerHTML = renderPendentes();
+}
+
 function renderPendentes() {
   if (!dados.pendentes.length) {
-    return '<p class="texto-silencioso">Nenhuma conta aguardando.</p>';
+    return '<p class="texto-silencioso">Nenhuma conta encontrada para esse e-mail.</p>';
   }
   const perfilOpts = opcoes(dados.perfis, 'codigo', 'nome');
   const uniOpts = opcoes(dados.unidades.map(u => ({ id: u.id, r: `${u.nome}${u.sigla ? ` (${u.sigla})` : ''}` })), 'id', 'r');
@@ -156,6 +182,12 @@ async function iniciar() {
   }
 
   pintar();
+  const campoBusca = document.getElementById('busca-pendente');
+  if (campoBusca) {
+    const disparar = () => buscarPendentes(campoBusca.value);
+    document.getElementById('btn-buscar-pendente').addEventListener('click', disparar);
+    campoBusca.addEventListener('keydown', (e) => { if (e.key === 'Enter') disparar(); });
+  }
   document.getElementById('pendentes').addEventListener('submit', (e) => {
     const form = e.target.closest('.admin-pend');
     if (form) { e.preventDefault(); aoLiberar(form); }
@@ -182,4 +214,5 @@ iniciarSessao();
 
 // Barra de navegação principal.
 import { montarNavegacao } from './navegacao.js';
+import * as demo from './demo.js';
 montarNavegacao();
