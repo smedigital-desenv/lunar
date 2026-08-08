@@ -22,13 +22,13 @@ async function carregarReal(filtro, pagina, porPagina) {
   return { itens, total, demo: false };
 }
 
+// Com sessão, um erro do banco SOBE — não vira "modo demonstração".
+// Quem decide é o js/ui/demo.js.
 async function carregar(filtro, pagina, porPagina) {
-  try {
-    const r = await carregarReal(filtro, pagina, porPagina);
-    if (r) return r;
-  } catch (e) { console.error('Falha ao carregar caixa de saída real:', e); }
-  const { itens, total } = filtrarPaginar(EXEMPLO, filtro, pagina, porPagina);
-  return { itens, total, demo: true };
+  return demo.carregar(
+    () => carregarReal(filtro, pagina, porPagina),
+    () => filtrarPaginar(EXEMPLO, filtro, pagina, porPagina)
+  );
 }
 
 iniciarCaixa({
@@ -60,4 +60,5 @@ montarNavegacao('saida');
 
 // Visão lista + detalhe (desktop).
 import { habilitarDetalheLateral } from './detalhe-lado.js';
+import * as demo from './demo.js';
 habilitarDetalheLateral();

@@ -31,12 +31,14 @@ function buscaExemplo(f, pagina) {
 }
 
 async function buscar(f, pagina) {
-  try {
-    const { pesquisar } = await import('../services/painel.js');
-    const r = await pesquisar({ ...f, pagina, porPagina: POR_PAGINA });
-    if (r) return { total: r.total ?? 0, itens: r.itens ?? [], demo: false };
-  } catch (_) { /* sem config/sessão → exemplo */ }
-  return buscaExemplo(f, pagina);
+  return demo.carregar(
+    async () => {
+      const { pesquisar } = await import('../services/painel.js');
+      const r = await pesquisar({ ...f, pagina, porPagina: POR_PAGINA });
+      return { total: r?.total ?? 0, itens: r?.itens ?? [] };
+    },
+    () => buscaExemplo(f, pagina)
+  );
 }
 
 const estado = { filtros: {}, pagina: 1 };
@@ -107,4 +109,5 @@ montarNavegacao('buscar');
 
 // Visão lista + detalhe (desktop).
 import { habilitarDetalheLateral } from './detalhe-lado.js';
+import * as demo from './demo.js';
 habilitarDetalheLateral();
