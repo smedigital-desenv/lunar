@@ -503,6 +503,21 @@ a.cartao:active { transform: translateY(0); }
   background: #fee2e2; color: #b91c1c; border-radius: 999px;
   padding: 0 .45rem; font-weight: 700;
 }
+/* Titulares no próprio nó: é o que se procura ao abrir um organograma.
+   Chips em vez de linha corrida para o nome não se confundir com a
+   sigla nem com o tipo da unidade. */
+.org-no__titulares {
+  display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .3rem;
+}
+.org-no__pessoa {
+  background: var(--cinza-100); color: var(--cinza-700);
+  border-radius: 999px; padding: .05rem .5rem;
+  font-size: .78rem; font-weight: 600;
+}
+.org-no__vago {
+  display: inline-block; margin-top: .3rem;
+  font-size: .75rem; font-style: italic; color: var(--cinza-500);
+}
 /* A cor da borda esquerda dá o nível de relance, sem precisar contar recuos. */
 .org-no--gabinete .org-no__corpo      { border-left-color: #0f172a; }
 .org-no--subsecretaria .org-no__corpo { border-left-color: #14539a; }

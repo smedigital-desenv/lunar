@@ -30,22 +30,42 @@ const estado = { unidades: [], recolhidos: new Set(), podeEditar: false, filtro:
 let svc = null;
 
 // Dados de exemplo, para a tela abrir sem sessão/banco (modo demo).
+const pessoa = (nome, perfil) => ({ id: nome, nome, perfil, ativo: true });
 const EXEMPLO = [
-  { id: 'g', parent_id: null, tipo: 'gabinete', nome: 'Gabinete do Secretário', sigla: 'GAB', ativo: true, pessoas: 2 },
-  { id: 's1', parent_id: 'g', tipo: 'subsecretaria', nome: 'Subsecretaria Pedagógica', sigla: 'SUBPED', ativo: true, pessoas: 1 },
-  { id: 'n', parent_id: 'g', tipo: 'secao', nome: 'Núcleo de Apoio Administrativo', sigla: 'NAA', ativo: true, pessoas: 0 },
-  { id: 'g1', parent_id: 's1', tipo: 'gerencia', nome: 'Gerência de Ensino Fundamental', sigla: 'GEF', ativo: true, pessoas: 1 },
-  { id: 'c1', parent_id: 'g1', tipo: 'secao', nome: 'Seção de Anos Iniciais', sigla: 'SAI', ativo: true, pessoas: 1 }
-];
+  { id: 'g', parent_id: null, tipo: 'gabinete', nome: 'Gabinete do Secretário', sigla: 'GAB', ativo: true,
+    titulares: [pessoa('Secretário', 'gabinete'), pessoa('Secretário Adjunto', 'gabinete')] },
+  { id: 's1', parent_id: 'g', tipo: 'subsecretaria', nome: 'Subsecretaria Pedagógica', sigla: 'SUBPED', ativo: true,
+    titulares: [pessoa('Subsecretária', 'subsecretario')] },
+  { id: 'n', parent_id: 'g', tipo: 'secao', nome: 'Núcleo de Apoio Administrativo', sigla: 'NAA', ativo: true, titulares: [] },
+  { id: 'g1', parent_id: 's1', tipo: 'gerencia', nome: 'Gerência de Ensino Fundamental', sigla: 'GEF', ativo: true,
+    titulares: [pessoa('Gerente', 'gerente')] },
+  { id: 'c1', parent_id: 'g1', tipo: 'secao', nome: 'Seção de Anos Iniciais', sigla: 'SAI', ativo: true,
+    titulares: [pessoa('Chefe de Seção', 'chefe_secao')] }
+].map(u => ({ ...u, pessoas: u.titulares.length }));
 
 // --------------------------------------------------------------- Render
+
+// Os titulares aparecem no próprio nó — é para isso que se olha um
+// organograma. Acima de três, a lista viraria parágrafo: mostramos os
+// dois primeiros e o resto sai no painel da unidade.
+function titularesHtml(u) {
+  const titulares = u.titulares ?? [];
+  if (!titulares.length) {
+    return '<span class="org-no__vago">sem titular</span>';
+  }
+  const visiveis = titulares.slice(0, 2)
+    .map(p => `<span class="org-no__pessoa">${escapeHtml(p.nome)}</span>`).join('');
+  const resto = titulares.length - 2;
+  return `<span class="org-no__titulares">${visiveis}`
+    + (resto > 0 ? `<span class="org-no__vago">+${resto}</span>` : '')
+    + '</span>';
+}
 
 // Um nó e sua descendência. `aberto` é o padrão; o usuário recolhe o que
 // não quer ver, e a escolha vale só enquanto a página estiver aberta.
 function noHtml(u, nivel) {
   const temFilhas = u.filhas.length > 0;
   const recolhido = estado.recolhidos.has(u.id);
-  const pessoas = u.pessoas === 1 ? '1 pessoa' : `${u.pessoas ?? 0} pessoas`;
 
   const cabeca = `
     <div class="org-no org-no--${escapeHtml(u.tipo)}${u.ativo ? '' : ' org-no--inativa'}"
@@ -60,9 +80,9 @@ function noHtml(u, nivel) {
         <span class="org-no__meta">
           ${u.sigla ? `<span class="org-no__sigla">${escapeHtml(u.sigla)}</span>` : ''}
           <span>${escapeHtml(ROTULO_TIPO[u.tipo] ?? u.tipo)}</span>
-          <span>· ${pessoas}</span>
           ${u.ativo ? '' : '<span class="org-no__inativa">inativa</span>'}
         </span>
+        ${titularesHtml(u)}
       </button>
     </div>`;
 
@@ -107,13 +127,12 @@ async function abrirUnidade(id) {
   const u = estado.unidades.find(x => x.id === id);
   if (!u) return;
 
-  let pessoas = [];
-  try { pessoas = await svc.listarPessoas(id); } catch (_) { /* demo/offline */ }
-
-  // O campo `aviso` do abrirFormulario recebe TEXTO e o escapa — nada de
-  // marcação aqui. Por isso a lista sai em uma linha, separada por vírgula.
-  const listaPessoas = pessoas.length
-    ? pessoas.map(p => `${p.nome} (${p.perfil})`).join(', ')
+  // Os titulares já vieram com a árvore — nada de nova consulta ao abrir.
+  // O campo `aviso` do abrirFormulario recebe TEXTO e o escapa: nada de
+  // marcação aqui, então a lista sai em uma linha, separada por vírgula.
+  const titulares = u.titulares ?? [];
+  const listaPessoas = titulares.length
+    ? titulares.map(p => `${p.nome} (${p.perfil})`).join(', ')
     : 'Ninguém lotado nesta unidade.';
 
   const filhos = TIPO_FILHO[u.tipo] ?? [];
