@@ -10,7 +10,8 @@
 ## Tabelas (colunas-chave)
 
 - **perfis**(`codigo` PK, nome, `nivel` smallint, `escopo_global` bool, `pode_administrar` bool)
-  — códigos: agente_administrativo(1), chefe_secao(2), gerente(3), subsecretario(4), gabinete(5, global), admin_ti(3, global, administra).
+  — códigos: agente_administrativo(1), chefe_secao(2), gerente(3), subsecretario(4), gabinete(5, global, **administra**), admin_ti(3, global, administra).
+  — ⚠️ `admin_ti` **não vê demanda com sigilo restrito** (trava explícita em `fn_escopo_permite`, sql/005). Por isso Secretário e Secretário Adjunto são `gabinete` — que ganhou `pode_administrar` — e não `admin_ti`: precisam da tela de Admin sem perder o sigilo nem o nível 5.
 - **unidades_organizacionais**(`id` PK, `parent_id`→self, tipo[gabinete|subsecretaria|gerencia|secao], nome, sigla, ativo, inativado_*) — organograma.
 - **usuarios**(`id` PK = `auth.users.id`, nome, email[UNIQUE, domínio @educacao.pmrp.sp.gov.br], `perfil`→perfis, `unidade_id`→unidades, ativo, inativado_*).
 - **tipos_demanda**(`id` PK, nome, descricao, ativo) · **escolas**(`id` PK, nome, codigo_inep, ativo) · **feriados**(`data` PK, descricao, tipo, ativo).
