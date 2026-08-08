@@ -838,6 +838,14 @@ body.com-nav { padding-bottom: 4rem; }
 /* O corpo do nó não é clicável nesta tela (quem age é o chip). */
 .org-no__corpo--estatico { cursor: default; }
 .org-no__corpo--estatico:hover { background: #fff; }
+/* "+ Incluir pessoa": discreto, ao lado dos chips, só para quem administra. */
+.org-no__incluir {
+  border: 1px dashed var(--cinza-300); background: transparent;
+  color: var(--cinza-500); border-radius: 999px; padding: .05rem .55rem;
+  font-size: .72rem; font-weight: 600; cursor: pointer; margin-top: .3rem;
+  transition: color var(--transicao), border-color var(--transicao);
+}
+.org-no__incluir:hover { color: var(--cor-primaria); border-color: var(--cor-primaria-borda); }
 @media (max-width: 520px) {
 }
 
