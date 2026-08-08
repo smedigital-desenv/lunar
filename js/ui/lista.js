@@ -46,14 +46,18 @@ document.title = `${titulo} — SME Ribeirão Preto`;
 let pagina = 1;
 
 async function carregar() {
-  try {
-    const { listarPorKpi } = await import('../services/painel.js');
-    const dados = await listarPorKpi(kpi, pagina, POR_PAGINA);
-    if (dados) return { itens: dados.itens || [], total: dados.total || 0, demo: false };
-  } catch (_) { /* sem config/sessão → exemplo */ }
-  const filtrados = EXEMPLO.filter(PREDICADOS[kpi] || (() => true));
-  const de = (pagina - 1) * POR_PAGINA;
-  return { itens: filtrados.slice(de, de + POR_PAGINA), total: filtrados.length, demo: true };
+  return demo.carregar(
+    async () => {
+      const { listarPorKpi } = await import('../services/painel.js');
+      const dados = await listarPorKpi(kpi, pagina, POR_PAGINA);
+      return { itens: dados?.itens ?? [], total: dados?.total ?? 0 };
+    },
+    () => {
+      const filtrados = EXEMPLO.filter(PREDICADOS[kpi] || (() => true));
+      const de = (pagina - 1) * POR_PAGINA;
+      return { itens: filtrados.slice(de, de + POR_PAGINA), total: filtrados.length };
+    }
+  );
 }
 
 function renderItem(d) {
@@ -113,4 +117,5 @@ montarNavegacao(kpi === 'todos' ? 'todos' : 'painel');
 
 // Visão lista + detalhe (desktop).
 import { habilitarDetalheLateral } from './detalhe-lado.js';
+import * as demo from './demo.js';
 habilitarDetalheLateral();

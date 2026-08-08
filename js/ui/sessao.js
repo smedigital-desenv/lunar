@@ -84,6 +84,9 @@ export async function iniciarSessao(elId = 'usuario-sessao') {
             + `<a class="sessao__admin" href="./organograma.html">Organograma</a>` : '')
       + `<button type="button" id="btn-sair" class="sessao__sair" aria-label="Sair">Sair</button>`;
     document.getElementById('btn-sair').addEventListener('click', () => auth.logout());
+    // Alternar demonstração: discreto, e só para quem administra.
+    const demo = await import('./demo.js');
+    demo.montarBotao(el, usuario);
   }
   return usuario;
 }

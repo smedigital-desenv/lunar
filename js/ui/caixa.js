@@ -65,8 +65,13 @@ export async function iniciarCaixa(config) {
     try {
       dados = await config.carregar(estado.filtro, estado.pagina, porPagina);
     } catch (e) {
+      // O motivo aparece na tela, não só no console: um erro genérico foi
+      // o que deixou uma migração faltando passar por "modo demonstração".
       console.error(e);
-      elCarregando.textContent = 'Erro ao carregar a lista.';
+      elCarregando.textContent = `Erro ao carregar a lista: ${e.message || e}`;
+      elCarregando.hidden = false;
+      elLista.innerHTML = '';
+      elPag.innerHTML = '';
       return;
     }
     const { itens, total, demo } = dados;

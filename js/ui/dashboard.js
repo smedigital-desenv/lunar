@@ -45,12 +45,14 @@ const PALETA = ['#14539a', '#0aa2c0', '#198754', '#d97706', '#7048e8', '#dc3545'
                 '#b8860b', '#0d6efd', '#6b7684', '#0e3d75', '#20c997', '#e83e8c'];
 
 async function carregar() {
-  try {
-    const { obterDashboard, obterGerencial } = await import('../services/painel.js');
-    const [d, g] = await Promise.all([obterDashboard(), obterGerencial()]);
-    if (d) return { dados: { ...d, ...(g || {}) }, demo: false };
-  } catch (_) { /* sem config/sessão → exemplo */ }
-  return { dados: EXEMPLO, demo: true };
+  return demo.carregar(
+    async () => {
+      const { obterDashboard, obterGerencial } = await import('../services/painel.js');
+      const [d, g] = await Promise.all([obterDashboard(), obterGerencial()]);
+      return { dados: { ...d, ...(g || {}) } };
+    },
+    () => ({ dados: EXEMPLO })
+  );
 }
 
 function renderKpis(d) {
@@ -162,4 +164,5 @@ iniciarSessao();
 
 // Barra de navegação principal.
 import { montarNavegacao } from './navegacao.js';
+import * as demo from './demo.js';
 montarNavegacao('painel');

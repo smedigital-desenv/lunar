@@ -462,6 +462,19 @@ a.cartao:active { transform: translateY(0); }
   margin-bottom: var(--gap);
 }
 
+/* Alternar demonstração — discreto no cabeçalho, só para quem administra.
+   Fica visível mesmo ligado, para ninguém ficar preso sem saber sair. */
+.sessao__demo {
+  border: 1px solid rgba(255, 255, 255, .35); background: transparent;
+  color: #fff; border-radius: 999px; padding: .1rem .6rem;
+  font-size: .74rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+  opacity: .75; transition: opacity var(--transicao), background-color var(--transicao);
+}
+.sessao__demo:hover { opacity: 1; background: rgba(255, 255, 255, .12); }
+.sessao__demo--on {
+  background: #fff3cd; color: #664d03; border-color: #ffe69c; opacity: 1;
+}
+
 /* --------------------------------------------------------------- Organograma
    Árvore recolhível. A indentação vem de --nivel, calculada no JS, em vez de
    aninhar <ul>: a lista fica plana e o recolher/expandir não precisa remontar
