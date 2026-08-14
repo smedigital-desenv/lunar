@@ -117,5 +117,7 @@ de migração identificado. Locais e fases distintos alimentam os catálogos.
 
 ## Dúvidas em aberto
 
-- Homologação parcial: a economia calculada (requisição − arrematado) cobre
-  todos os casos, ou precisa de campo próprio?
+Nenhuma. Sobre valores (decisão de 2026-08-14): **nenhum campo financeiro é
+obrigatório nem trava movimentação** — a economia é exibida apenas quando
+requisição e arrematado estiverem preenchidos; caso contrário fica em branco,
+sem impedir nada (inclusive em homologação parcial).
