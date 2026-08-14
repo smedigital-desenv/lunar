@@ -48,7 +48,8 @@ async function enviar(e) {
       prioridade: document.getElementById('prioridade').value,
       unidadeSolicitanteId: document.getElementById('unidade').value || null,
       texto: document.getElementById('texto').value.trim() || null,
-      numeroProcessoSolar: document.getElementById('solar').value.trim() || null
+      numeroProcessoSolar: document.getElementById('solar').value.trim() || null,
+      linkDocumentacao: document.getElementById('link-doc').value.trim() || null
     });
     toast('Pedido registrado.', 'sucesso');
     location.href = `./processo-licitacao.html?id=${encodeURIComponent(id)}`;

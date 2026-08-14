@@ -29,6 +29,7 @@ const EXEMPLO = {
     categoria: 'almox_sede', prioridade: '2_alta', ativo: true,
     numero_requisicao: '249/2024', numero_processo_compra: '526/2024',
     numero_pregao: '273/2024', numero_processo_solar: '121273/2024',
+    link_documentacao: 'https://drive.google.com/drive/folders/exemplo',
     fase: { id: 'f14', nome: 'Em execução' }, local: { id: 'l1', sigla: 'EDUC-ALMOX' },
     unidade: { sigla: 'GCP', nome: 'Gerência de Compras' },
     data_pregao: '2026-03-25', valor_requisicao: 1114490.20,
@@ -85,6 +86,11 @@ function renderDados(p) {
     ${linha('Processo de compra', p.numero_processo_compra)}
     ${linha('Pregão eletrônico', p.numero_pregao)}
     ${linha('Processo digital (Solar)', p.numero_processo_solar)}
+    ${p.link_documentacao ? `<div class="d-flex justify-content-between gap-3 py-1 border-bottom">
+      <span class="texto-silencioso">Documentação</span>
+      <a class="text-end text-truncate" style="max-width: 70%"
+         href="${escapeHtml(p.link_documentacao)}" target="_blank"
+         rel="noopener noreferrer">${escapeHtml(p.link_documentacao)}</a></div>` : ''}
     ${linha('Data do pregão', p.data_pregao ? fmtPrazo(p.data_pregao) : null)}
     ${linha('Valor da requisição', fmtValor(p.valor_requisicao))}
     ${linha('Valor arrematado', fmtValor(p.valor_arrematado))}

@@ -138,7 +138,8 @@ export function criarProcesso(dados = {}) {
     p_unidade_solicitante_id: dados.unidadeSolicitanteId ?? null,
     p_texto: dados.texto ?? null,
     p_numero_processo_solar: dados.numeroProcessoSolar ?? null,
-    p_demanda_id: dados.demandaId ?? null
+    p_demanda_id: dados.demandaId ?? null,
+    p_link_documentacao: dados.linkDocumentacao ?? null
   });
 }
 
