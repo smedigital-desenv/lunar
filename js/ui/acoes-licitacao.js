@@ -60,6 +60,7 @@ function definirAcao(acao, ctx) {
         { nome: 'numero_processo_compra', rotulo: 'Nº do processo de compra', valor: p.numero_processo_compra ?? '' },
         { nome: 'numero_pregao', rotulo: 'Nº do pregão eletrônico', valor: p.numero_pregao ?? '' },
         { nome: 'numero_processo_solar', rotulo: 'Nº do processo (Solar)', valor: p.numero_processo_solar ?? '' },
+        { nome: 'link_documentacao', rotulo: 'Link da documentação (Drive)', tipo: 'url', valor: p.link_documentacao ?? '', placeholder: 'https://drive.google.com/…' },
         { nome: 'valor_requisicao', rotulo: 'Valor da requisição (R$)', valor: p.valor_requisicao ?? '' },
         { nome: 'valor_arrematado', rotulo: 'Valor arrematado (R$)', valor: p.valor_arrematado ?? '' },
         { nome: 'valor_frustrado_deserto', rotulo: 'Valores frustrados/desertos (R$)', valor: p.valor_frustrado_deserto ?? '' },
