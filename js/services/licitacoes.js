@@ -108,15 +108,21 @@ export async function listarMovimentacoes(processoId) {
   return data ?? [];
 }
 
-// O usuário corrente pertence à equipe de licitações? (gate de botões na
-// interface; a trava real é o RLS/RPC — regra 4 do CLAUDE.md.)
-// A guarda do central devolve o USUÁRIO (id direto); uma sessão Supabase
-// traria user.id — aceitamos os dois formatos.
+// O usuário corrente pode escrever no módulo? Equipe de licitações OU
+// administrador (sql/042). Gate de botões na interface; a trava real é
+// o RLS/RPC — regra 4 do CLAUDE.md. A guarda do central devolve o
+// USUÁRIO (id direto); uma sessão Supabase traria user.id — aceitamos
+// os dois formatos. Cai em fn_lic_e_equipe caso o 042 ainda não tenha
+// sido aplicado no banco.
 export async function souEquipe() {
   const sessao = await aguardarSessao();
   const usuarioId = sessao?.user?.id ?? sessao?.id;
   if (!usuarioId) return false;
-  return !!await rpc('fn_lic_e_equipe', { p_usuario_id: usuarioId });
+  try {
+    return !!await rpc('fn_lic_pode_editar', { p_usuario_id: usuarioId });
+  } catch (_) {
+    return !!await rpc('fn_lic_e_equipe', { p_usuario_id: usuarioId });
+  }
 }
 
 // ---------------------------------------------------------------------
