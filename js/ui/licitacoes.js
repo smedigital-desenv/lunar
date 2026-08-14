@@ -5,16 +5,10 @@
 // =====================================================================
 
 import { escapeHtml, fmtData } from './componentes.js';
+import { ROTULO_CATEGORIA, ROTULO_PRIORIDADE_LIC } from './acoes-licitacao.js';
 import * as demo from './demo.js';
 
 const POR_PAGINA = 10;
-
-export const ROTULO_CATEGORIA = {
-  almox_sede: 'Almox e Sede', nutricao: 'Nutrição', servicos_obras: 'Serviços e Obras'
-};
-export const ROTULO_PRIORIDADE_LIC = {
-  '1_secretario': '1 - Secretário', '2_alta': '2 - Alta', '3_normal': '3 - Normal'
-};
 // Reusa as cores dos badges de prioridade das demandas (app.css).
 const COR_PRIORIDADE = {
   '1_secretario': 'urgente', '2_alta': 'alta', '3_normal': 'normal'
