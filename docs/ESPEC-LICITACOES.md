@@ -31,13 +31,19 @@ Todos os processos tramitam oficialmente no SOLAR — este módulo é
   (a) gerente ou acima (`nivel >= 3`), OU
   (b) lotado na Subsecretaria de Licitações e Contratos ou descendentes
   (qualquer nível), OU
-  (c) chefia com a `unidade_solicitante_id` do processo no seu escopo
+  (c) da unidade solicitante: lotado diretamente nela (**inclui agente
+  administrativo** — decisão de 2026-08-14) ou chefia com ela no escopo
   (`fn_unidades_no_escopo`, regra 5 — nada fixo por cargo).
+- **Alerta de "parado":** processo sem andamento há mais dias que o limite
+  da fase atual. Limite por fase em `lic_fases.prazo_alerta_dias`,
+  **padrão 10 dias**; personalizável por fase via admin (decisão de
+  2026-08-14).
 
 ## Modelo de dados (schema `gestao`, prefixo `lic_`)
 
 - **lic_fases** — catálogo ordenado: `id`, `ordem`, `nome`, `desvio` bool
-  (Suspenso e Compra Direta são desvios, não passos da esteira), `ativo`.
+  (Suspenso e Compra Direta são desvios, não passos da esteira),
+  `prazo_alerta_dias` smallint NOT NULL DEFAULT 10, `ativo`.
   Editável por admin; a numeração da planilha morre aqui.
 - **lic_locais** — locais de tramitação: `id`, `sigla` (ex.: `ADM-222`),
   `nome`, `ativo`. Separado de `unidades_organizacionais` porque inclui
@@ -113,6 +119,3 @@ de migração identificado. Locais e fases distintos alimentam os catálogos.
 
 - Homologação parcial: a economia calculada (requisição − arrematado) cobre
   todos os casos, ou precisa de campo próprio?
-- Prazo/alerta: qual o X de dias sem andamento que acende o destaque?
-- Agente administrativo da unidade solicitante vê o processo da unidade?
-  (Hoje: não — escopo de agente é vazio; só chefias da unidade veem.)
