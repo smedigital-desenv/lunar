@@ -110,9 +110,11 @@ export async function listarMovimentacoes(processoId) {
 
 // O usuário corrente pertence à equipe de licitações? (gate de botões na
 // interface; a trava real é o RLS/RPC — regra 4 do CLAUDE.md.)
+// A guarda do central devolve o USUÁRIO (id direto); uma sessão Supabase
+// traria user.id — aceitamos os dois formatos.
 export async function souEquipe() {
   const sessao = await aguardarSessao();
-  const usuarioId = sessao?.user?.id;
+  const usuarioId = sessao?.user?.id ?? sessao?.id;
   if (!usuarioId) return false;
   return !!await rpc('fn_lic_e_equipe', { p_usuario_id: usuarioId });
 }

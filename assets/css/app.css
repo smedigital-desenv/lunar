@@ -1036,3 +1036,16 @@ body.embed .pagina { padding-top: .6rem; }
 }
 .fase-card__parados { font-size: .72rem; color: var(--pri-urgente); font-weight: 700; }
 .fase-card--desvio { border-style: dashed; opacity: .92; }
+
+/* Lista de licitações no desktop: página larga + tabela ordenável. */
+.pagina--larga { max-width: 1500px; }
+.tabela-lic { font-size: .88rem; }
+.tabela-lic tbody tr { cursor: pointer; }
+.tabela-lic__objeto { max-width: 28rem; }
+.tabela-lic__ordenar {
+  background: none; border: 0; padding: 0;
+  font: inherit; font-weight: 800; font-size: .7rem;
+  text-transform: uppercase; letter-spacing: .05em;
+  color: var(--cinza-500); cursor: pointer; white-space: nowrap;
+}
+.tabela-lic__ordenar--ativa { color: var(--cor-primaria); }
