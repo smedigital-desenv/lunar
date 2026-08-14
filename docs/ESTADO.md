@@ -3,8 +3,8 @@
 > Atualizado ao final de cada sessão do Claude Code. Máximo 40 linhas.
 > Formato: o que está pronto, o que vem a seguir, decisões que não estão no código.
 
-**Última atualização:** 2026-08-14 (Licitações — Sessões L1, L2 e L3)
-**Fase atual:** Sessões 1–11 concluídas. Módulo de Licitações em construção (L1–L3 prontas; L4 = migração da planilha).
+**Última atualização:** 2026-08-14 (Licitações — Sessões L1 a L4)
+**Fase atual:** Sessões 1–11 concluídas. Módulo de Licitações: código completo (L1–L4). Falta implantar (ver checklist abaixo). Fase 2 do módulo (atas/contratos, solicitações, KPIs, regras de fase) por planejar.
 
 > **Todos os SQL (`001`…`013` + seed) executados no Supabase** (confirmado pelo usuário, 2026-08-01).
 > `js/config.js` **preenchido e versionado** (URL + anon key do projeto `iqldovwttomkjkoakosc`; anon é pública/protegida por RLS — service_role nunca). Removido do `.gitignore`.
@@ -52,6 +52,9 @@
 
 - **Licitações — Sessão L2 (2026-08-14):** `js/services/licitacoes.js` (catálogos, listagem com fase/local/unidade/última movimentação embutidos, busca em objeto+5 números, e todos os wrappers de RPC), `pages/licitacoes.html` + `js/ui/licitacoes.js` (filtros categoria/fase/prioridade, busca com debounce, paginação, alerta "Parado há N dias úteis" — conta dias úteis descontando `feriados`, limite por `lic_fases.prazo_alerta_dias` —, economia calculada no cartão, modo demo honesto) e aba "Licitações" na `navegacao.js`. **Verificado no navegador (390px)** com stubs de CDN/central (política de rede daqui bloqueia esm.sh/jsdelivr): render, filtros, busca e alerta OK. **Registrar as telas `licitacoes`, `processo-licitacao` e `nova-licitacao` no catálogo do central** (acesso-sme bloqueia por nome de arquivo) — mesmo passo manual do organograma.
 - **Licitações — Sessão L3 (2026-08-14):** `pages/processo-licitacao.html` + `js/ui/processo-licitacao.js` (cabeçalho, dados com economia calculada, timeline imutável com retificação/ressalva por item, barra de ações da equipe) e `js/ui/acoes-licitacao.js` (modais declarativos via `modais.js`; edição envia só os campos alterados). `pages/nova-licitacao.html` + `js/ui/nova-licitacao.js` (novo pedido, gerente+; unidade solicitante via `organograma.listarUnidades`; desabilitado em demo) e botão "+ Novo" na lista. Rótulos compartilhados movidos para `acoes-licitacao.js` (módulo sem efeito colateral). **Verificado no navegador (390px, stubs de CDN/central):** detalhe, timeline, 6 ações, modal abre e em demo avisa sem gravar, formulário e navegação lista→detalhe.
+
+- **Licitações — Sessão L4 (2026-08-14):** `scripts/migrar_licitacoes.py` converte a planilha (3 abas de compras) em SQL: 118 processos e 2.052 movimentações — o diário da coluna "Situação" vira andamentos individuais (ano inferido pela Data de Atualização, ordem cronológica garantida; o resumo sem data vira o último andamento marcado `[Resumo na migração]`); coluna de pregão vira `agendamento_pregao`; fases e locais normalizados (variantes de grafia mapeadas). Idempotente por objeto+categoria+números externos (a planilha repete objeto em edições de anos diferentes — ambos entram). **Testado no Postgres 16 local: aplicado 2× — 118/2052 sem duplicar, joins íntegros, cronologia OK.** O SQL gerado (`migracao_licitacoes_dados.sql`) **não é versionado** (dados reais, repositório público) — está no `.gitignore`.
+- **Checklist de implantação do módulo de Licitações:** (1) rodar `sql/041_licitacoes.sql` no SQL Editor; (2) `select gestao.fn_lic_definir_equipe('<id da Subsec. de Licitações e Contratos>', true);` (admin); (3) registrar as telas `licitacoes`, `processo-licitacao` e `nova-licitacao` no catálogo do central; (4) gerar e aplicar a migração: `python3 scripts/migrar_licitacoes.py <planilha.xlsx>`, editar `EMAIL_RESPONSAVEL` no SQL gerado, rodar no SQL Editor.
 
 ## Próximo passo
 

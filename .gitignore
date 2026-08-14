@@ -7,6 +7,10 @@
 supabase/.env
 supabase/.temp/
 
+# SQL gerado pela migração de licitações: contém dados reais da planilha
+# e o repositório é público. Versionamos só o conversor (scripts/).
+migracao_licitacoes_dados.sql
+
 # Sistema
 .DS_Store
 Thumbs.db
