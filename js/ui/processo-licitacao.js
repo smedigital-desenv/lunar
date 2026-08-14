@@ -201,15 +201,21 @@ async function atualizar() {
   document.getElementById('conteudo').hidden = false;
 }
 
+// Depois de gravar, avisa a lista (quando aberto no modal sobre ela) —
+// no acesso direto, parent === window e o aviso é um no-op.
+function avisarLista() {
+  try { window.parent?.marcarListaSuja?.(); } catch (_) { /* cross-origin: ignora */ }
+}
+
 document.getElementById('acoes').addEventListener('click', async (e) => {
   const b = e.target.closest('[data-acao]');
   if (!b) return;
-  if (await abrirEExecutar(b.dataset.acao, ctx)) atualizar();
+  if (await abrirEExecutar(b.dataset.acao, ctx)) { avisarLista(); atualizar(); }
 });
 document.getElementById('timeline').addEventListener('click', async (e) => {
   const b = e.target.closest('[data-mov-acao]');
   if (!b) return;
-  if (await abrirEExecutar(b.dataset.movAcao, ctx, b.dataset.movId)) atualizar();
+  if (await abrirEExecutar(b.dataset.movAcao, ctx, b.dataset.movId)) { avisarLista(); atualizar(); }
 });
 
 if (!id) {
@@ -221,6 +227,15 @@ if (!id) {
 import { montarSino } from './notificacoes.js';
 import { iniciarSessao } from './sessao.js';
 import { montarNavegacao } from './navegacao.js';
-montarSino('sino-notificacoes');
-iniciarSessao();
-montarNavegacao('licitacoes');
+
+// Modo "embed": aberto no modal sobre a lista (modal-processo.js).
+// Esconde cabeçalho/navegação (CSS body.embed) e avisa a lista quando
+// alguma ação grava — ela recarrega ao fechar o modal.
+const EMBED = new URLSearchParams(location.search).get('embed') === '1';
+if (EMBED) {
+  document.body.classList.add('embed');
+} else {
+  montarSino('sino-notificacoes');
+  iniciarSessao();
+  montarNavegacao('licitacoes');
+}

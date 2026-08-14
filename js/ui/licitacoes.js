@@ -12,8 +12,22 @@ import {
   estaParado, EXEMPLO_FASES, EXEMPLO_PROCESSOS
 } from './licitacoes-comum.js';
 import * as demo from './demo.js';
+import { abrirModalProcesso } from './modal-processo.js';
 
 const POR_PAGINA = 20;
+
+// O modal do processo avisa quando gravou algo; ao fechar, recarregamos.
+let listaSuja = false;
+window.marcarListaSuja = () => { listaSuja = true; };
+
+async function abrirProcesso(href) {
+  abrirModalProcesso(href, async () => {
+    if (!listaSuja) return;
+    listaSuja = false;
+    try { await carregarTudo(); } catch (e) { console.error(e); }
+    atualizar();
+  });
+}
 
 const url = new URLSearchParams(location.search);
 const estado = {
@@ -188,8 +202,9 @@ document.getElementById('paginacao').addEventListener('click', (e) => {
   estado.pagina += b.dataset.pag === 'next' ? 1 : -1;
   atualizar();
 });
-// Ordenação pelo cabeçalho (repetir a coluna inverte a direção) e
-// navegação pela linha da tabela.
+// Ordenação pelo cabeçalho (repetir a coluna inverte a direção); linha
+// da tabela e cartão abrem o processo em MODAL sobre a lista (Ctrl/⌘/
+// botão do meio no cartão seguem abrindo em aba nova).
 document.getElementById('lista').addEventListener('click', (e) => {
   const th = e.target.closest('[data-ordem]');
   if (th) {
@@ -200,7 +215,12 @@ document.getElementById('lista').addEventListener('click', (e) => {
     return;
   }
   const tr = e.target.closest('tr[data-href]');
-  if (tr) location.href = tr.dataset.href;
+  if (tr) { abrirProcesso(tr.dataset.href); return; }
+  const cartaoEl = e.target.closest('a.cartao--compacto');
+  if (cartaoEl && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+    e.preventDefault();
+    abrirProcesso(cartaoEl.getAttribute('href'));
+  }
 });
 
 (async () => {
