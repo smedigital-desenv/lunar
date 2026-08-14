@@ -991,3 +991,48 @@ body.embed .pagina { padding-top: .6rem; }
   text-align: center; color: var(--cinza-500);
   font-size: .82rem; margin: 1.5rem 0 0;
 }
+
+/* ============================== Licitações ============================== */
+/* Linha compacta da lista de processos: número + objeto numa linha,
+   chips e meta na outra — cabem ~3x mais processos por tela. */
+.cartao--compacto { padding: .55rem .8rem; margin-bottom: .5rem; }
+.compacto__linha1 {
+  display: flex; align-items: baseline; gap: .6rem; min-width: 0;
+}
+.compacto__linha1 .demanda-cabecalho__numero { margin: 0; flex-shrink: 0; }
+.compacto__objeto {
+  font-weight: 600; font-size: .92rem;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.compacto__linha2 {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .35rem;
+  margin-top: .25rem;
+}
+.compacto__linha2 .badge-chip { font-size: .68rem; padding: .1rem .45rem; }
+/* No celular a meta quebra para a linha de baixo sem empurrar os chips. */
+@media (max-width: 520px) {
+  .compacto__objeto { white-space: normal; }
+  .compacto__linha2 .ms-auto { margin-left: 0 !important; width: 100%; }
+}
+
+/* Painel: grade de cards por fase. */
+.fases {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: .6rem; margin-bottom: var(--gap);
+}
+.fase-card {
+  display: block; text-decoration: none; color: inherit;
+  background: #fff; border: 1px solid var(--cinza-200);
+  border-radius: var(--raio); box-shadow: var(--sombra);
+  padding: .6rem .75rem;
+  transition: transform var(--transicao), box-shadow var(--transicao);
+}
+.fase-card:hover { transform: translateY(-1px); }
+.fase-card__valor { font-size: 1.4rem; font-weight: 800; line-height: 1.1; }
+.fase-card__nome {
+  font-size: .68rem; color: var(--cinza-500);
+  text-transform: uppercase; letter-spacing: .05em; font-weight: 800;
+}
+.fase-card__parados { font-size: .72rem; color: var(--pri-urgente); font-weight: 700; }
+.fase-card--desvio { border-style: dashed; opacity: .92; }
