@@ -7,25 +7,7 @@
 
 import { abrirFormulario } from './modais.js';
 import { toast } from './componentes.js';
-
-export const PRIORIDADES_LIC = [
-  { valor: '1_secretario', rotulo: '1 - Secretário' },
-  { valor: '2_alta', rotulo: '2 - Alta' },
-  { valor: '3_normal', rotulo: '3 - Normal' }
-];
-
-export const CATEGORIAS = [
-  { valor: 'almox_sede', rotulo: 'Almox e Sede' },
-  { valor: 'nutricao', rotulo: 'Nutrição' },
-  { valor: 'servicos_obras', rotulo: 'Serviços e Obras' }
-];
-
-// Rótulos compartilhados entre a lista e o detalhe (módulo sem efeito
-// colateral — as páginas importam daqui, nunca uma da outra).
-export const ROTULO_CATEGORIA =
-  Object.fromEntries(CATEGORIAS.map(c => [c.valor, c.rotulo]));
-export const ROTULO_PRIORIDADE_LIC =
-  Object.fromEntries(PRIORIDADES_LIC.map(p => [p.valor, p.rotulo]));
+import { CATEGORIAS, PRIORIDADES_LIC } from './licitacoes-comum.js';
 
 // ctx = { processo, fases, locais, servico } — servico é o módulo
 // js/services/licitacoes.js (null em modo demonstração).

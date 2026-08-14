@@ -5,11 +5,10 @@
 // trava real é a RPC (regra 4 do CLAUDE.md).
 // =====================================================================
 
-import { escapeHtml, fmtData, fmtDataHora, toast } from './componentes.js';
-import { abrirEExecutar, ROTULO_CATEGORIA, ROTULO_PRIORIDADE_LIC } from './acoes-licitacao.js';
+import { escapeHtml, fmtPrazo, fmtDataHora, toast } from './componentes.js';
+import { abrirEExecutar } from './acoes-licitacao.js';
+import { ROTULO_CATEGORIA, ROTULO_PRIORIDADE_LIC, COR_PRIORIDADE } from './licitacoes-comum.js';
 import * as demo from './demo.js';
-
-const COR_PRIORIDADE = { '1_secretario': 'urgente', '2_alta': 'alta', '3_normal': 'normal' };
 
 const TIPO_LIC = {
   criacao: { rotulo: 'Criação do pedido', icone: '✚' },
@@ -86,7 +85,7 @@ function renderDados(p) {
     ${linha('Processo de compra', p.numero_processo_compra)}
     ${linha('Pregão eletrônico', p.numero_pregao)}
     ${linha('Processo digital (Solar)', p.numero_processo_solar)}
-    ${linha('Data do pregão', p.data_pregao ? fmtData(p.data_pregao) : null)}
+    ${linha('Data do pregão', p.data_pregao ? fmtPrazo(p.data_pregao) : null)}
     ${linha('Valor da requisição', fmtValor(p.valor_requisicao))}
     ${linha('Valor arrematado', fmtValor(p.valor_arrematado))}
     ${linha('Economia', economia != null ? fmtValor(economia) : null)}
@@ -104,7 +103,7 @@ function metaMov(m) {
     return `${m.local_anterior?.sigla ?? '—'} → ${m.local_novo.sigla}`;
   }
   if (m.tipo === 'agendamento_pregao' && m.data_pregao) {
-    return `Sessão em ${fmtData(m.data_pregao)}`;
+    return `Sessão em ${fmtPrazo(m.data_pregao)}`;
   }
   return null;
 }

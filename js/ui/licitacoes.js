@@ -1,50 +1,28 @@
 // =====================================================================
-// licitacoes.js — lista de processos de licitação, com filtros, busca e
-// alerta de "parado" (dias úteis sem andamento > prazo da fase atual).
-// Dados via js/services/licitacoes.js; visibilidade decidida pelo RLS.
+// licitacoes.js — lista de processos de licitação em linhas compactas,
+// com filtros (também via URL, para os cliques do painel), busca e
+// alerta de "parado". Dados via js/services/licitacoes.js; RLS decide.
+// Filtros de URL: ?categoria= &fase= &prioridade= &parados=1 &busca=
 // =====================================================================
 
 import { escapeHtml, fmtData } from './componentes.js';
-import { ROTULO_CATEGORIA, ROTULO_PRIORIDADE_LIC } from './acoes-licitacao.js';
+import {
+  ROTULO_CATEGORIA, ROTULO_PRIORIDADE_LIC, COR_PRIORIDADE,
+  estaParado, EXEMPLO_FASES, EXEMPLO_PROCESSOS
+} from './licitacoes-comum.js';
 import * as demo from './demo.js';
 
-const POR_PAGINA = 10;
-// Reusa as cores dos badges de prioridade das demandas (app.css).
-const COR_PRIORIDADE = {
-  '1_secretario': 'urgente', '2_alta': 'alta', '3_normal': 'normal'
+const POR_PAGINA = 15;
+
+const url = new URLSearchParams(location.search);
+const estado = {
+  categoria: url.get('categoria') || '',
+  faseId: url.get('fase') || '',
+  prioridade: url.get('prioridade') || '',
+  busca: url.get('busca') || '',
+  soParados: url.get('parados') === '1',
+  pagina: 1
 };
-
-// Dias ÚTEIS entre duas datas (exclusivo no início, inclusivo no fim),
-// descontando os feriados cadastrados (regra 8 do CLAUDE.md).
-export function diasUteisDesde(inicioIso, feriados) {
-  const umDia = 86400000;
-  const d = new Date(`${String(inicioIso).slice(0, 10)}T12:00:00`);
-  const hoje = new Date(); hoje.setHours(12, 0, 0, 0);
-  let n = 0;
-  for (let t = d.getTime() + umDia; t <= hoje.getTime(); t += umDia) {
-    const dia = new Date(t);
-    const semana = dia.getDay();
-    const iso = dia.toISOString().slice(0, 10);
-    if (semana !== 0 && semana !== 6 && !feriados.has(iso)) n++;
-  }
-  return n;
-}
-
-const EXEMPLO_FASES = [
-  { id: 'f1', nome: 'DFD', ordem: 10, desvio: false, prazo_alerta_dias: 10 },
-  { id: 'f5', nome: 'Elaborar edital', ordem: 50, desvio: false, prazo_alerta_dias: 10 },
-  { id: 'f9', nome: 'Pregão em andamento', ordem: 90, desvio: false, prazo_alerta_dias: 10 },
-  { id: 'f14', nome: 'Em execução', ordem: 140, desvio: false, prazo_alerta_dias: 10 },
-  { id: 'f90', nome: 'Suspenso', ordem: 900, desvio: true, prazo_alerta_dias: 10 }
-];
-const EXEMPLO = [
-  { id: 'p1', numero: 'LIC-2026-0001', objeto: 'Material escolar – Lista 1', categoria: 'almox_sede', prioridade: '2_alta', fase: EXEMPLO_FASES[3], local: { sigla: 'EDUC-ALMOX' }, unidade: { sigla: 'GCP' }, valor_requisicao: 1114490.20, valor_arrematado: 980210.55, ultima_movimentacao_em: '2026-08-10' },
-  { id: 'p2', numero: 'LIC-2026-0002', objeto: 'Uniforme escolar - 2027', categoria: 'almox_sede', prioridade: '1_secretario', fase: EXEMPLO_FASES[1], local: { sigla: 'EDUC-LICITAÇÕES' }, unidade: { sigla: 'GCP' }, valor_requisicao: 6363000, valor_arrematado: null, ultima_movimentacao_em: '2026-07-20' },
-  { id: 'p3', numero: 'LIC-2026-0003', objeto: 'Gêneros alimentícios — hortifrúti', categoria: 'nutricao', prioridade: '2_alta', fase: EXEMPLO_FASES[2], local: { sigla: 'ADM-222' }, unidade: { sigla: 'GNA' }, valor_requisicao: 2861416.68, valor_arrematado: null, ultima_movimentacao_em: '2026-08-12' },
-  { id: 'p4', numero: 'LIC-2026-0004', objeto: 'Manutenção predial — telhados', categoria: 'servicos_obras', prioridade: '3_normal', fase: EXEMPLO_FASES[4], local: { sigla: 'PGM-PJ' }, unidade: { sigla: 'GOB' }, valor_requisicao: null, valor_arrematado: null, ultima_movimentacao_em: '2026-06-30' }
-];
-
-const estado = { categoria: '', faseId: '', prioridade: '', busca: '', pagina: 1 };
 let feriados = new Set();
 
 async function carregarFases() {
@@ -61,52 +39,75 @@ async function carregarFases() {
   sel.innerHTML = '<option value="">Todas as fases</option>'
     + dados.fases.map(f =>
       `<option value="${escapeHtml(f.id)}">${escapeHtml(f.nome)}</option>`).join('');
+  // Reflete os filtros vindos da URL nos controles.
+  sel.value = estado.faseId;
+  document.getElementById('f-categoria').value = estado.categoria;
+  document.getElementById('f-prioridade').value = estado.prioridade;
+  document.getElementById('f-busca').value = estado.busca;
+  document.getElementById('f-parados').classList.toggle('btn-danger', estado.soParados);
+  document.getElementById('f-parados').classList.toggle('btn-outline-danger', !estado.soParados);
 }
 
 function filtrarExemplo() {
   const b = estado.busca.toLowerCase();
-  const itens = EXEMPLO.filter(p =>
+  return EXEMPLO_PROCESSOS.filter(p =>
     (!estado.categoria || p.categoria === estado.categoria)
     && (!estado.faseId || p.fase.id === estado.faseId)
     && (!estado.prioridade || p.prioridade === estado.prioridade)
     && (!b || p.objeto.toLowerCase().includes(b) || p.numero.toLowerCase().includes(b)));
-  const de = (estado.pagina - 1) * POR_PAGINA;
-  return { itens: itens.slice(de, de + POR_PAGINA), total: itens.length };
 }
 
-function fmtValor(v) {
-  if (v == null) return null;
-  return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+// "Só parados" é decidido no navegador (depende de feriados + prazo da
+// fase), então nesse modo a busca traz a página inteira e pagina aqui.
+async function carregar() {
+  return demo.carregar(
+    async () => {
+      const s = await import('../services/licitacoes.js');
+      const base = {
+        categoria: estado.categoria || null,
+        faseId: estado.faseId || null,
+        prioridade: estado.prioridade || null,
+        busca: estado.busca
+      };
+      if (!estado.soParados) {
+        return s.listarProcessos({ ...base, pagina: estado.pagina, porPagina: POR_PAGINA });
+      }
+      const tudo = await s.listarProcessos({ ...base, pagina: 1, porPagina: 1000 });
+      const parados = tudo.itens.filter(p => estaParado(p, feriados));
+      const de = (estado.pagina - 1) * POR_PAGINA;
+      return { itens: parados.slice(de, de + POR_PAGINA), total: parados.length };
+    },
+    () => {
+      let itens = filtrarExemplo();
+      if (estado.soParados) itens = itens.filter(p => estaParado(p, feriados));
+      const de = (estado.pagina - 1) * POR_PAGINA;
+      return { itens: itens.slice(de, de + POR_PAGINA), total: itens.length };
+    }
+  );
 }
 
+// Linha compacta: número + objeto na primeira linha; chips e meta na
+// segunda. ~3x mais processos por tela que o cartão original.
 function renderItem(p) {
-  const parado = diasUteisDesde(p.ultima_movimentacao_em, feriados);
-  const limite = p.fase?.prazo_alerta_dias ?? 10;
-  const alerta = parado > limite
-    ? `<span class="badge-chip badge-prioridade badge-prioridade--urgente">
-         Parado há ${parado} dias úteis</span>`
-    : '';
-  const economia = (p.valor_requisicao != null && p.valor_arrematado != null)
-    ? p.valor_requisicao - p.valor_arrematado : null;
+  const parado = estaParado(p, feriados);
   const meta = [
-    p.unidade?.sigla ? `Solicitante: ${p.unidade.sigla}` : null,
-    p.local?.sigla ? `Local: ${p.local.sigla}` : null,
-    fmtValor(p.valor_requisicao) ? `Requisição: ${fmtValor(p.valor_requisicao)}` : null,
-    economia != null ? `Economia: ${fmtValor(economia)}` : null,
-    `Atualizado: ${fmtData(p.ultima_movimentacao_em)}`
+    p.unidade?.sigla ?? null,
+    p.local?.sigla ?? null,
+    fmtData(p.ultima_movimentacao_em)
   ].filter(Boolean).join(' · ');
-
-  return `<a class="cartao d-block text-decoration-none text-reset"
+  return `<a class="cartao cartao--compacto d-block text-decoration-none text-reset"
       href="./processo-licitacao.html?id=${encodeURIComponent(p.id)}">
-    <div class="demanda-cabecalho__numero">${escapeHtml(p.numero)}</div>
-    <div class="fw-semibold mb-2">${escapeHtml(p.objeto)}</div>
-    <div class="demanda-cabecalho__chips mb-1">
+    <div class="compacto__linha1">
+      <span class="demanda-cabecalho__numero">${escapeHtml(p.numero)}</span>
+      <span class="compacto__objeto">${escapeHtml(p.objeto)}</span>
+    </div>
+    <div class="compacto__linha2">
       <span class="badge-chip badge-situacao badge-situacao--em_andamento">${escapeHtml(p.fase?.nome ?? '—')}</span>
       <span class="badge-chip badge-prioridade badge-prioridade--${COR_PRIORIDADE[p.prioridade] ?? 'normal'}">${escapeHtml(ROTULO_PRIORIDADE_LIC[p.prioridade] ?? p.prioridade)}</span>
       <span class="badge-chip">${escapeHtml(ROTULO_CATEGORIA[p.categoria] ?? p.categoria)}</span>
-      ${alerta}
+      ${parado ? '<span class="badge-chip badge-prioridade badge-prioridade--urgente">Parado</span>' : ''}
+      <span class="texto-silencioso small ms-auto">${escapeHtml(meta)}</span>
     </div>
-    <div class="texto-silencioso small">${escapeHtml(meta)}</div>
   </a>`;
 }
 
@@ -117,19 +118,7 @@ async function atualizar() {
   carr.hidden = false;
   let dados;
   try {
-    dados = await demo.carregar(
-      async () => {
-        const s = await import('../services/licitacoes.js');
-        return s.listarProcessos({
-          categoria: estado.categoria || null,
-          faseId: estado.faseId || null,
-          prioridade: estado.prioridade || null,
-          busca: estado.busca,
-          pagina: estado.pagina, porPagina: POR_PAGINA
-        });
-      },
-      () => filtrarExemplo()
-    );
+    dados = await carregar();
   } catch (e) {
     console.error(e);
     carr.textContent = `Erro ao carregar os processos: ${e.message || e}`;
@@ -149,10 +138,9 @@ async function atualizar() {
   carr.hidden = true;
 }
 
-// Filtros: selects aplicam na hora; busca com pequena espera de digitação.
-for (const id of ['f-categoria', 'f-fase', 'f-prioridade']) {
+for (const [id, chave] of [['f-categoria', 'categoria'], ['f-fase', 'faseId'], ['f-prioridade', 'prioridade']]) {
   document.getElementById(id).addEventListener('change', (e) => {
-    estado[{ 'f-categoria': 'categoria', 'f-fase': 'faseId', 'f-prioridade': 'prioridade' }[id]] = e.target.value;
+    estado[chave] = e.target.value;
     estado.pagina = 1;
     atualizar();
   });
@@ -166,6 +154,13 @@ document.getElementById('f-busca').addEventListener('input', (e) => {
     atualizar();
   }, 350);
 });
+document.getElementById('f-parados').addEventListener('click', (e) => {
+  estado.soParados = !estado.soParados;
+  estado.pagina = 1;
+  e.target.classList.toggle('btn-danger', estado.soParados);
+  e.target.classList.toggle('btn-outline-danger', !estado.soParados);
+  atualizar();
+});
 document.getElementById('filtros').addEventListener('submit', e => e.preventDefault());
 
 document.getElementById('paginacao').addEventListener('click', (e) => {
@@ -177,7 +172,6 @@ document.getElementById('paginacao').addEventListener('click', (e) => {
 
 carregarFases().then(atualizar);
 
-// Sino, sessão e navegação — como nas demais telas.
 import { montarSino } from './notificacoes.js';
 import { iniciarSessao } from './sessao.js';
 import { montarNavegacao } from './navegacao.js';
