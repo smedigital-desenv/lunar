@@ -9,6 +9,11 @@
 # público) — aplique-o no SQL Editor do Supabase após o sql/041 e após
 # editar a linha EMAIL_RESPONSAVEL no topo do arquivo gerado.
 #
+# EMAIL_RESPONSAVEL deve ser um USUÁRIO DE SERVIÇO (ex.: "Dados
+# importados", dados.importados@educacao.pmrp.sp.gov.br, sem login),
+# não uma pessoa: o autor fica gravado em movimentações IMUTÁVEIS e
+# aparece como "Registrado por" em todos os processos da carga.
+#
 # O que o script faz, por linha da planilha:
 #  - cria o lic_processo (número LIC- gerado pelo trigger; criado_em =
 #    data do evento mais antigo encontrado);
