@@ -3,8 +3,8 @@
 > Atualizado ao final de cada sessão do Claude Code. Máximo 40 linhas.
 > Formato: o que está pronto, o que vem a seguir, decisões que não estão no código.
 
-**Última atualização:** 2026-08-01 (Sessões 3, 9, 10 e 11)
-**Fase atual:** Sessões 1–11 concluídas. Sessão 4 (serviços) em evolução.
+**Última atualização:** 2026-08-14 (Licitações — Sessão L1)
+**Fase atual:** Sessões 1–11 concluídas. Módulo de Licitações em construção (L1 pronta; L2 = serviço+lista, L3 = detalhe+ações, L4 = migração da planilha).
 
 > **Todos os SQL (`001`…`013` + seed) executados no Supabase** (confirmado pelo usuário, 2026-08-01).
 > `js/config.js` **preenchido e versionado** (URL + anon key do projeto `iqldovwttomkjkoakosc`; anon é pública/protegida por RLS — service_role nunca). Removido do `.gitignore`.
@@ -47,6 +47,8 @@
 - **Auditoria das migrações (2026-08-07):** das 36 funções que o front chama, **35 estavam no banco**; só `fn_caixa_saida` (`sql/030`) faltava — por isso a Caixa de saída nunca funcionou com dado real. Vale repetir essa conferência ao suspeitar de tela quebrada: uma consulta cruzando as chamadas `rpc('fn_…')` do front com `pg_proc` acha o problema em segundos.
 - **Base limpa (2026-08-07):** demandas de teste apagadas via `manutencao_limpar_demandas.sql`; numeração reiniciada. Preservados os 63 usuários e as 56 unidades. Sobraram 5 PDFs órfãos no bucket `relatorios` (SQL não remove arquivo).
 - **Aberto — contas pendentes num projeto compartilhado:** `fn_listar_contas_pendentes` ganhou filtro de domínio (tirou 12 contas `@gmail` de outros sistemas), mas ainda lista **66 contas `@educacao`** que pertencem ao outro sistema — `auth.users` não guarda marca de origem, então não há como distinguir por SQL. A saída é trocar a lista por uma **busca por e-mail** na tela de Admin.
+
+- **Licitações — Sessão L1 (2026-08-14):** espec fechada em `docs/ESPEC-LICITACOES.md` (decisões do usuário: entidade própria, prioridade em 3 níveis, valores nunca obrigatórios, visibilidade B+C com agente da unidade solicitante, alerta de parado por fase via `lic_fases.prazo_alerta_dias` padrão 10). `sql/041_licitacoes.sql`: `lic_fases`/`lic_locais`/`lic_processos` (numeração `LIC-AAAA-NNNN`)/`lic_movimentacoes` imutável, coluna `unidades_organizacionais.equipe_licitacoes`, RLS, 13 RPCs e seeds (17 fases, 29 locais da planilha). **Validado em Postgres 16 local** (stubs de auth): 13 critérios verdes — permissões, janela de retificação, imutabilidade, RLS B+C, INSERT direto bloqueado. **Não aplicado no Supabase ainda.** Após aplicar: admin roda `fn_lic_definir_equipe` na unidade da Subsecretaria de Licitações e Contratos (nada é hardcoded).
 
 ## Próximo passo
 
