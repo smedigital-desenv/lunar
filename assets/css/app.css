@@ -45,6 +45,13 @@
   --pri-alta: #c2620c;
   --pri-urgente: #dc2626;
 
+  /* Fluxo do processo em "Meus processos" — de onde ele vem, do ponto de
+     vista de quem olha. Hues afastados dos de situação/prioridade para as
+     duas leituras não se confundirem. */
+  --fluxo-entrada: #0f766e;   /* verde-azulado: chegou para mim   */
+  --fluxo-saida:   #7c3aed;   /* violeta: saiu de mim             */
+  --fluxo-ambos:   #002b5e;   /* marinho: as duas coisas          */
+
   /* Layout — cantos generosos e sombras em camadas mais amplas, como no
      padrão de referência (cartões "flutuam" mais). */
   --raio: 18px;
@@ -1049,6 +1056,48 @@ body.embed .pagina { padding-top: .6rem; }
   color: var(--cinza-500); cursor: pointer; white-space: nowrap;
 }
 .tabela-lic__ordenar--ativa { color: var(--cor-primaria); }
+
+/* ---- Meus processos: fluxo de entrada x saída ----------------------
+   A cor identifica de onde o processo vem, num canal visual diferente
+   das pílulas de situação/prioridade (faixa à esquerda), para as duas
+   informações poderem ser lidas ao mesmo tempo sem competir.
+   'ambos' = a mesma demanda que eu criei e da qual sou responsável. */
+.tabela-lista__titulo { max-width: 26rem; }
+.tabela-lista__cronograma { max-width: 20rem; }
+
+.badge-fluxo { color: #fff; }
+.badge-fluxo--entrada { background: var(--fluxo-entrada); }
+.badge-fluxo--saida   { background: var(--fluxo-saida); }
+.badge-fluxo--ambos   { background: var(--fluxo-ambos); }
+
+.linha-fluxo > td:first-child { border-left: 4px solid transparent; }
+.linha-fluxo--entrada > td:first-child { border-left-color: var(--fluxo-entrada); }
+.linha-fluxo--saida   > td:first-child { border-left-color: var(--fluxo-saida); }
+.linha-fluxo--ambos   > td:first-child { border-left-color: var(--fluxo-ambos); }
+
+.cartao-fluxo { border-left: 4px solid var(--cinza-300); }
+.cartao-fluxo--entrada { border-left-color: var(--fluxo-entrada); }
+.cartao-fluxo--saida   { border-left-color: var(--fluxo-saida); }
+.cartao-fluxo--ambos   { border-left-color: var(--fluxo-ambos); }
+
+/* Marcos do cronograma (tarefas de 1º nível ainda em aberto). O lugar é
+   reservado vazio e preenchido quando a consulta volta — sem marcos, a
+   tabela mostra um traço (mantém a coluna alinhada) e o cartão não mostra
+   nada. Sem margem no invólucro: assim ele colapsa quando fica vazio. */
+.tabela-lista__cronograma .cronograma-lugar:empty::before {
+  content: '—'; color: var(--cinza-500);
+}
+.marco {
+  display: inline-flex; align-items: baseline; gap: .3rem;
+  max-width: 100%; margin: .25rem .3rem 0 0; padding: .1rem .45rem;
+  border: 1px dashed var(--cinza-300); border-radius: .6rem;
+  font-size: .72rem; color: var(--cinza-700);
+}
+.marco__nome {
+  max-width: 11rem; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+}
+.marco__data { color: var(--cinza-500); font-variant-numeric: tabular-nums; }
 
 /* Modal do processo de licitação sobre a lista. */
 .modal-proc {

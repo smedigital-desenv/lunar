@@ -11,48 +11,54 @@
 <body>
   <header class="app-header">
     <div class="app-header__barra">
+      <a href="./dashboard.html">&#8592; Painel</a>
       <h1 class="app-header__titulo" id="titulo-pagina">Meus processos</h1>
       <div id="sino-notificacoes" class="app-header__sino"></div>
       <div id="usuario-sessao" class="app-header__sessao"></div>
     </div>
   </header>
 
-  <main class="pagina">
+  <main class="pagina pagina--larga">
     <div id="tarja-demo" class="tarja-demo" hidden>
       Modo demonstração — exibindo dados de exemplo (sem sessão/banco).
     </div>
 
     <div id="aviso-teto" class="tarja-demo" hidden>
-      Você tem mais de 500 processos nesta caixa — a lista mostra os 500 primeiros.
-      Use a Pesquisa para alcançar o restante.
+      Você tem mais de 500 processos numa das caixas — a lista mostra os 500
+      primeiros de cada. Use a Pesquisa para alcançar o restante.
     </div>
 
-    <!-- Abas: entrada vs saída -->
-    <div class="mb-3">
-      <div class="btn-group" role="tablist">
-        <button class="btn btn-sm btn-primary" data-aba="entrada" role="tab" aria-selected="true">
-          📥 Entrada (tarefas)
-        </button>
-        <button class="btn btn-sm btn-outline-primary" data-aba="saida" role="tab" aria-selected="false">
-          📤 Saída (demandas)
-        </button>
+    <form id="filtros" class="row g-2 mb-3" autocomplete="off">
+      <div class="col-6 col-md-3">
+        <select id="f-fluxo" class="form-select form-select-sm" aria-label="Fluxo">
+          <option value="todos">Entrada e saída</option>
+          <option value="entrada">Só entrada</option>
+          <option value="saida">Só saída</option>
+        </select>
       </div>
-    </div>
-
-    <!-- Filtros e busca -->
-    <div class="d-flex flex-wrap gap-2 mb-3">
-      <div id="filtros"></div>
-      <div class="ms-auto">
-        <input type="text" id="busca" class="form-control form-control-sm"
-               placeholder="Buscar por número ou título…" style="width: 250px;">
+      <div class="col-6 col-md-3">
+        <select id="f-situacao" class="form-select form-select-sm" aria-label="Situação">
+          <option value="todos">Todas as situações</option>
+          <option value="pendentes">Pendentes</option>
+          <option value="em_andamento">Em andamento</option>
+          <option value="urgentes">Urgentes</option>
+          <option value="encerrados">Encerrados</option>
+        </select>
       </div>
-    </div>
+      <div class="col-12 col-md-4">
+        <input id="f-busca" class="form-control form-control-sm" type="search"
+               placeholder="Título ou número…" aria-label="Buscar por título ou número">
+      </div>
+      <div class="col-6 col-md-1 d-grid">
+        <a class="btn btn-sm btn-outline-primary" href="./pesquisa.html">Buscar</a>
+      </div>
+      <div class="col-6 col-md-1 d-grid">
+        <a class="btn btn-sm btn-primary" href="./nova-demanda.html">+ Nova</a>
+      </div>
+    </form>
 
-    <!-- Lista -->
     <div id="lista"></div>
     <div id="carregando" class="carregando">Carregando…</div>
-
-    <!-- Paginação -->
     <div id="paginacao" class="d-flex align-items-center justify-content-between gap-2 mt-2"></div>
   </main>
 
