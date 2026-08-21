@@ -202,6 +202,35 @@ def processar(caminho):
     return itens
 
 
+def preVoo(itens):
+    """Confere TODOS os nomes de unidade ANTES de gravar qualquer coisa e
+    falha UMA vez, listando o que faltou.
+
+    Antes, a carga abortava no primeiro nome divergente: cada tentativa
+    revelava só o próximo problema, e foram três rodadas para descobrir
+    três nomes. Agora uma execução mostra a lista inteira.
+
+    Só unidades: pessoa sem conta não bloqueia (cai para a Subsecretaria).
+    """
+    nomes = sorted({it['resp2_banco'] for it in itens
+                    if it['responsavel2'] and e_unidade(it['responsavel2'])})
+    linhas = ['\n  -- Pré-voo: confere os nomes de unidade antes de gravar.']
+    for n in nomes:
+        linhas.append(
+            f"""  if not exists (select 1 from gestao.unidades_organizacionais
+                  where {norm('nome')} = {norm(sql_txt(n))} and ativo) then
+    v_faltam := v_faltam || chr(10) || '  - ' || {sql_txt(n)};
+  end if;""")
+    # Um único marcador % no RAISE: tudo concatenado num argumento só.
+    linhas.append("""  if v_faltam <> '' then
+    raise exception 'Unidades não encontradas no organograma:%',
+      v_faltam || chr(10)
+      || 'Veja os nomes reais com scripts/diagnostico_subped.sql (consulta 2) '
+      || 'e mapeie em MAPA_UNIDADES (scripts/migrar_subped.py). Nada foi gravado.';
+  end if;""")
+    return '\n'.join(linhas)
+
+
 def gerar_sql(itens, planilha):
     hoje = datetime.now().date().isoformat()
     out = [f"""-- Migração do Painel de Tarefas da Subsecretaria Pedagógica.
@@ -226,6 +255,7 @@ declare
   v_criado   timestamptz;
   v_desc     text;
   v_sobrou   int := 0;   -- pessoas não localizadas que caíram na Subsecretaria
+  v_faltam   text := '';
 begin
   select id into v_autor from gestao.usuarios where email = {sql_txt(EMAIL_AUTOR)};
   if v_autor is null then
@@ -246,6 +276,7 @@ begin
   if v_titular is null then
     raise exception 'Nenhum usuário ativo lotado em %', {sql_txt(UNIDADE_TITULAR)};
   end if;
+{preVoo(itens)}
 """]
 
     for it in itens:
