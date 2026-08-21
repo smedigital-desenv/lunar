@@ -95,6 +95,7 @@ async function aoSalvar(e) {
     escolaId: document.getElementById('escola').value || null,
     alunoNome: document.getElementById('aluno').value.trim() || null,
     numeroProcessoSolar: document.getElementById('solar').value.trim() || null,
+    linkDocumentacao: document.getElementById('link').value.trim() || null,
     sigilo: document.getElementById('sigilo').value,
     responsavelId: document.getElementById('responsavel').value || null,
     pessoas: coletarPessoas()

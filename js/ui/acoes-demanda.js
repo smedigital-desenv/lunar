@@ -96,6 +96,7 @@ export function camposDaAcao(chave, ctx) {
           { nome: 'escola_id', rotulo: 'Escola', tipo: 'select', opcoes: [SEM_ESCOLA, ...escolas], valor: d.escola_id },
           { nome: 'aluno_nome', rotulo: 'Aluno', tipo: 'text', valor: d.aluno_nome },
           { nome: 'numero_processo_solar', rotulo: 'Nº processo Solar', tipo: 'text', valor: d.numero_processo_solar },
+          { nome: 'link_documentacao', rotulo: 'Link da documentação', tipo: 'text', valor: d.link_documentacao },
           { nome: 'sigilo', rotulo: 'Sigilo', tipo: 'select', opcoes: SIGILO, valor: d.sigilo }
         );
       }
@@ -168,6 +169,7 @@ async function executar(chave, vals, ctx) {
         campos.escola_id = vals.escola_id || null;
         campos.aluno_nome = vals.aluno_nome;
         campos.numero_processo_solar = vals.numero_processo_solar;
+        campos.link_documentacao = vals.link_documentacao;
         campos.sigilo = vals.sigilo;
       }
       // Responsável: só envia se realmente mudou — reenviar o valor
