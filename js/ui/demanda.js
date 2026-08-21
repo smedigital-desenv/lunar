@@ -124,10 +124,18 @@ function renderCabecalho(d) {
     </div>`;
 }
 function renderDados(d) {
+  // O link abre em aba nova. O banco só aceita http(s):// (CHECK do
+  // sql/044), então não há como injetar `javascript:` neste href.
+  const link = d.link_documentacao
+    ? `<h2 class="cartao__titulo" style="margin-top:1rem">Documentação</h2>
+       <p><a href="${escapeHtml(d.link_documentacao)}" target="_blank"
+             rel="noopener noreferrer">${escapeHtml(d.link_documentacao)}</a></p>`
+    : '';
   return `<h2 class="cartao__titulo">Objeto / queixa</h2>
     <p>${escapeHtml(d.objeto_queixa)}</p>
     ${d.descricao ? `<h2 class="cartao__titulo" style="margin-top:1rem">Descrição</h2>
-      <p>${escapeHtml(d.descricao)}</p>` : ''}`;
+      <p>${escapeHtml(d.descricao)}</p>` : ''}
+    ${link}`;
 }
 function renderPessoas(pessoas) {
   if (!pessoas || !pessoas.length) {

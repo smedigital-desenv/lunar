@@ -18,10 +18,31 @@
     </div>
   </header>
 
-  <main class="pagina">
+  <main class="pagina pagina--larga">
     <div id="tarja-demo" class="tarja-demo" hidden>
       Modo demonstração — exibindo dados de exemplo (sem sessão/banco).
     </div>
+
+    <form id="filtros" class="row g-2 mb-3" autocomplete="off">
+      <!-- As opções saem do organograma real; some para quem enxerga uma
+           só secretaria, porque aí não há o que separar. -->
+      <div class="col-12 col-md-4" id="campo-unidade" hidden>
+        <select id="f-unidade" class="form-select form-select-sm"
+                aria-label="Filtrar por secretaria">
+          <option value="">Todas as secretarias</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-4">
+        <input id="f-busca" class="form-control form-control-sm" type="search"
+               placeholder="Título ou número…" aria-label="Buscar por título ou número">
+      </div>
+      <div class="col-6 col-md-2 d-grid">
+        <a class="btn btn-sm btn-outline-primary" href="./pesquisa.html">Buscar</a>
+      </div>
+      <div class="col-6 col-md-2 d-grid">
+        <a class="btn btn-sm btn-primary" href="./nova-demanda.html">+ Nova</a>
+      </div>
+    </form>
 
     <div id="lista"></div>
     <div id="carregando" class="carregando">Carregando…</div>

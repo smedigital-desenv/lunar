@@ -16,8 +16,13 @@ export function obterGerencial() {
 }
 
 // Lista as demandas de um KPI do painel (drill-down). Retorna { total, itens }.
-export function listarPorKpi(kpi, pagina = 1, porPagina = 20) {
-  return rpc('fn_listar_por_kpi', { p_kpi: kpi, p_pagina: pagina, p_por_pagina: porPagina });
+// `unidadeId` recorta pela subárvore de uma unidade (sql/045). Só
+// ESTREITA: a RLS segue decidindo o que a pessoa pode ver.
+export function listarPorKpi(kpi, pagina = 1, porPagina = 20, unidadeId = null) {
+  return rpc('fn_listar_por_kpi', {
+    p_kpi: kpi, p_pagina: pagina, p_por_pagina: porPagina,
+    p_unidade_id: unidadeId || null
+  });
 }
 
 // Busca textual + filtros, paginada. Retorna { total, itens }.

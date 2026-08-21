@@ -1075,7 +1075,7 @@ body.embed .pagina { padding-top: .6rem; }
 .linha-fluxo--saida   > td:first-child { border-left-color: var(--fluxo-saida); }
 .linha-fluxo--ambos   > td:first-child { border-left-color: var(--fluxo-ambos); }
 
-.cartao-fluxo { border-left: 4px solid var(--cinza-300); }
+.cartao-processo { border-left: 4px solid var(--cinza-300); }
 .cartao-fluxo--entrada { border-left-color: var(--fluxo-entrada); }
 .cartao-fluxo--saida   { border-left-color: var(--fluxo-saida); }
 .cartao-fluxo--ambos   { border-left-color: var(--fluxo-ambos); }

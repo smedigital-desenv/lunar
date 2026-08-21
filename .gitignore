@@ -7,9 +7,12 @@
 supabase/.env
 supabase/.temp/
 
-# SQL gerado pela migração de licitações: contém dados reais da planilha
-# e o repositório é público. Versionamos só o conversor (scripts/).
+# SQL gerado pelas migrações de planilha: contém dados reais (inclusive
+# nomes de servidores) e o repositório é público. Versionamos só os
+# conversores, em scripts/.
 migracao_licitacoes_dados.sql
+migracao_subped_dados.sql
+migracao_subped_dados_conferencia.sql
 
 # Sistema
 .DS_Store

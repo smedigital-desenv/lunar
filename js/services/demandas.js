@@ -22,7 +22,8 @@ export function criarDemanda(dados = {}) {
     p_sigilo: dados.sigilo ?? 'normal',
     p_solicitante_id: dados.solicitanteId ?? null,
     p_responsavel_id: dados.responsavelId ?? null,
-    p_pessoas: dados.pessoas ?? []
+    p_pessoas: dados.pessoas ?? [],
+    p_link_documentacao: dados.linkDocumentacao ?? null
   });
 }
 
