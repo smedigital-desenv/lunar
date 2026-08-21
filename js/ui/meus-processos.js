@@ -4,7 +4,6 @@
 // =====================================================================
 
 import { escapeHtml, badgeSituacao, badgePrioridade, badgeSigilo, fmtPrazo } from './componentes.js';
-import { listarPorDemanda } from '../services/tarefas.js';
 
 const FILTROS = [
   ['todos', 'Todos'], ['pendentes', 'Pendentes'], ['em_andamento', 'Em andamento'],
@@ -19,33 +18,40 @@ const PREDICADOS = {
   encerrados: i => i.situacao === 'concluida'
 };
 
-// Dados de exemplo
+// Dados de exemplo, já na forma normalizada (mesma que `normalizar()` produz).
 const EXEMPLO_ENTRADA = [
-  { id: 't1', demanda_id: 'd1', demanda_numero: 'DEM-2026-000042', titulo: 'Verificar contrato de merenda', situacao: 'em_andamento', prioridade: 'alta', prazo: '2026-08-05' },
-  { id: 't2', demanda_id: 'd2', demanda_numero: 'DEM-2026-000051', titulo: 'Emitir parecer sobre transferência', situacao: 'aberta', prioridade: 'normal', prazo: '2026-08-12' },
-  { id: 't3', demanda_id: 'd3', demanda_numero: 'DEM-2026-000058', titulo: 'Vazamento no telhado — vistoria', situacao: 'aberta', prioridade: 'urgente', prazo: '2026-08-01' }
+  { demandaId: 'd1', numero: 'DEM-2026-000042', titulo: 'Verificar contrato de merenda', situacao: 'em_andamento', prioridade: 'alta', sigilo: 'normal', prazo: '2026-08-05' },
+  { demandaId: 'd2', numero: 'DEM-2026-000051', titulo: 'Emitir parecer sobre transferência', situacao: 'aberta', prioridade: 'normal', sigilo: 'normal', prazo: '2026-08-12' },
+  { demandaId: 'd3', numero: 'DEM-2026-000058', titulo: 'Vazamento no telhado — vistoria', situacao: 'aberta', prioridade: 'urgente', sigilo: 'normal', prazo: '2026-08-01' }
 ];
 
 const EXEMPLO_SAIDA = [
-  { id: 'd1', numero: 'DEM-2026-000042', titulo: 'Falta de merenda na EMEF Prof. João da Silva', situacao: 'em_andamento', prioridade: 'alta', sigilo: 'normal', prazo: '2026-08-05' },
-  { id: 'd8', numero: 'DEM-2026-000044', titulo: 'Pedido de transporte escolar', situacao: 'aberta', prioridade: 'normal', sigilo: 'normal', prazo: '2026-08-18' },
-  { id: 'd9', numero: 'DEM-2026-000047', titulo: 'Ocorrência com aluno (sigilo)', situacao: 'aguardando_complementacao', prioridade: 'alta', sigilo: 'restrito', prazo: '2026-08-03' }
+  { demandaId: 'd1', numero: 'DEM-2026-000042', titulo: 'Falta de merenda na EMEF Prof. João da Silva', situacao: 'em_andamento', prioridade: 'alta', sigilo: 'normal', prazo: '2026-08-05' },
+  { demandaId: 'd8', numero: 'DEM-2026-000044', titulo: 'Pedido de transporte escolar', situacao: 'aberta', prioridade: 'normal', sigilo: 'normal', prazo: '2026-08-18' },
+  { demandaId: 'd9', numero: 'DEM-2026-000047', titulo: 'Ocorrência com aluno (sigilo)', situacao: 'aguardando_complementacao', prioridade: 'alta', sigilo: 'restrito', prazo: '2026-08-03' }
 ];
 
-// Cache de cronogramas (subtarefas por demanda)
+// Cronograma = as tarefas de primeiro nível da demanda ainda em aberto,
+// exibidas como marcos. Cache por demanda: paginar e voltar não reconsulta.
 const cronogramaCache = new Map();
+const MARCOS = 3;
 
 async function obterCronograma(demandaId) {
-  if (cronogramaCache.has(demandaId)) {
-    return cronogramaCache.get(demandaId);
-  }
+  if (cronogramaCache.has(demandaId)) return cronogramaCache.get(demandaId);
   try {
+    // Import preguiçoso: o supabaseClient não pode ser arrastado na abertura
+    // da página, senão a tela deixa de abrir offline/em demonstração.
+    const { listarPorDemanda } = await import('../services/tarefas.js');
     const tarefas = await listarPorDemanda(demandaId);
-    const subtarefas = tarefas.filter(t => t.parent_id === null && t.situacao !== 'concluida').slice(0, 3);
-    cronogramaCache.set(demandaId, subtarefas);
-    return subtarefas;
+    const marcos = tarefas
+      .filter(t => t.parent_id === null && t.ativo !== false && t.situacao !== 'concluida')
+      .slice(0, MARCOS);
+    cronogramaCache.set(demandaId, marcos);
+    return marcos;
   } catch (e) {
-    console.error('Erro ao carregar cronograma:', e);
+    // O cronograma é enfeite do cartão: falhar aqui não pode derrubar a lista.
+    console.error('Cronograma indisponível para', demandaId, e);
+    cronogramaCache.set(demandaId, []);
     return [];
   }
 }
@@ -61,59 +67,66 @@ function renderCronograma(subtarefas) {
   </div>`;
 }
 
-function cartaoComCronograma(item, tipo) {
-  const href = tipo === 'entrada'
-    ? `./demanda.html?id=${item.demanda_id || item.id}`
-    : `./demanda.html?id=${item.id}`;
-  const numero = item.demanda_numero || item.numero;
+// Forma única de item, venha da entrada ou da saída. Antes cada aba tinha um
+// formato próprio e os itens da entrada chegavam SEM `id` — o placeholder do
+// cronograma virava "cronograma-undefined" em todos os cartões e o
+// getElementById devolvia sempre o primeiro. No exemplo passava (tem `id`).
+function normalizar(d) {
+  return {
+    demandaId: d.id,
+    numero: d.numero,
+    titulo: d.titulo,
+    situacao: d.situacao,
+    prioridade: d.prioridade,
+    sigilo: d.sigilo,
+    prazo: d.prazo
+  };
+}
+
+function cartaoComCronograma(item) {
   const sigilo = item.sigilo ? badgeSigilo(item.sigilo) : '';
+  const href = `./demanda.html?id=${item.demandaId}`;
 
   return `<a class="cartao d-block text-decoration-none text-reset" href="${escapeHtml(href)}">
-    <div class="demanda-cabecalho__numero">${escapeHtml(numero)}</div>
+    <div class="demanda-cabecalho__numero">${escapeHtml(item.numero)}</div>
     <div class="fw-semibold mb-2">${escapeHtml(item.titulo)}</div>
     <div class="demanda-cabecalho__chips mb-1">
       ${badgeSituacao(item.situacao)} ${badgePrioridade(item.prioridade)} ${sigilo}
     </div>
     <div class="texto-silencioso small">Prazo: ${fmtPrazo(item.prazo)}</div>
-    <div id="cronograma-${item.id}" class="cronograma-placeholder"></div>
+    <div data-cronograma="${escapeHtml(item.demandaId)}" class="cronograma-placeholder"></div>
   </a>`;
 }
 
+// Filtro, busca e paginação rodam no navegador sobre a lista inteira da aba.
+// A busca precisa disso: `fn_caixa_entrada`/`fn_caixa_saida` não recebem termo,
+// então filtrar só a página corrente devolveria "nada encontrado" para algo que
+// existe duas páginas adiante — um silêncio pior que não ter o campo.
 function filtrarPaginar(itens, filtro, pagina, porPagina, busca) {
   let filtrados = itens.filter(PREDICADOS[filtro] || PREDICADOS.todos);
 
-  if (busca && busca.trim()) {
-    const termo = busca.trim().toLowerCase();
-    filtrados = filtrados.filter(i => {
-      const numero = (i.numero || i.demanda_numero || '').toLowerCase();
-      const titulo = (i.titulo || '').toLowerCase();
-      return numero.includes(termo) || titulo.includes(termo);
-    });
+  const termo = (busca || '').trim().toLowerCase();
+  if (termo) {
+    filtrados = filtrados.filter(i =>
+      (i.numero || '').toLowerCase().includes(termo)
+      || (i.titulo || '').toLowerCase().includes(termo));
   }
 
   const de = (pagina - 1) * porPagina;
   return { itens: filtrados.slice(de, de + porPagina), total: filtrados.length };
 }
 
-async function carregarEntradaReal(filtro, pagina, porPagina) {
-  const { listarCaixaEntrada } = await import('../services/tarefas.js');
-  const { itens, total } = await listarCaixaEntrada({ filtro, pagina, porPagina });
-  const mapeados = itens.map(d => ({
-    demanda_id: d.id,
-    demanda_numero: d.numero,
-    titulo: d.titulo,
-    situacao: d.situacao,
-    prioridade: d.prioridade,
-    sigilo: d.sigilo,
-    prazo: d.prazo
-  }));
-  return { itens: mapeados, total, demo: false };
-}
+// Teto da carga única. As caixas são "o que é meu" — dezenas de itens, não
+// milhares. Se alguma passar disso, a tela avisa em vez de mentir por omissão.
+const TETO = 500;
 
-async function carregarSaidaReal(filtro, pagina, porPagina) {
+async function carregarTudoReal(aba) {
+  const { listarCaixaEntrada } = await import('../services/tarefas.js');
   const { listarCaixaSaida } = await import('../services/demandas.js');
-  const { itens, total } = await listarCaixaSaida({ filtro, pagina, porPagina });
-  return { itens, total, demo: false };
+  const listar = aba === 'entrada' ? listarCaixaEntrada : listarCaixaSaida;
+  // filtro 'todos': quem filtra é o navegador, junto com a busca.
+  const { itens, total } = await listar({ filtro: 'todos', pagina: 1, porPagina: TETO });
+  return { itens: (itens ?? []).map(normalizar), truncado: total > TETO };
 }
 
 async function inicializar() {
@@ -127,6 +140,7 @@ async function inicializar() {
   const elPag = document.getElementById('paginacao');
   const elCarregando = document.getElementById('carregando');
   const elTarja = document.getElementById('tarja-demo');
+  const elAvisoTeto = document.getElementById('aviso-teto');
 
   const renderFiltros = () => {
     elFiltros.innerHTML = FILTROS.map(([c, r]) =>
@@ -134,42 +148,56 @@ async function inicializar() {
       + ` data-filtro="${c}">${r}</button>`).join('');
   };
 
+  // Lista completa da aba, carregada uma vez. Trocar filtro, buscar ou
+  // paginar não volta ao banco.
+  const carregado = { entrada: null, saida: null };
+
+  async function listaDaAba() {
+    if (carregado[estado.aba]) return carregado[estado.aba];
+    const dados = await demo.carregar(
+      () => carregarTudoReal(estado.aba),
+      () => ({ itens: estado.aba === 'entrada' ? EXEMPLO_ENTRADA : EXEMPLO_SAIDA })
+    );
+    carregado[estado.aba] = dados;
+    return dados;
+  }
+
   async function atualizar() {
     elCarregando.hidden = false;
     let dados;
     try {
-      const carregador = estado.aba === 'entrada' ? carregarEntradaReal : carregarSaidaReal;
-      dados = await demo.carregar(
-        () => carregador(estado.filtro, estado.pagina, porPagina),
-        () => {
-          const exemplo = estado.aba === 'entrada' ? EXEMPLO_ENTRADA : EXEMPLO_SAIDA;
-          return filtrarPaginar(exemplo, estado.filtro, estado.pagina, porPagina, estado.busca);
-        }
-      );
+      dados = await listaDaAba();
     } catch (e) {
+      // O motivo aparece na tela, não só no console (mesma regra das caixas).
       console.error(e);
-      elCarregando.textContent = `Erro ao carregar: ${e.message || e}`;
+      elCarregando.textContent = `Erro ao carregar a lista: ${e.message || e}`;
       elCarregando.hidden = false;
       elLista.innerHTML = '';
       elPag.innerHTML = '';
+      elAvisoTeto.hidden = true;
       return;
     }
 
-    const { itens, total, demo: emDemo } = dados;
+    const { itens: todos, demo: emDemo, truncado } = dados;
     elTarja.hidden = !emDemo;
-    elLista.innerHTML = itens.length
-      ? itens.map(item => cartaoComCronograma(item, estado.aba)).join('')
-      : '<p class="texto-silencioso">Nenhum item neste filtro.</p>';
+    elAvisoTeto.hidden = !truncado;
 
-    // Carregar cronogramas em paralelo
+    const { itens, total } = filtrarPaginar(
+      todos, estado.filtro, estado.pagina, porPagina, estado.busca);
+
+    elLista.innerHTML = itens.length
+      ? itens.map(cartaoComCronograma).join('')
+      : `<p class="texto-silencioso">${estado.busca.trim()
+          ? 'Nenhum item para esta busca.' : 'Nenhum item neste filtro.'}</p>`;
+
+    // Cronograma só dos cartões visíveis, em paralelo e sem bloquear a lista.
+    // No exemplo não há banco a consultar.
     if (!emDemo) {
-      itens.forEach(item => {
-        const demandaId = item.demanda_id || item.id;
-        obterCronograma(demandaId).then(subs => {
-          const el = document.getElementById(`cronograma-${item.id}`);
-          if (el) el.innerHTML = renderCronograma(subs);
-        });
-      });
+      itens.forEach(item => obterCronograma(item.demandaId).then(subs => {
+        if (!subs.length) return;
+        const el = elLista.querySelector(`[data-cronograma="${CSS.escape(item.demandaId)}"]`);
+        if (el) el.innerHTML = renderCronograma(subs);
+      }));
     }
 
     const paginas = Math.max(1, Math.ceil(total / porPagina));
@@ -193,7 +221,8 @@ async function inicializar() {
     });
     estado.aba = btn.dataset.aba;
     estado.pagina = 1;
-    cronogramaCache.clear(); // Limpar cache ao trocar aba
+    // O cache do cronograma é por demanda, não por aba — a mesma demanda pode
+    // aparecer nas duas. Limpar aqui só faria reconsultar o que já se sabe.
     atualizar();
   }));
 
