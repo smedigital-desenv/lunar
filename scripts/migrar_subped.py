@@ -61,11 +61,11 @@ EMAIL_AUTOR = 'dados.importados@educacao.pmrp.sp.gov.br'
 # lista os nomes reais sob a Subsecretaria. Deixar em branco não é opção
 # silenciosa: o nome que não resolver aborta a migração inteira.
 MAPA_UNIDADES = {
-    # Confirmado como divergente em 2026-08-21 (a migração abortou nele).
-    # O nome REAL sai da consulta 2 do diagnóstico — não preencher por
-    # palpite: um nome errado que exista manda a tarefa para a unidade
-    # errada, e aí a carga passa em silêncio.
-    # 'GERÊNCIA DO CENTRO DE FORMAÇÃO PAULO FREIRE': '<nome exato no organograma>',
+    # Confirmado contra o organograma real em 2026-08-21: a unidade é
+    # "Gerência de Atribuição" (GAT) — a planilha acrescenta "DE AULAS".
+    # Seguro: GAT é a única unidade com "Atribuição" em toda a árvore da
+    # Subsecretaria, então não há parecida com que confundir.
+    'GERÊNCIA DE ATRIBUIÇÃO DE AULAS': 'Gerência de Atribuição',
 }
 
 # Mesmo mecanismo para pessoas (casamento por nome completo).
