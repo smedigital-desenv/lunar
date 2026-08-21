@@ -54,6 +54,36 @@ UNIDADE_TITULAR = 'SUBSECRETARIA PEDAGÓGICA'
 # Usuário de serviço da migração (criado na recarga de Licitações).
 EMAIL_AUTOR = 'dados.importados@educacao.pmrp.sp.gov.br'
 
+# Grafias da planilha que não batem com o organograma oficial. A busca já
+# ignora acento e caixa; isto é para diferença de PALAVRAS mesmo.
+#
+# Preencher a partir da consulta 2 de scripts/diagnostico_subped.sql, que
+# lista os nomes reais sob a Subsecretaria. Deixar em branco não é opção
+# silenciosa: o nome que não resolver aborta a migração inteira.
+MAPA_UNIDADES = {
+    # Confirmado como divergente em 2026-08-21 (a migração abortou nele).
+    # O nome REAL sai da consulta 2 do diagnóstico — não preencher por
+    # palpite: um nome errado que exista manda a tarefa para a unidade
+    # errada, e aí a carga passa em silêncio.
+    # 'GERÊNCIA DO CENTRO DE FORMAÇÃO PAULO FREIRE': '<nome exato no organograma>',
+}
+
+# Mesmo mecanismo para pessoas (casamento por nome completo).
+MAPA_PESSOAS = {
+    # 'NOME NA PLANILHA': 'Nome exato no cadastro',
+}
+
+
+def mapear(nome, mapa):
+    """Aplica o mapa de grafias, comparando sem acento e sem caixa."""
+    if not nome:
+        return nome
+    alvo = sem_acento(nome).upper().strip()
+    for de, para in mapa.items():
+        if sem_acento(de).upper().strip() == alvo:
+            return para
+    return nome
+
 
 def sem_acento(txt):
     return ''.join(c for c in unicodedata.normalize('NFD', str(txt))
@@ -148,7 +178,12 @@ def processar(caminho):
             'prazo': fim if situacao != 'concluida' else None,
             'inicio': como_data(row[C_INICIO]),
             'link': link if link_e_url else None,
+            # `responsavel2` é o texto original (vai para a descrição da
+            # tarefa); `resp2_banco` é o nome já mapeado, usado na busca.
             'responsavel2': limpar(row[C_RESP2]),
+            'resp2_banco': mapear(
+                limpar(row[C_RESP2]),
+                MAPA_UNIDADES if e_unidade(limpar(row[C_RESP2])) else MAPA_PESSOAS),
         })
     return itens
 
@@ -232,29 +267,30 @@ begin
       'Demanda migrada do Painel de Tarefas da Subsecretaria Pedagógica.',
       {sql_txt(it['situacao'])}, v_titular, 'normal', v_criado);""")
 
-        r2 = it['responsavel2']
+        r2 = it['responsavel2']          # texto original, para a descrição
+        r2b = it['resp2_banco']          # nome já mapeado, para a busca
         if r2 and e_unidade(r2):
             out.append(f"""
     -- Responsável 2 é unidade: a tarefa vai para o titular dela.
     select id into v_uresp from gestao.unidades_organizacionais
-     where upper(unaccent(nome)) = upper(unaccent({sql_txt(r2)})) and ativo;
+     where upper(unaccent(nome)) = upper(unaccent({sql_txt(r2b)})) and ativo;
     if v_uresp is null then
-      raise exception 'Linha {it['linha']}: unidade não encontrada: %', {sql_txt(r2)};
+      raise exception 'Linha {it['linha']}: unidade não encontrada: % — mapeie a grafia em MAPA_UNIDADES (scripts/migrar_subped.py).', {sql_txt(r2b)};
     end if;
     select u.id into v_resp
       from gestao.usuarios u join gestao.perfis p on p.codigo = u.perfil
      where u.unidade_id = v_uresp and u.ativo
      order by p.nivel desc, u.criado_em limit 1;
     if v_resp is null then
-      raise exception 'Linha {it['linha']}: sem titular ativo em %', {sql_txt(r2)};
+      raise exception 'Linha {it['linha']}: sem titular ativo em %', {sql_txt(r2b)};
     end if;""")
         elif r2:
             out.append(f"""
     -- Responsável 2 é pessoa: casada pelo nome, sem acento e sem caixa.
     select id, unidade_id into v_resp, v_uresp from gestao.usuarios
-     where upper(unaccent(nome)) = upper(unaccent({sql_txt(r2)})) and ativo;
+     where upper(unaccent(nome)) = upper(unaccent({sql_txt(r2b)})) and ativo;
     if v_resp is null then
-      raise exception 'Linha {it['linha']}: pessoa não encontrada: %', {sql_txt(r2)};
+      raise exception 'Linha {it['linha']}: pessoa não encontrada: % — mapeie a grafia em MAPA_PESSOAS (scripts/migrar_subped.py).', {sql_txt(r2b)};
     end if;""")
         else:
             out.append("""
@@ -306,9 +342,9 @@ def gerar_conferencia(itens):
     """SQL só de leitura, para rodar ANTES: mostra quais nomes da planilha
     o banco encontra. Sem isso a migração só falha no primeiro nome ruim,
     um de cada vez."""
-    nomes_un = sorted({it['responsavel2'] for it in itens
+    nomes_un = sorted({it['resp2_banco'] for it in itens
                        if it['responsavel2'] and e_unidade(it['responsavel2'])})
-    nomes_pe = sorted({it['responsavel2'] for it in itens
+    nomes_pe = sorted({it['resp2_banco'] for it in itens
                        if it['responsavel2'] and not e_unidade(it['responsavel2'])})
     un = ', '.join(f'({sql_txt(n)})' for n in [UNIDADE_TITULAR] + nomes_un)
     pe = ', '.join(f'({sql_txt(n)})' for n in nomes_pe)
