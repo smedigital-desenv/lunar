@@ -9,6 +9,7 @@ import { escapeHtml } from './componentes.js';
 const ABAS = [
   { chave: 'entrada', rotulo: 'Entrada', icone: '\u{1F4E5}', href: 'caixa-entrada.html' },
   { chave: 'saida',   rotulo: 'Saída',   icone: '\u{1F4E4}', href: 'caixa-saida.html' },
+  { chave: 'meus-processos', rotulo: 'Meus processos', icone: '\u{1F4DD}', href: 'meus-processos.html' },
   { chave: 'todos',   rotulo: 'Todos',   icone: '\u{1F4CB}', href: 'lista.html?kpi=todos' },
   { chave: 'nova',    rotulo: 'Nova',    icone: '+',         href: 'nova-demanda.html', destaque: true },
   { chave: 'licitacoes', rotulo: 'Licitações', icone: '⚖️', href: 'licitacoes.html' },

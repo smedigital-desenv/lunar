@@ -3,8 +3,8 @@
 > Atualizado ao final de cada sessão do Claude Code. Máximo 40 linhas.
 > Formato: o que está pronto, o que vem a seguir, decisões que não estão no código.
 
-**Última atualização:** 2026-08-14 (Licitações — Sessões L1 a L4)
-**Fase atual:** Sessões 1–11 concluídas. Módulo de Licitações: código completo (L1–L4). Falta implantar (ver checklist abaixo). Fase 2 do módulo (atas/contratos, solicitações, KPIs, regras de fase) por planejar.
+**Última atualização:** 2026-08-21 (Tela consolidada — Entrada + Saída)
+**Fase atual:** Sessões 1–11 concluídas. Módulo de Licitações pronto (L1–L6). Tela consolidada de processos entrada/saída com cronograma. Falta implantar licitações no real (ver checklist). Fase 2 do módulo (atas/contratos, solicitações, KPIs, regras de fase) por planejar.
 
 > **Todos os SQL (`001`…`013` + seed) executados no Supabase** (confirmado pelo usuário, 2026-08-01).
 > `js/config.js` **preenchido e versionado** (URL + anon key do projeto `iqldovwttomkjkoakosc`; anon é pública/protegida por RLS — service_role nunca). Removido do `.gitignore`.
@@ -63,6 +63,10 @@
 - **Licitações — link da documentação (2026-08-14, `043`):** coluna `lic_processos.link_documentacao` (CHECK `^https?://` — barra `javascript:` num campo que vira `<a href>`), parâmetro novo em `fn_lic_criar_processo` (DROP+CREATE: parâmetro a mais criaria sobrecarga e o PostgREST não resolve) e entrada na lista branca de `fn_lic_editar`. Front: campo no novo pedido, no modal de edição e link clicável (nova aba) no detalhe. Testado no Postgres local (criação, edição, limpeza, rejeição de link inválido). **Rodar o 043 no SQL Editor** (depois do 042).
 
 - **Licitações — detalhe em modal (2026-08-14):** clicar num processo (linha da tabela ou cartão) abre o detalhe em **modal sobre a lista** (`js/ui/modal-processo.js`: iframe `?embed=1`, mesmo padrão do detalhe-lado das demandas; X/Esc/clique-fora fecham; Ctrl/⌘-clique no cartão ainda abre em aba). `processo-licitacao.js` ganhou o modo embed (classe `body.embed` esconde cabeçalho/nav) e avisa a lista via `window.parent.marcarListaSuja()` quando grava — a lista recarrega ao fechar. Celular: modal em tela cheia (lista preservada atrás). Verificado no navegador (1280px e 390px).
+
+- **Tela consolidada — Meus processos (2026-08-21):** `pages/meus-processos.html` + `js/ui/meus-processos.js` — visão única de entrada (tarefas minhas) + saída (demandas minhas), com abas. Filtros todos/pendentes/em andamento/urgentes/encerrados, busca por número/título com debounce e paginação. **Cronograma:** as tarefas de 1º nível ainda em aberto viram até 3 marcos no cartão (`data-cronograma`, carga paralela, cache por demanda) — **não houve mudança de esquema**, reusa a árvore de tarefas que já existia. A aba carrega a lista inteira uma vez (`filtro='todos'`, teto de 500 com aviso na tela) e filtra/busca/pagina no navegador: as RPCs de caixa não recebem termo de busca, então filtrar só a página corrente diria "nada encontrado" para algo que existe adiante. Mesmo padrão da lista de Licitações. Link `meus-processos` na navegação.
+- **Três defeitos corrigidos antes de publicar (2026-08-21):** todos invisíveis no modo demonstração e só visíveis com dado real — (a) `fn_caixa_entrada` devolve itens **sem `id`**, então os placeholders do cronograma viravam `cronograma-undefined` e o `getElementById` empilhava os marcos de todos os cartões no primeiro; (b) a busca era aplicada só no ramo de exemplo — com dado real o campo aceitava texto e não filtrava nada, calado; (c) `import` estático de `services/tarefas.js` arrastava o `supabaseClient` na abertura, quebrando o carregamento offline/demo. **Lição repetida:** massa de exemplo com forma diferente da do banco esconde defeito — os exemplos agora usam a mesma forma normalizada.
+- **Verificação (2026-08-21):** navegador (Chromium, stubs de CDN/central — o sandbox bloqueia `esm.sh`/`jsdelivr`; sem eles **nenhuma** tela do sistema sobe, inclusive as já publicadas). Demo: abas, filtros, busca, paginação, vazio. Dado real simulado: cada cartão recebeu o seu próprio cronograma e a tarefa concluída ficou fora dos marcos. **Não testado contra o Supabase real** — falta validar no ar com sessão de verdade. `js/ui/meus-processos.js` tem **280 linhas**, acima do teto de ~250 (mesma pendência do `organograma.js`): dividir depois de validada.
 
 ## Próximo passo
 
