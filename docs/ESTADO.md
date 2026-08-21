@@ -3,8 +3,8 @@
 > Atualizado ao final de cada sessão do Claude Code. Máximo 40 linhas.
 > Formato: o que está pronto, o que vem a seguir, decisões que não estão no código.
 
-**Última atualização:** 2026-08-14 (Licitações — Sessões L1 a L4)
-**Fase atual:** Sessões 1–11 concluídas. Módulo de Licitações: código completo (L1–L4). Falta implantar (ver checklist abaixo). Fase 2 do módulo (atas/contratos, solicitações, KPIs, regras de fase) por planejar.
+**Última atualização:** 2026-08-21 (Tela consolidada — Entrada + Saída)
+**Fase atual:** Sessões 1–11 concluídas. Módulo de Licitações pronto (L1–L6). Tela consolidada de processos entrada/saída com cronograma. Falta implantar licitações no real (ver checklist). Fase 2 do módulo (atas/contratos, solicitações, KPIs, regras de fase) por planejar.
 
 > **Todos os SQL (`001`…`013` + seed) executados no Supabase** (confirmado pelo usuário, 2026-08-01).
 > `js/config.js` **preenchido e versionado** (URL + anon key do projeto `iqldovwttomkjkoakosc`; anon é pública/protegida por RLS — service_role nunca). Removido do `.gitignore`.
@@ -63,6 +63,8 @@
 - **Licitações — link da documentação (2026-08-14, `043`):** coluna `lic_processos.link_documentacao` (CHECK `^https?://` — barra `javascript:` num campo que vira `<a href>`), parâmetro novo em `fn_lic_criar_processo` (DROP+CREATE: parâmetro a mais criaria sobrecarga e o PostgREST não resolve) e entrada na lista branca de `fn_lic_editar`. Front: campo no novo pedido, no modal de edição e link clicável (nova aba) no detalhe. Testado no Postgres local (criação, edição, limpeza, rejeição de link inválido). **Rodar o 043 no SQL Editor** (depois do 042).
 
 - **Licitações — detalhe em modal (2026-08-14):** clicar num processo (linha da tabela ou cartão) abre o detalhe em **modal sobre a lista** (`js/ui/modal-processo.js`: iframe `?embed=1`, mesmo padrão do detalhe-lado das demandas; X/Esc/clique-fora fecham; Ctrl/⌘-clique no cartão ainda abre em aba). `processo-licitacao.js` ganhou o modo embed (classe `body.embed` esconde cabeçalho/nav) e avisa a lista via `window.parent.marcarListaSuja()` quando grava — a lista recarrega ao fechar. Celular: modal em tela cheia (lista preservada atrás). Verificado no navegador (1280px e 390px).
+
+- **Tela consolidada — Meus processos (2026-08-21):** `pages/meus-processos.html` + `js/ui/meus-processos.js` — visão única para entrada (tarefas minhas) + saída (demandas minhas). Abas para alternar. Filtros rápidos: todos/pendentes/em andamento/urgentes/encerrados. Busca por número/título com debounce. **Cronograma:** exibe até 3 subtarefas como marcos de cada processo (indicador visual de progresso). Reutiliza `listarCaixaEntrada()`/`listarCaixaSaida()` e componentes do sistema. Modo demonstração com dados de exemplo. Link adicionado à navegação (`meus-processos`). **Verificar:** render em desktop + mobile após sessão real (cronograma carrega em paralelo, evita bloquear UI). Sintaxe sem erros, estrutura pronta para testes.
 
 ## Próximo passo
 
