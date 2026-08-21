@@ -74,6 +74,20 @@ MAPA_PESSOAS = {
 }
 
 
+def norm(expr):
+    """Expressão SQL que normaliza um nome para comparação: sem acento,
+    sem caixa, sem aspas decorativas e com espaços colapsados.
+
+    O organograma escreve Gerência do Centro de Formação "Paulo Freire"
+    entre aspas e a planilha não — foi o que abortou a carga de
+    2026-08-21. Aspas são enfeite de grafia, não identidade da unidade;
+    resolver aqui evita um mapa por unidade aspeada. Só aspas: tirar
+    hífen ou ponto criaria equivalências que ninguém pediu.
+    """
+    sem_aspas = f"""translate({expr}, '"''´`', '')"""
+    return f"btrim(regexp_replace(upper(unaccent({sem_aspas})), '\\s+', ' ', 'g'))"
+
+
 def mapear(nome, mapa):
     """Aplica o mapa de grafias, comparando sem acento e sem caixa."""
     if not nome:
@@ -217,7 +231,7 @@ begin
   end if;
 
   select id into v_unidade from gestao.unidades_organizacionais
-   where upper(unaccent(nome)) = upper(unaccent({sql_txt(UNIDADE_TITULAR)})) and ativo;
+   where {norm('nome')} = {norm(sql_txt(UNIDADE_TITULAR))} and ativo;
   if v_unidade is null then
     raise exception 'Unidade não encontrada no organograma: %', {sql_txt(UNIDADE_TITULAR)};
   end if;
@@ -273,7 +287,7 @@ begin
             out.append(f"""
     -- Responsável 2 é unidade: a tarefa vai para o titular dela.
     select id into v_uresp from gestao.unidades_organizacionais
-     where upper(unaccent(nome)) = upper(unaccent({sql_txt(r2b)})) and ativo;
+     where {norm('nome')} = {norm(sql_txt(r2b))} and ativo;
     if v_uresp is null then
       raise exception 'Linha {it['linha']}: unidade não encontrada: % — mapeie a grafia em MAPA_UNIDADES (scripts/migrar_subped.py).', {sql_txt(r2b)};
     end if;
@@ -288,7 +302,7 @@ begin
             out.append(f"""
     -- Responsável 2 é pessoa: casada pelo nome, sem acento e sem caixa.
     select id, unidade_id into v_resp, v_uresp from gestao.usuarios
-     where upper(unaccent(nome)) = upper(unaccent({sql_txt(r2b)})) and ativo;
+     where {norm('nome')} = {norm(sql_txt(r2b))} and ativo;
     if v_resp is null then
       raise exception 'Linha {it['linha']}: pessoa não encontrada: % — mapeie a grafia em MAPA_PESSOAS (scripts/migrar_subped.py).', {sql_txt(r2b)};
     end if;""")
@@ -332,7 +346,7 @@ end $$;
 -- Conferência (rode depois):
 --   select count(*) from gestao.demandas d
 --     join gestao.unidades_organizacionais u on u.id = d.unidade_responsavel_id
---    where upper(unaccent(u.nome)) = upper(unaccent({sql_txt(UNIDADE_TITULAR)}));
+--    where {norm('u.nome')} = {norm(sql_txt(UNIDADE_TITULAR))};
 --   -- esperado: {len(itens)}
 """)
     return '\n'.join(out)
@@ -359,12 +373,12 @@ select 'unidade' as tipo, v.nome,
          where x.unidade_id = u.id and x.ativo) as pessoas_ativas
   from (values {un}) as v(nome)
   left join gestao.unidades_organizacionais u
-    on upper(unaccent(u.nome)) = upper(unaccent(v.nome)) and u.ativo
+    on {norm('u.nome')} = {norm('v.nome')} and u.ativo
 union all
 select 'pessoa', v.nome, (p.id is not null), null
   from (values {pe}) as v(nome)
   left join gestao.usuarios p
-    on upper(unaccent(p.nome)) = upper(unaccent(v.nome)) and p.ativo
+    on {norm('p.nome')} = {norm('v.nome')} and p.ativo
 order by achou, tipo, nome;
 
 -- Usuário de serviço da migração:
