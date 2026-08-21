@@ -1,8 +1,8 @@
 // =====================================================================
-// meus-processos-render.js — desenho da lista de "Meus processos".
-// Tabela ordenável (desktop) e cartões compactos (celular), no mesmo
-// padrão da lista de Licitações. Módulo sem efeito colateral: só recebe
-// dados e devolve HTML.
+// meus-processos-render.js — colunas e cartão da tela "Meus processos".
+// O esqueleto (tabela ordenável + cartões + eventos) mora em
+// tabela-processos.js, compartilhado com a tela "Todos".
+// Módulo sem efeito colateral: recebe dados e devolve HTML.
 // =====================================================================
 
 import { escapeHtml, badgeSituacao, badgePrioridade, badgeSigilo, fmtPrazo } from './componentes.js';
@@ -11,15 +11,10 @@ import { escapeHtml, badgeSituacao, badgePrioridade, badgeSigilo, fmtPrazo } fro
 // coisas (eu criei E estou responsável), daí 'ambos'.
 export const ROTULO_FLUXO = { entrada: 'Entrada', saida: 'Saída', ambos: 'Entrada e saída' };
 
-export const COLUNAS = [
-  ['numero', 'Número'], ['titulo', 'Título'], ['fluxo', 'Fluxo'],
-  ['situacao', 'Situação'], ['prioridade', 'Prioridade'],
-  ['cronograma', 'Cronograma'], ['prazo', 'Prazo']
-];
-
 // Marcos = tarefas de 1º nível ainda em aberto. Chegam depois da lista
 // (uma consulta por processo visível), então o lugar fica reservado no
 // HTML e é preenchido quando a resposta volta.
+//
 // Vazio devolve vazio: na tabela o CSS põe um traço para a coluna não
 // desalinhar; no cartão o lugar simplesmente some, em vez de virar ruído.
 export function renderCronograma(marcos) {
@@ -43,20 +38,24 @@ const badgeFluxo = (fluxo) =>
   `<span class="badge-chip badge-fluxo badge-fluxo--${escapeHtml(fluxo)}">`
   + `${escapeHtml(ROTULO_FLUXO[fluxo] ?? fluxo)}</span>`;
 
-function linhaTabela(item) {
-  return `<tr data-href="${escapeHtml(item.href)}" class="linha-fluxo linha-fluxo--${escapeHtml(item.fluxo)}">
-    <td class="demanda-cabecalho__numero">${escapeHtml(item.numero)}</td>
-    <td class="tabela-lista__titulo">${escapeHtml(item.titulo)}</td>
-    <td>${badgeFluxo(item.fluxo)}</td>
-    <td>${badgeSituacao(item.situacao)}</td>
-    <td>${badgePrioridade(item.prioridade)}</td>
-    <td class="tabela-lista__cronograma">${lugarCronograma(item)}</td>
-    <td class="text-nowrap">${escapeHtml(fmtPrazo(item.prazo))}</td>
-  </tr>`;
-}
+export const COLUNAS = [
+  { chave: 'numero', rotulo: 'Número',
+    celula: i => `<span class="demanda-cabecalho__numero">${escapeHtml(i.numero)}</span>` },
+  { chave: 'titulo', rotulo: 'Título', classe: 'tabela-lista__titulo',
+    celula: i => escapeHtml(i.titulo) },
+  { chave: 'fluxo', rotulo: 'Fluxo', celula: i => badgeFluxo(i.fluxo) },
+  { chave: 'situacao', rotulo: 'Situação', celula: i => badgeSituacao(i.situacao) },
+  { chave: 'prioridade', rotulo: 'Prioridade', celula: i => badgePrioridade(i.prioridade) },
+  { chave: 'cronograma', rotulo: 'Cronograma', classe: 'tabela-lista__cronograma',
+    celula: lugarCronograma },
+  { chave: 'prazo', rotulo: 'Prazo', classe: 'text-nowrap',
+    celula: i => escapeHtml(fmtPrazo(i.prazo)) }
+];
 
-function cartao(item) {
-  return `<a class="cartao cartao--compacto cartao-fluxo cartao-fluxo--${escapeHtml(item.fluxo)}
+export const linhaClasse = (item) => `linha-fluxo--${item.fluxo}`;
+
+export function cartao(item) {
+  return `<a class="cartao cartao--compacto cartao-processo cartao-fluxo--${escapeHtml(item.fluxo)}
       d-block text-decoration-none text-reset" href="${escapeHtml(item.href)}">
     <div class="compacto__linha1">
       <span class="demanda-cabecalho__numero">${escapeHtml(item.numero)}</span>
@@ -69,24 +68,4 @@ function cartao(item) {
     </div>
     <div class="compacto__cronograma">${lugarCronograma(item)}</div>
   </a>`;
-}
-
-function tabela(itens, ordem, asc) {
-  const th = COLUNAS.map(([c, rotulo]) => {
-    const ativa = ordem === c;
-    const seta = ativa ? (asc ? ' ▲' : ' ▼') : '';
-    return `<th><button type="button" class="tabela-lic__ordenar${ativa ? ' tabela-lic__ordenar--ativa' : ''}"
-      data-ordem="${c}">${escapeHtml(rotulo)}${seta}</button></th>`;
-  }).join('');
-  return `<div class="table-responsive d-none d-md-block">
-    <table class="table table-hover align-middle tabela-lic tabela-lista">
-      <thead><tr>${th}</tr></thead>
-      <tbody>${itens.map(linhaTabela).join('')}</tbody>
-    </table></div>`;
-}
-
-// Tabela e cartões saem juntos; o CSS mostra um ou outro pela largura.
-export function renderLista(itens, ordem, asc) {
-  return tabela(itens, ordem, asc)
-    + `<div class="d-md-none">${itens.map(cartao).join('')}</div>`;
 }

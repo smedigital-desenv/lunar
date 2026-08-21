@@ -5,7 +5,9 @@
 // O desenho fica em meus-processos-render.js; aqui é estado e carga.
 // =====================================================================
 
-import { renderLista, renderCronograma, chaveCronograma } from './meus-processos-render.js';
+import { COLUNAS, cartao, linhaClasse, renderCronograma, chaveCronograma }
+  from './meus-processos-render.js';
+import { renderLista, renderPaginacao, ligarEventos } from './tabela-processos.js';
 import { abrirModalProcesso } from './modal-processo.js';
 import * as demo from './demo.js';
 
@@ -164,14 +166,12 @@ function atualizar() {
   document.getElementById('tarja-demo').hidden = !emDemo;
   document.getElementById('aviso-teto').hidden = !truncado;
   document.getElementById('lista').innerHTML = pagina.length
-    ? renderLista(pagina, estado.ordem, estado.asc)
+    ? renderLista(pagina, { colunas: COLUNAS, cartao, linhaClasse }, estado.ordem, estado.asc)
     : `<p class="texto-silencioso">${estado.busca.trim()
         ? 'Nenhum processo para esta busca.' : 'Nenhum processo com esses filtros.'}</p>`;
 
-  document.getElementById('paginacao').innerHTML = `
-    <button class="btn btn-sm btn-outline-secondary" data-pag="prev" ${estado.pagina <= 1 ? 'disabled' : ''}>Anterior</button>
-    <span class="texto-silencioso small">Página ${estado.pagina} de ${paginas} · ${itens.length} processo(s)</span>
-    <button class="btn btn-sm btn-outline-secondary" data-pag="next" ${estado.pagina >= paginas ? 'disabled' : ''}>Próxima</button>`;
+  document.getElementById('paginacao').innerHTML =
+    renderPaginacao(estado.pagina, paginas, itens.length);
 
   preencherCronogramas(pagina);
 }
@@ -211,23 +211,14 @@ document.getElementById('paginacao').addEventListener('click', (e) => {
 });
 
 // Cabeçalho ordena (repetir a coluna inverte a direção); linha e cartão
-// abrem o detalhe em modal (Ctrl/⌘/Shift no cartão seguem abrindo em aba).
-document.getElementById('lista').addEventListener('click', (e) => {
-  const th = e.target.closest('[data-ordem]');
-  if (th) {
-    const c = th.dataset.ordem;
+// abrem o detalhe em modal.
+ligarEventos(document.getElementById('lista'), {
+  aoOrdenar: (c) => {
     estado.asc = estado.ordem === c ? !estado.asc : true;
     estado.ordem = c;
     atualizar();
-    return;
-  }
-  const tr = e.target.closest('tr[data-href]');
-  if (tr) { abrir(tr.dataset.href); return; }
-  const cartaoEl = e.target.closest('a.cartao-fluxo');
-  if (cartaoEl && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
-    e.preventDefault();
-    abrir(cartaoEl.getAttribute('href'));
-  }
+  },
+  aoAbrir: abrir
 });
 
 // ---------------------------------------------------------- Abertura
