@@ -224,6 +224,8 @@ declare
   v_demanda  uuid;
   v_tarefa   uuid;
   v_criado   timestamptz;
+  v_desc     text;
+  v_sobrou   int := 0;   -- pessoas não localizadas que caíram na Subsecretaria
 begin
   select id into v_autor from gestao.usuarios where email = {sql_txt(EMAIL_AUTOR)};
   if v_autor is null then
@@ -297,18 +299,31 @@ begin
      order by p.nivel desc, u.criado_em limit 1;
     if v_resp is null then
       raise exception 'Linha {it['linha']}: sem titular ativo em %', {sql_txt(r2b)};
-    end if;""")
+    end if;
+    v_desc := {sql_txt(f'Responsável na planilha de origem: {r2}.')};""")
         elif r2:
             out.append(f"""
-    -- Responsável 2 é pessoa: casada pelo nome, sem acento e sem caixa.
+    -- Responsável 2 é pessoa. Só os 52 titulares do organograma foram
+    -- cadastrados (sql/039), então quem não chefia unidade pode não ter
+    -- conta. Decisão do usuário (2026-08-21): não abortar — a tarefa vai
+    -- para a titular da Subsecretaria, com o nome de origem registrado,
+    -- e ela redistribui quando a conta existir. Inativo conta como
+    -- ausente: atribuir a quem saiu ressuscitaria trabalho.
     select id, unidade_id into v_resp, v_uresp from gestao.usuarios
      where {norm('nome')} = {norm(sql_txt(r2b))} and ativo;
+    v_desc := {sql_txt(f'Responsável na planilha de origem: {r2}.')};
     if v_resp is null then
-      raise exception 'Linha {it['linha']}: pessoa não encontrada: % — mapeie a grafia em MAPA_PESSOAS (scripts/migrar_subped.py).', {sql_txt(r2b)};
+      v_resp   := v_titular;
+      v_uresp  := v_unidade;
+      v_sobrou := v_sobrou + 1;
+      v_desc   := v_desc || ' Conta não localizada (ou inativa) no cadastro;'
+                         || ' atribuída à Subsecretaria para redistribuição.';
+      raise notice 'Linha {it['linha']}: % sem conta ativa — tarefa para a Subsecretaria.', {sql_txt(r2b)};
     end if;""")
         else:
             out.append("""
-    v_resp := null;   -- linha sem Responsável 2: fica só a demanda""")
+    v_resp := null;   -- linha sem Responsável 2: fica só a demanda
+    v_desc := null;""")
 
         # Demanda concluída não pode deixar tarefa aberta: ela ficaria para
         # sempre na caixa de entrada da gerência e apareceria como marco em
@@ -322,8 +337,7 @@ begin
         demanda_id, parent_id, titulo, descricao, responsavel_id,
         unidade_responsavel_id, situacao, prioridade, prazo,
         conclusao, data_conclusao, criado_por, criado_em)
-      values (v_demanda, null, {sql_txt(it['titulo'])},
-        {sql_txt(f'Responsável na planilha de origem: {r2}.' if r2 else None)},
+      values (v_demanda, null, {sql_txt(it['titulo'])}, v_desc,
         v_resp, v_uresp, {sql_txt(sit_tarefa)}, 'normal',
         {sql_txt(it['prazo'].isoformat()) if it['prazo'] else 'null'}::date,
         {sql_txt(it['conclusao'])},
@@ -340,7 +354,7 @@ begin
   end if;""")
 
     out.append(f"""
-  raise notice 'Migração concluída em {hoje}.';
+  raise notice 'Migração concluída em {hoje}. % tarefa(s) sem conta própria foram para a Subsecretaria.', v_sobrou;
 end $$;
 
 -- Conferência (rode depois):
