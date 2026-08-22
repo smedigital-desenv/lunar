@@ -72,8 +72,9 @@ controle sigiloso, basta voltar o campo.
 ## 4. Tipos propostos
 
 **Atendimento:** Plantão da Supervisão · Reclamação · Solicitação de
-munícipe · Denúncia · Requerimento · Pedido de informação · Ofício
-recebido
+munícipe · Denúncia · Requerimento · Pedido de informação
+
+*Ofício* fica fora por ora — ver §9.
 
 **Controle:** Controle da Subsecretaria · Solicitação do Secretário ·
 Solicitação entre Subsecretários · Solicitação para Gerentes
@@ -117,23 +118,58 @@ isso as duas lacunas entram junto com a separação dos formulários.
 
 1. **SQL — formato e tipos.** Coluna de formato em `tipos_demanda`;
    `objeto_queixa` deixa de ser `NOT NULL`; `fn_criar_demanda` passa a
-   exigi-lo conforme o formato; tipos criados/renomeados/inativados; as
+   exigi-lo conforme o formato; tipos criados/renomeados/inativados (um
+   único *Controle da Subsecretaria*, sem restrição de quem escolhe); as
    31 demandas recebem o tipo de controle.
 2. **Tela de nova demanda.** Campos aparecem conforme o formato do tipo
    escolhido. Sem tipo escolhido, mostra o mínimo comum.
 3. **Pessoas envolvidas — leitura.** Serviço + exibição no detalhe.
 4. **Pessoas envolvidas — escrita.** RPC para acrescentar/corrigir/
-   inativar depois da criação, com justificativa (regra 7) e permissão a
-   definir.
+   inativar depois da criação, com justificativa (regra 7), restrita a
+   quem faz parte do processo (§8.3).
 
-## 8. Decisões pendentes
+## 8. Decisões complementares (2026-08-22)
 
-1. **"Controle da Subsecretaria" é um tipo só ou um por subsecretaria?**
-   Um só parece melhor — a unidade responsável já diz de quem é.
-2. **Ofício:** o seed o define como "comunicação oficial entre unidades"
-   (interno); a proposta traz *Ofício recebido* (externo). Ofício entre
-   unidades vira um tipo de controle?
-3. **Quem escolhe cada tipo?** Hoje qualquer pessoa cria qualquer tipo.
-   Faz sentido restringir — por exemplo, "Solicitação do Secretário" só
-   para o Gabinete?
-4. **Quem edita pessoas envolvidas** depois da criação? (passo 4)
+1. **"Controle da Subsecretaria" é um tipo único** — não um por
+   subsecretaria. A unidade responsável já diz de quem é o controle.
+2. **Escolha de tipo fica livre.** Qualquer pessoa cria qualquer tipo;
+   nenhuma restrição por perfil nas funções.
+3. **Pessoas envolvidas: quem edita são "os usuários que fazem parte do
+   processo".** Leitura adotada: quem está em `participantes`
+   (solicitante, responsável atual, participante) **e** quem tem tarefa
+   ativa na demanda — quem executa é quem percebe o nome errado.
+   *A confirmar:* a segunda metade (quem tem tarefa) é interpretação
+   minha. **Não** vale `fn_pode_ver_demanda`: ela inclui chefia no
+   escopo, que enxerga a demanda sem participar dela — e aqui se trata de
+   escrever dado pessoal (LGPD, `ESPEC.md §20`).
+
+## 9. Em aberto — a função do ofício
+
+O sistema hoje se contradiz sobre o que é um ofício:
+
+| Onde | O que diz | Sentido |
+|---|---|---|
+| `sql/008_seed.sql:112` | "Comunicação oficial **entre unidades**" | interno |
+| `js/ui/caixa-entrada.js:13` (exemplo) | "Responder ofício **da Câmara**" | externo |
+
+São os dois únicos lugares onde a palavra aparece — não há campo, regra
+nem fluxo próprio de ofício em lugar nenhum. Ou seja: nada foi construído
+em cima dessa definição, e dá para escolher a que fizer sentido.
+
+Três perguntas que resolvem:
+
+1. **O ofício é o que chega, o que sai, ou os dois?** Ofício recebido da
+   Câmara/MP/Defensoria é atendimento (chega e exige resposta). Ofício
+   que a SME expede é produto de uma demanda, não o começo dela — pode
+   nem ser um tipo.
+2. **Ofício entre unidades é mesmo ofício, ou é encaminhamento?** O
+   sistema já registra comunicação entre unidades como tramitação
+   (`fn_encaminhar` + movimentação). Se o ofício interno é isso, o tipo
+   sobra; se é um documento formal com numeração própria, é outra coisa.
+3. **Precisa guardar o número do ofício?** Se sim, é campo — e a decisão
+   de "nenhum campo novo por enquanto" (§2.3) precisa ser revista para
+   esse caso.
+
+Enquanto não se decide, *Ofício recebido* fica **fora** da lista do §4 e
+o tipo do seed permanece como está — inativá-lo ou renomeá-lo sem saber
+para quê seria trocar uma definição errada por outra.
