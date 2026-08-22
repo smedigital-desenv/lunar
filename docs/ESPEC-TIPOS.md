@@ -1,6 +1,7 @@
 # Espec — Tipos de demanda e formulários por formato
 
-> Proposta para aprovação. Nada implementado ainda.
+> **Passo 1 implementado** em `sql/046_tipos_formato.sql` (falta rodar no
+> Supabase). Passos 2 a 4 pendentes — ver §7.
 > Levantada em 2026-08-22, a partir do pedido: "atendimentos aos munícipes
 > têm campos diferentes dos controles de tarefas de cada subsecretaria".
 
@@ -116,7 +117,8 @@ isso as duas lacunas entram junto com a separação dos formulários.
 
 ## 7. Implementação (4 passos, com parada entre eles)
 
-1. **SQL — formato e tipos.** Coluna de formato em `tipos_demanda`;
+1. ~~**SQL — formato e tipos.**~~ **Feito:** `sql/046_tipos_formato.sql`.
+   Coluna de formato em `tipos_demanda`;
    `objeto_queixa` deixa de ser `NOT NULL`; `fn_criar_demanda` passa a
    exigi-lo conforme o formato; tipos criados/renomeados/inativados (um
    único *Controle da Subsecretaria*, sem restrição de quem escolhe); as
@@ -134,42 +136,39 @@ isso as duas lacunas entram junto com a separação dos formulários.
    subsecretaria. A unidade responsável já diz de quem é o controle.
 2. **Escolha de tipo fica livre.** Qualquer pessoa cria qualquer tipo;
    nenhuma restrição por perfil nas funções.
-3. **Pessoas envolvidas: quem edita são "os usuários que fazem parte do
-   processo".** Leitura adotada: quem está em `participantes`
-   (solicitante, responsável atual, participante) **e** quem tem tarefa
-   ativa na demanda — quem executa é quem percebe o nome errado.
-   *A confirmar:* a segunda metade (quem tem tarefa) é interpretação
-   minha. **Não** vale `fn_pode_ver_demanda`: ela inclui chefia no
-   escopo, que enxerga a demanda sem participar dela — e aqui se trata de
-   escrever dado pessoal (LGPD, `ESPEC.md §20`).
+3. **Pessoas envolvidas: edita quem está em `participantes`** —
+   solicitante, responsável atual e participantes. Só isso: quem tem
+   apenas tarefa **não** edita, e `fn_pode_ver_demanda` **não** serve de
+   critério (inclui chefia no escopo, que enxerga a demanda sem
+   participar dela). Trata-se de escrever dado pessoal de terceiro
+   (LGPD, `ESPEC.md §20`), então o critério é o mais estreito.
 
-## 9. Em aberto — a função do ofício
+## 9. Ofício — descartado como tipo
 
-O sistema hoje se contradiz sobre o que é um ofício:
+**Decisão (2026-08-22): o ofício não tem função própria no sistema e sai
+da lista de tipos.** O tipo do seed é inativado (regra 1: inativar com
+motivo, nunca apagar).
+
+O que sustentou a decisão: o sistema se contradizia sobre o que era um
+ofício, e nada havia sido construído sobre nenhuma das definições —
 
 | Onde | O que diz | Sentido |
 |---|---|---|
 | `sql/008_seed.sql:112` | "Comunicação oficial **entre unidades**" | interno |
 | `js/ui/caixa-entrada.js:13` (exemplo) | "Responder ofício **da Câmara**" | externo |
 
-São os dois únicos lugares onde a palavra aparece — não há campo, regra
-nem fluxo próprio de ofício em lugar nenhum. Ou seja: nada foi construído
-em cima dessa definição, e dá para escolher a que fizer sentido.
+esses são os dois únicos lugares onde a palavra aparece em todo o
+repositório. Sem campo, sem regra e sem fluxo, o tipo era um rótulo sem
+comportamento.
 
-Três perguntas que resolvem:
+Na prática, o que o ofício faria já tem lugar:
 
-1. **O ofício é o que chega, o que sai, ou os dois?** Ofício recebido da
-   Câmara/MP/Defensoria é atendimento (chega e exige resposta). Ofício
-   que a SME expede é produto de uma demanda, não o começo dela — pode
-   nem ser um tipo.
-2. **Ofício entre unidades é mesmo ofício, ou é encaminhamento?** O
-   sistema já registra comunicação entre unidades como tramitação
-   (`fn_encaminhar` + movimentação). Se o ofício interno é isso, o tipo
-   sobra; se é um documento formal com numeração própria, é outra coisa.
-3. **Precisa guardar o número do ofício?** Se sim, é campo — e a decisão
-   de "nenhum campo novo por enquanto" (§2.3) precisa ser revista para
-   esse caso.
+- **ofício que chega** de fora (Câmara, MP, Defensoria) é um atendimento
+  como outro qualquer — o que importa é a providência, não o veículo;
+- **ofício entre unidades** é o que `fn_encaminhar` já registra como
+  tramitação, com movimentação na timeline;
+- **ofício que a SME expede** é produto de uma demanda, não o começo
+  dela — cabe como anexo.
 
-Enquanto não se decide, *Ofício recebido* fica **fora** da lista do §4 e
-o tipo do seed permanece como está — inativá-lo ou renomeá-lo sem saber
-para quê seria trocar uma definição errada por outra.
+Se um dia for preciso guardar número e data de ofício, a conversa volta —
+mas aí como campo, não como tipo.
