@@ -1022,6 +1022,42 @@ body.embed .pagina { padding-top: .6rem; }
   .compacto__linha2 .ms-auto { margin-left: 0 !important; width: 100%; }
 }
 
+/* ---- Cartão de processo (Meus processos e Todos) -------------------
+   Estes cartões só existem no celular: no desktop as duas telas usam a
+   tabela (`d-md-none` no invólucro). Por isso o desenho aqui é para tela
+   estreita, sem o meio-termo que as classes compartilhadas com a lista
+   de Licitações precisam manter.
+
+   O que mudou depois de ver no aparelho: o número dividia a linha com o
+   título, que sobrava numa coluna estreita e quebrava em três linhas
+   ("Aquisição de livros / de Inglês para / contraturno"). Agora o número
+   fica sozinho no topo com o prazo à direita — espaço que estava vazio —
+   e o título usa a largura inteira. */
+.cartao-processo .compacto__topo {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: .5rem; min-width: 0;
+}
+.cartao-processo .compacto__topo .demanda-cabecalho__numero {
+  margin: 0; font-size: .68rem; flex: 0 0 auto;
+}
+.cartao-processo .compacto__prazo {
+  font-size: .7rem; color: var(--cinza-500);
+  font-variant-numeric: tabular-nums; white-space: nowrap; flex: 0 0 auto;
+}
+.cartao-processo .compacto__objeto {
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  overflow: hidden; white-space: normal;
+  font-weight: 600; font-size: .95rem; line-height: 1.25;
+  margin: .1rem 0 .35rem;
+}
+.cartao-processo .compacto__linha2 { gap: .3rem; margin-top: 0; }
+
+/* Marco ocupa a linha inteira: com 11rem o nome cortava cedo demais
+   ("Verificar com Adriana formado…") e sobrava espaço vazio à direita. */
+.cartao-processo .marco { display: flex; width: 100%; gap: .5rem; }
+.cartao-processo .marco__nome { max-width: none; flex: 1 1 auto; }
+.cartao-processo .marco__data { flex: 0 0 auto; }
+
 /* Painel: grade de cards por fase. */
 .fases {
   display: grid;
