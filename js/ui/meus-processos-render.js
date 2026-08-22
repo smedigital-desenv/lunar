@@ -57,14 +57,14 @@ export const linhaClasse = (item) => `linha-fluxo--${item.fluxo}`;
 export function cartao(item) {
   return `<a class="cartao cartao--compacto cartao-processo cartao-fluxo--${escapeHtml(item.fluxo)}
       d-block text-decoration-none text-reset" href="${escapeHtml(item.href)}">
-    <div class="compacto__linha1">
+    <div class="compacto__topo">
       <span class="demanda-cabecalho__numero">${escapeHtml(item.numero)}</span>
-      <span class="compacto__objeto">${escapeHtml(item.titulo)}</span>
+      ${item.prazo ? `<span class="compacto__prazo">${escapeHtml(fmtPrazo(item.prazo))}</span>` : ''}
     </div>
+    <div class="compacto__objeto">${escapeHtml(item.titulo)}</div>
     <div class="compacto__linha2">
       ${badgeFluxo(item.fluxo)} ${badgeSituacao(item.situacao)}
       ${badgePrioridade(item.prioridade)} ${item.sigilo ? badgeSigilo(item.sigilo) : ''}
-      <span class="texto-silencioso small ms-auto">Prazo: ${escapeHtml(fmtPrazo(item.prazo))}</span>
     </div>
     <div class="compacto__cronograma">${lugarCronograma(item)}</div>
   </a>`;

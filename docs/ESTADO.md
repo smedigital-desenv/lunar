@@ -89,6 +89,8 @@
 - **Defeito evitado no teste:** escrevi o `045` a partir do `016` e reintroduzi o `CREATE TEMPORARY TABLE` dentro de função STABLE — proibido pelo Postgres (0A000), exatamente o bug que o `027` já tinha corrigido (todo clique em KPI dava 400). O teste local pegou; a versão final parte do `027`. **Lição:** ao reescrever uma função, conferir se existe migração posterior sobre ela.
 - **Nota sobre o recorte:** como a migração da SUBPED pôs as 31 demandas na Subsecretaria (o trabalho está nas *tarefas* das gerências), filtrar por uma gerência devolve 0 demandas. Filtrar por secretaria é o recorte que faz sentido nesses dados.
 
+- **Cartões do celular reorganizados (2026-08-22, visto no aparelho):** o número dividia a linha com o título, que sobrava numa coluna estreita e quebrava em três linhas; "Prazo: —" gastava uma linha inteira sem informar nada; e os marcos cortavam cedo (`max-width: 11rem`) sobrando espaço vazio à direita. Agora o **número fica sozinho no topo com o prazo à direita** (espaço que estava vazio), o **título usa a largura inteira** com corte em 3 linhas, o prazo some quando não existe e o marco ocupa a linha toda. Altura da lista caiu de 584px para 507px em "Meus processos" (415px em "Todos") a 390px — 4 cartões e a paginação cabem na tela, contra 3 antes. Estilos **escopados em `.cartao-processo`**: `.cartao--compacto`/`.compacto__*` são compartilhados com a lista de Licitações, que ficou intocada. Desktop reverificado nas duas telas — sem regressão.
+
 ## Próximo passo
 
 - **Ligar o real:** rodar `sql/011`+`sql/012`+`sql/013`, preencher `js/config.js`, habilitar provider Email (login de teste com usuários do seed, senha `dev-123456`) e/ou Google OAuth, deploy da Edge Function `relatorios` + bucket. Aí as telas saem do modo demo.
