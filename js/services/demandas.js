@@ -78,7 +78,8 @@ export async function obterDemanda(id) {
     .from('demandas')
     .select('*, responsavel:usuarios!responsavel_atual_id(nome),'
       + ' solicitante:usuarios!solicitante_id(nome),'
-      + ' escola:escolas!escola_id(nome), tipo:tipos_demanda!tipo_id(nome)')
+      + ' escola:escolas!escola_id(nome),'
+      + ' tipo:tipos_demanda!tipo_id(nome, formato)')
     .eq('id', id).maybeSingle();
   if (error) throw error;
   if (!data) return null;
@@ -87,8 +88,28 @@ export async function obterDemanda(id) {
     responsavel_nome: data.responsavel?.nome ?? null,
     solicitante_nome: data.solicitante?.nome ?? null,
     escola_nome: data.escola?.nome ?? null,
-    tipo_nome: data.tipo?.nome ?? null
+    tipo_nome: data.tipo?.nome ?? null,
+    // Sem tipo, trata como atendimento — mesmo default do sql/046.
+    tipo_formato: data.tipo?.formato ?? 'atendimento'
   };
+}
+
+// Pessoas envolvidas de uma demanda (nome, vínculo, observação). Só as
+// ativas: a inativação é o "apagar" do sistema (regra 1).
+//
+// Até agora esta leitura não existia: a tela devolvia lista vazia fixa,
+// então o dado era gravado na criação, entrava no PDF e nunca aparecia
+// na interface. Ver docs/ESPEC-TIPOS.md §5.
+export async function listarPessoas(demandaId) {
+  await aguardarSessao();
+  const { data, error } = await supabase
+    .from('pessoas_envolvidas')
+    .select('id, nome, vinculo, observacao')
+    .eq('demanda_id', demandaId)
+    .eq('ativo', true)
+    .order('criado_em');
+  if (error) throw error;
+  return data ?? [];
 }
 
 // Caixa de SAÍDA: demandas que o usuário criou OU encaminhou (mesmo que

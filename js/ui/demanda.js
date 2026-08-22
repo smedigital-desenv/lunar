@@ -88,16 +88,17 @@ async function carregarReal(id) {
   ]);
   const demanda = await dem.obterDemanda(id);
   if (!demanda) return null;
-  const [tarefas, movimentacoes, listaUsuarios, listaTipos, listaEscolas, usuario] = await Promise.all([
-    tar.listarPorDemanda(id), mov.listarPorDemanda(id),
-    ref.listarUsuariosAtivos(), ref.listarTipos(), ref.listarEscolas(), auth.usuarioCorrente()
-  ]);
+  const [tarefas, movimentacoes, pessoas, listaUsuarios, listaTipos, listaEscolas, usuario] =
+    await Promise.all([
+      tar.listarPorDemanda(id), mov.listarPorDemanda(id), dem.listarPessoas(id),
+      ref.listarUsuariosAtivos(), ref.listarTipos(), ref.listarEscolas(), auth.usuarioCorrente()
+    ]);
   // Selects de destinatário/responsável precisam de UUIDs reais (não os
   // exemplos u_julia/…). valor = id da conta; rotulo = nome.
   const usuarios = (listaUsuarios || []).map(u => ({ valor: u.id, rotulo: u.nome }));
   const tipos = (listaTipos || []).map(t => ({ valor: t.id, rotulo: t.nome }));
   const escolas = (listaEscolas || []).map(e => ({ valor: e.id, rotulo: e.nome }));
-  return { demanda, tarefas, movimentacoes, pessoas: [], usuario, usuarios, tipos, escolas };
+  return { demanda, tarefas, movimentacoes, pessoas, usuario, usuarios, tipos, escolas };
 }
 
 // ---------------------------------------------------------------- Render
@@ -131,13 +132,24 @@ function renderDados(d) {
        <p><a href="${escapeHtml(d.link_documentacao)}" target="_blank"
              rel="noopener noreferrer">${escapeHtml(d.link_documentacao)}</a></p>`
     : '';
-  return `<h2 class="cartao__titulo">Objeto / queixa</h2>
-    <p>${escapeHtml(d.objeto_queixa)}</p>
-    ${d.descricao ? `<h2 class="cartao__titulo" style="margin-top:1rem">Descrição</h2>
-      <p>${escapeHtml(d.descricao)}</p>` : ''}
-    ${link}`;
+  // Objeto/queixa não existe no controle interno (sql/046). Nas 31
+  // demandas migradas da SUBPED ele guarda uma cópia do título, herdada
+  // do NOT NULL antigo — esconder aqui basta, sem mexer nos dados.
+  const objeto = d.tipo_formato !== 'controle' && d.objeto_queixa
+    ? `<h2 class="cartao__titulo">Objeto / queixa</h2>
+       <p>${escapeHtml(d.objeto_queixa)}</p>`
+    : '';
+  const descricao = d.descricao
+    ? `<h2 class="cartao__titulo"${objeto ? ' style="margin-top:1rem"' : ''}>Descrição</h2>
+       <p>${escapeHtml(d.descricao)}</p>`
+    : '';
+  return `${objeto}${descricao}${link}` ||
+    '<p class="texto-silencioso">Sem descrição registrada.</p>';
 }
-function renderPessoas(pessoas) {
+// No controle interno não há munícipe envolvido: a seção some, em vez de
+// exibir "nenhuma pessoa registrada" em toda demanda da subsecretaria.
+function renderPessoas(pessoas, demanda) {
+  if (demanda?.tipo_formato === 'controle') return '';
   if (!pessoas || !pessoas.length) {
     return `<h2 class="cartao__titulo">Pessoas envolvidas</h2>
       <p class="texto-silencioso">Nenhuma pessoa registrada.</p>`;
@@ -365,7 +377,7 @@ async function iniciar() {
 
   document.getElementById('cabecalho').innerHTML = renderCabecalho(demanda);
   document.getElementById('dados').innerHTML = renderDados(demanda);
-  document.getElementById('pessoas').innerHTML = renderPessoas(pessoas);
+  document.getElementById('pessoas').innerHTML = renderPessoas(pessoas, demanda);
   document.getElementById('arvore').innerHTML = renderArvore(tarefas, usuario.id);
   document.getElementById('timeline').innerHTML = renderTimeline(movimentacoes, usuario, tarefas);
   document.getElementById('acoes').innerHTML = renderAcoes(demanda, usuario, tarefas);

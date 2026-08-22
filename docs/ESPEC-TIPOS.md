@@ -1,7 +1,7 @@
 # Espec — Tipos de demanda e formulários por formato
 
-> **Passos 1 e 2 feitos.** `sql/046` rodado no Supabase em 2026-08-22.
-> Passos 3 e 4 (pessoas envolvidas) pendentes — ver §7.
+> **Passos 1, 2 e 3 feitos.** `sql/046` rodado no Supabase em 2026-08-22.
+> Falta o passo 4 (escrita de pessoas envolvidas) — ver §7.
 > Levantada em 2026-08-22, a partir do pedido: "atendimentos aos munícipes
 > têm campos diferentes dos controles de tarefas de cada subsecretaria".
 
@@ -128,7 +128,12 @@ isso as duas lacunas entram junto com a separação dos formulários.
    tipo escolhido é de controle; o `formato` viaja no próprio `<option>`.
    Sem tipo escolhido **mostra tudo** — mesmo critério do banco, que só
    dispensa o objeto/queixa quando o tipo é de controle.
-3. **Pessoas envolvidas — leitura.** Serviço + exibição no detalhe.
+3. ~~**Pessoas envolvidas — leitura.**~~ **Feito.** `listarPessoas()` em
+   `services/demandas.js` (RLS já tinha a policy de SELECT amarrada à
+   visibilidade da demanda) e `demanda.js` deixou de devolver a lista
+   vazia fixa. A seção some no controle, e `renderDados` esconde o
+   objeto/queixa nesse formato — é o que tira da tela a cópia do título
+   herdada do NOT NULL antigo, sem tocar nos dados (§6).
 4. **Pessoas envolvidas — escrita.** RPC para acrescentar/corrigir/
    inativar depois da criação, com justificativa (regra 7), restrita a
    quem faz parte do processo (§8.3).
