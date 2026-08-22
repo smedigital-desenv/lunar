@@ -8,7 +8,7 @@ import { supabase, aguardarSessao } from './supabaseClient.js';
 export async function listarTipos() {
   await aguardarSessao();
   const { data, error } = await supabase
-    .from('tipos_demanda').select('id, nome').eq('ativo', true).order('nome');
+    .from('tipos_demanda').select('id, nome, formato').eq('ativo', true).order('nome');
   if (error) throw error;
   return data;
 }

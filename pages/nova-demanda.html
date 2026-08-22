@@ -30,8 +30,8 @@
         <input class="form-control" id="titulo" name="titulo" required maxlength="200">
       </div>
 
-      <div class="mb-3">
-        <label class="form-label" for="objeto">Objeto / queixa *</label>
+      <div class="mb-3" data-so="atendimento">
+        <label class="form-label" for="objeto">Objeto / queixa <span data-obrig>*</span></label>
         <textarea class="form-control" id="objeto" name="objeto" rows="3" required></textarea>
         <div class="form-text">Campo estruturado que alimenta o relatório do processo.</div>
       </div>
@@ -72,11 +72,11 @@
           <select class="form-select" id="responsavel" name="responsavel"></select>
           <div class="form-text">Em branco = você.</div>
         </div>
-        <div class="mb-3">
+        <div class="mb-3" data-so="atendimento">
           <label class="form-label" for="escola">Escola</label>
           <select class="form-select" id="escola" name="escola"></select>
         </div>
-        <div class="mb-3">
+        <div class="mb-3" data-so="atendimento">
           <label class="form-label" for="aluno">Aluno</label>
           <input class="form-control" id="aluno" name="aluno">
         </div>
@@ -90,7 +90,7 @@
                  placeholder="https://…">
           <div class="form-text">Pasta ou arquivo de referência. Deve começar com http:// ou https://.</div>
         </div>
-        <div class="mb-3">
+        <div class="mb-3" data-so="atendimento">
           <label class="form-label" for="sigilo">Sigilo</label>
           <select class="form-select" id="sigilo" name="sigilo">
             <option value="normal" selected>Normal</option>
@@ -99,7 +99,7 @@
         </div>
       </div>
 
-      <fieldset class="mb-3">
+      <fieldset class="mb-3" data-so="atendimento">
         <legend class="cartao__titulo">Pessoas envolvidas</legend>
         <div id="pessoas"></div>
         <button type="button" id="add-pessoa" class="btn btn-sm btn-outline-primary">+ Adicionar pessoa</button>

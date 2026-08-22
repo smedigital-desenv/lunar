@@ -1,7 +1,7 @@
 # Espec — Tipos de demanda e formulários por formato
 
-> **Passo 1 implementado** em `sql/046_tipos_formato.sql` (falta rodar no
-> Supabase). Passos 2 a 4 pendentes — ver §7.
+> **Passos 1 e 2 feitos.** `sql/046` rodado no Supabase em 2026-08-22.
+> Passos 3 e 4 (pessoas envolvidas) pendentes — ver §7.
 > Levantada em 2026-08-22, a partir do pedido: "atendimentos aos munícipes
 > têm campos diferentes dos controles de tarefas de cada subsecretaria".
 
@@ -123,8 +123,11 @@ isso as duas lacunas entram junto com a separação dos formulários.
    exigi-lo conforme o formato; tipos criados/renomeados/inativados (um
    único *Controle da Subsecretaria*, sem restrição de quem escolhe); as
    31 demandas recebem o tipo de controle.
-2. **Tela de nova demanda.** Campos aparecem conforme o formato do tipo
-   escolhido. Sem tipo escolhido, mostra o mínimo comum.
+2. ~~**Tela de nova demanda.**~~ **Feito.** Os blocos que só valem no
+   atendimento levam `data-so="atendimento"` no HTML e somem quando o
+   tipo escolhido é de controle; o `formato` viaja no próprio `<option>`.
+   Sem tipo escolhido **mostra tudo** — mesmo critério do banco, que só
+   dispensa o objeto/queixa quando o tipo é de controle.
 3. **Pessoas envolvidas — leitura.** Serviço + exibição no detalhe.
 4. **Pessoas envolvidas — escrita.** RPC para acrescentar/corrigir/
    inativar depois da criação, com justificativa (regra 7), restrita a
