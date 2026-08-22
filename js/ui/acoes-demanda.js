@@ -7,6 +7,11 @@
 import { abrirFormulario, PRIORIDADES } from './modais.js';
 import { toast } from './componentes.js';
 
+const VINCULOS = [
+  { valor: 'aluno', rotulo: 'Aluno' }, { valor: 'responsavel', rotulo: 'Responsável' },
+  { valor: 'servidor', rotulo: 'Servidor' }, { valor: 'outro', rotulo: 'Outro' }
+];
+
 // Retorna { titulo, textoConfirmar, campos } para a ação, ou null.
 export function camposDaAcao(chave, ctx) {
   const usuarios = ctx.usuarios || [];
@@ -68,6 +73,27 @@ export function camposDaAcao(chave, ctx) {
       campos.push({ nome: 'conclusao', rotulo: 'Conclusão / desfecho', tipo: 'textarea', obrigatorio: true });
       return { titulo: 'Concluir demanda', textoConfirmar: 'Concluir', campos };
     }
+    // Pessoas envolvidas (sql/047): só quem participa da demanda. A
+    // justificativa é obrigatória em todas — regra 7.
+    case 'pessoa_adicionar': return {
+      titulo: 'Acrescentar pessoa envolvida', textoConfirmar: 'Acrescentar', campos: [
+        { nome: 'nome', rotulo: 'Nome', tipo: 'text', obrigatorio: true },
+        { nome: 'vinculo', rotulo: 'Vínculo', tipo: 'select', opcoes: VINCULOS },
+        { nome: 'observacao', rotulo: 'Observação', tipo: 'text' },
+        { nome: 'justificativa', rotulo: 'Justificativa', tipo: 'textarea', obrigatorio: true } ] };
+    case 'pessoa_editar': {
+      const p = ctx.pessoa || {};
+      return { titulo: 'Corrigir pessoa envolvida', textoConfirmar: 'Salvar', campos: [
+        { nome: 'nome', rotulo: 'Nome', tipo: 'text', valor: p.nome, obrigatorio: true },
+        { nome: 'vinculo', rotulo: 'Vínculo', tipo: 'select', opcoes: VINCULOS, valor: p.vinculo },
+        { nome: 'observacao', rotulo: 'Observação', tipo: 'text', valor: p.observacao },
+        { nome: 'justificativa', rotulo: 'Justificativa', tipo: 'textarea', obrigatorio: true } ] };
+    }
+    case 'pessoa_inativar': return {
+      titulo: 'Remover pessoa envolvida', textoConfirmar: 'Remover', campos: [
+        { tipo: 'aviso', texto: 'O registro não é apagado: fica inativo, com o motivo, '
+          + 'e sai da tela e do relatório.' },
+        { nome: 'motivo', rotulo: 'Motivo', tipo: 'textarea', obrigatorio: true } ] };
     case 'reabrir': return { titulo: 'Reabrir demanda', textoConfirmar: 'Reabrir', campos: [
       { nome: 'justificativa', rotulo: 'Justificativa', tipo: 'textarea', obrigatorio: true } ] };
     case 'editar': {
@@ -179,6 +205,16 @@ async function executar(chave, vals, ctx) {
       }
       return dem.editarDemanda(id, campos, vals.justificativa);
     }
+    case 'pessoa_adicionar':
+      return dem.adicionarPessoa({ demandaId: id, nome: vals.nome,
+        vinculo: vals.vinculo, observacao: vals.observacao,
+        justificativa: vals.justificativa });
+    case 'pessoa_editar':
+      return dem.editarPessoa(ctx.pessoa.id, { nome: vals.nome,
+        vinculo: vals.vinculo, observacao: vals.observacao,
+        justificativa: vals.justificativa });
+    case 'pessoa_inativar':
+      return dem.inativarPessoa(ctx.pessoa.id, vals.motivo);
     case 'inativar': return dem.inativarDemanda(id, vals.motivo);
     case 'reativar': return dem.reativarDemanda(id, vals.motivo);
     case 'retificar': return mov.retificar(ctx.movId, vals.texto_correto, vals.justificativa);

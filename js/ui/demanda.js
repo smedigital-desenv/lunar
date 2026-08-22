@@ -148,17 +148,32 @@ function renderDados(d) {
 }
 // No controle interno não há munícipe envolvido: a seção some, em vez de
 // exibir "nenhuma pessoa registrada" em toda demanda da subsecretaria.
-function renderPessoas(pessoas, demanda) {
+function renderPessoas(pessoas, demanda, podeEditar) {
   if (demanda?.tipo_formato === 'controle') return '';
+
+  // Corrigir/remover só para quem participa (sql/047). Esconder aqui é
+  // cortesia, não segurança: a função do banco recusa de qualquer forma.
+  const acoes = (p) => podeEditar
+    ? ` <button type="button" class="botao-inline" data-pessoa="${escapeHtml(p.id)}"
+          data-acao-pessoa="pessoa_editar">corrigir</button>
+        <button type="button" class="botao-inline" data-pessoa="${escapeHtml(p.id)}"
+          data-acao-pessoa="pessoa_inativar">remover</button>`
+    : '';
+  const botaoAdd = podeEditar
+    ? `<button type="button" class="btn btn-sm btn-outline-primary"
+         data-acao-pessoa="pessoa_adicionar">+ Acrescentar pessoa</button>`
+    : '';
+
   if (!pessoas || !pessoas.length) {
     return `<h2 class="cartao__titulo">Pessoas envolvidas</h2>
-      <p class="texto-silencioso">Nenhuma pessoa registrada.</p>`;
+      <p class="texto-silencioso">Nenhuma pessoa registrada.</p>${botaoAdd}`;
   }
   const linhas = pessoas.map(p =>
     `<li><strong>${escapeHtml(p.nome)}</strong>
       <span class="texto-silencioso">(${escapeHtml(p.vinculo)})</span>
-      ${p.observacao ? `— ${escapeHtml(p.observacao)}` : ''}</li>`).join('');
-  return `<h2 class="cartao__titulo">Pessoas envolvidas</h2><ul>${linhas}</ul>`;
+      ${p.observacao ? `— ${escapeHtml(p.observacao)}` : ''}${acoes(p)}</li>`).join('');
+  return `<h2 class="cartao__titulo">Pessoas envolvidas</h2>
+    <ul>${linhas}</ul>${botaoAdd}`;
 }
 
 function renderArvore(tarefas, usuarioId) {
@@ -366,6 +381,18 @@ function renderAcoes(d, usuario, tarefas) {
   return partes.join('');
 }
 
+// Cliques das ações de pessoa envolvida. Recarrega ao gravar, porque a
+// lista vem de uma consulta separada.
+function ligarAcoesPessoa(ctx, pessoas) {
+  document.getElementById('pessoas').addEventListener('click', async (e) => {
+    const b = e.target.closest('[data-acao-pessoa]');
+    if (!b) return;
+    const id = b.dataset.pessoa;
+    const pessoa = id ? (pessoas || []).find(p => p.id === id) : null;
+    await abrirEExecutar(b.dataset.acaoPessoa, { ...ctx, pessoa });
+  });
+}
+
 // ---------------------------------------------------------------- Inicialização
 async function iniciar() {
   const dados = await carregar();
@@ -377,7 +404,12 @@ async function iniciar() {
 
   document.getElementById('cabecalho').innerHTML = renderCabecalho(demanda);
   document.getElementById('dados').innerHTML = renderDados(demanda);
-  document.getElementById('pessoas').innerHTML = renderPessoas(pessoas, demanda);
+  // Participa quem está em `participantes` — o mesmo critério do sql/047.
+  // Em demonstração não há lista: libera para a tela ficar exercitável.
+  const souParticipante = demo
+    || (demanda.participantes_ids || []).includes(usuario.id);
+  document.getElementById('pessoas').innerHTML =
+    renderPessoas(pessoas, demanda, souParticipante);
   document.getElementById('arvore').innerHTML = renderArvore(tarefas, usuario.id);
   document.getElementById('timeline').innerHTML = renderTimeline(movimentacoes, usuario, tarefas);
   document.getElementById('acoes').innerHTML = renderAcoes(demanda, usuario, tarefas);
@@ -387,6 +419,8 @@ async function iniciar() {
     tipos: dados.tipos || [], escolas: dados.escolas || [],
     souDono: ehDonoDaDemanda(demanda, usuario), podeEditarGeral: ehGerenteMais(usuario)
   };
+
+  ligarAcoesPessoa(ctxBase, pessoas);
 
   document.getElementById('acoes').addEventListener('click', (e) => {
     const b = e.target.closest('[data-acao]');

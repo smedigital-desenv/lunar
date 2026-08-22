@@ -1022,6 +1022,14 @@ body.embed .pagina { padding-top: .6rem; }
   .compacto__linha2 .ms-auto { margin-left: 0 !important; width: 100%; }
 }
 
+/* Ação discreta ao lado de um item de lista (corrigir/remover pessoa). */
+.botao-inline {
+  background: none; border: 0; padding: 0 .15rem;
+  font: inherit; font-size: .78rem;
+  color: var(--cor-primaria); text-decoration: underline; cursor: pointer;
+}
+.botao-inline:hover { color: var(--cor-primaria-escura); }
+
 /* ---- Cartão de processo (Meus processos e Todos) -------------------
    Estes cartões só existem no celular: no desktop as duas telas usam a
    tabela (`d-md-none` no invólucro). Por isso o desenho aqui é para tela

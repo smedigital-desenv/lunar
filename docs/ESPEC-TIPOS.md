@@ -1,7 +1,7 @@
 # Espec — Tipos de demanda e formulários por formato
 
-> **Passos 1, 2 e 3 feitos.** `sql/046` rodado no Supabase em 2026-08-22.
-> Falta o passo 4 (escrita de pessoas envolvidas) — ver §7.
+> **Os 4 passos feitos.** `sql/046` rodado no Supabase em 2026-08-22;
+> **falta rodar o `sql/047`**.
 > Levantada em 2026-08-22, a partir do pedido: "atendimentos aos munícipes
 > têm campos diferentes dos controles de tarefas de cada subsecretaria".
 
@@ -134,9 +134,14 @@ isso as duas lacunas entram junto com a separação dos formulários.
    vazia fixa. A seção some no controle, e `renderDados` esconde o
    objeto/queixa nesse formato — é o que tira da tela a cópia do título
    herdada do NOT NULL antigo, sem tocar nos dados (§6).
-4. **Pessoas envolvidas — escrita.** RPC para acrescentar/corrigir/
-   inativar depois da criação, com justificativa (regra 7), restrita a
-   quem faz parte do processo (§8.3).
+4. ~~**Pessoas envolvidas — escrita.**~~ **Feito:** `sql/047`.
+   `fn_pessoa_envolvida_adicionar/editar/inativar`, todas exigindo
+   justificativa (regra 7) e restritas a `participantes` via
+   `fn_e_participante`. `pessoas_envolvidas` ganhou
+   `inativado_em/inativado_por/motivo_inativacao` + CHECK — mesma lacuna
+   da regra 1 encontrada em `tipos_demanda`. Cada operação registra
+   movimentação `edicao` na timeline: é conteúdo que alimenta o
+   relatório, não detalhe interno.
 
 ## 8. Decisões complementares (2026-08-22)
 

@@ -79,7 +79,8 @@ export async function obterDemanda(id) {
     .select('*, responsavel:usuarios!responsavel_atual_id(nome),'
       + ' solicitante:usuarios!solicitante_id(nome),'
       + ' escola:escolas!escola_id(nome),'
-      + ' tipo:tipos_demanda!tipo_id(nome, formato)')
+      + ' tipo:tipos_demanda!tipo_id(nome, formato),'
+      + ' participantes(usuario_id, ativo)')
     .eq('id', id).maybeSingle();
   if (error) throw error;
   if (!data) return null;
@@ -90,7 +91,12 @@ export async function obterDemanda(id) {
     escola_nome: data.escola?.nome ?? null,
     tipo_nome: data.tipo?.nome ?? null,
     // Sem tipo, trata como atendimento — mesmo default do sql/046.
-    tipo_formato: data.tipo?.formato ?? 'atendimento'
+    tipo_formato: data.tipo?.formato ?? 'atendimento',
+    // Quem participa pode corrigir as pessoas envolvidas (sql/047). Vem
+    // junto para a tela não precisar de outra consulta; quem decide é a
+    // função do banco — isto só evita oferecer o que seria recusado.
+    participantes_ids: (data.participantes ?? [])
+      .filter(p => p.ativo !== false).map(p => p.usuario_id)
   };
 }
 
@@ -110,6 +116,28 @@ export async function listarPessoas(demandaId) {
     .order('criado_em');
   if (error) throw error;
   return data ?? [];
+}
+
+// Escrita de pessoas envolvidas (sql/047). Só quem está em
+// `participantes` pode — a função do banco é quem decide; o front só
+// evita oferecer o que seria recusado.
+export function adicionarPessoa({ demandaId, nome, vinculo, observacao, justificativa }) {
+  return rpc('fn_pessoa_envolvida_adicionar', {
+    p_demanda_id: demandaId, p_nome: nome, p_vinculo: vinculo,
+    p_observacao: observacao ?? null, p_justificativa: justificativa
+  });
+}
+
+// Campos não informados ficam como estão; observação vazia limpa.
+export function editarPessoa(id, { nome, vinculo, observacao, justificativa }) {
+  return rpc('fn_pessoa_envolvida_editar', {
+    p_pessoa_id: id, p_nome: nome ?? null, p_vinculo: vinculo ?? null,
+    p_observacao: observacao ?? null, p_justificativa: justificativa
+  });
+}
+
+export function inativarPessoa(id, motivo) {
+  return rpc('fn_pessoa_envolvida_inativar', { p_pessoa_id: id, p_motivo: motivo });
 }
 
 // Caixa de SAÍDA: demandas que o usuário criou OU encaminhou (mesmo que
