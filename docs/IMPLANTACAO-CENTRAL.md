@@ -235,6 +235,12 @@ que devia.
 
 ## Passo 5 — Cadastrar as pessoas no central
 
+> As **telas** do sistema (o que cada papel enxerga) são cadastro à parte, e
+> não acontece sozinho quando se cria uma página nova aqui: a matriz completa
+> e o script idempotente estão em [`CATALOGO-CENTRAL.md`](CATALOGO-CENTRAL.md).
+> Rode-o antes de liberar gente — tela fora do catálogo não abre para ninguém.
+
+
 Em `https://smedigital.com.br/central/admin.html`:
 
 1. **Usuários** — cadastre o e-mail (allowlist) e deixe ativo.
