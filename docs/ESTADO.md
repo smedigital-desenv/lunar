@@ -3,7 +3,7 @@
 > Atualizado ao final de cada sessão do Claude Code. Máximo 40 linhas.
 > Formato: o que está pronto, o que vem a seguir, decisões que não estão no código.
 
-**Última atualização:** 2026-08-21 (Tela consolidada — Entrada + Saída)
+**Última atualização:** 2026-08-25 (Porta de entrada em `/lunar/`)
 **Fase atual:** Sessões 1–11 concluídas. Módulo de Licitações pronto (L1–L6). Tela consolidada de processos entrada/saída com cronograma. Falta implantar licitações no real (ver checklist). Fase 2 do módulo (atas/contratos, solicitações, KPIs, regras de fase) por planejar.
 
 > **Todos os SQL (`001`…`013` + seed) executados no Supabase** (confirmado pelo usuário, 2026-08-01).
@@ -90,6 +90,8 @@
 - **Nota sobre o recorte:** como a migração da SUBPED pôs as 31 demandas na Subsecretaria (o trabalho está nas *tarefas* das gerências), filtrar por uma gerência devolve 0 demandas. Filtrar por secretaria é o recorte que faz sentido nesses dados.
 
 - **Cartões do celular reorganizados (2026-08-22, visto no aparelho):** o número dividia a linha com o título, que sobrava numa coluna estreita e quebrava em três linhas; "Prazo: —" gastava uma linha inteira sem informar nada; e os marcos cortavam cedo (`max-width: 11rem`) sobrando espaço vazio à direita. Agora o **número fica sozinho no topo com o prazo à direita** (espaço que estava vazio), o **título usa a largura inteira** com corte em 3 linhas, o prazo some quando não existe e o marco ocupa a linha toda. Altura da lista caiu de 584px para 507px em "Meus processos" (415px em "Todos") a 390px — 4 cartões e a paginação cabem na tela, contra 3 antes. Estilos **escopados em `.cartao-processo`**: `.cartao--compacto`/`.compacto__*` são compartilhados com a lista de Licitações, que ficou intocada. Desktop reverificado nas duas telas — sem regressão.
+
+- **Porta de entrada de `smedigital.com.br/lunar` (2026-08-25):** o repositório não tinha `index.html` na raiz — como o Pages serve este repositório em `/lunar/`, quem digitava o endereço sem página caía no **404 do Pages**, sem nada que disparasse a guarda de acesso. As únicas portas eram `/lunar/pages/caixa-entrada.html` e `/lunar/pages/login.html`. O `index.html` novo encaminha (`location.replace`) para `pages/caixa-entrada.html`: quem já tem sessão no central entra direto (SSO silencioso) e quem não tem é levado ao `/central/login.html` pela guarda de sempre — a página **não decide login nenhum**. Aceita `?next=`, mas só caminho dentro do sistema (`pages/…` ou `/lunar/…`, sem `:` nem `//`): sem essa conferência viraria ponte de redirecionamento para qualquer site. Sem JavaScript, o cartão com o botão "Entrar" fica visível. **Verificado no Chromium local** servindo o repositório em `/lunar/`: 7 casos de encaminhamento (padrão, `next` relativo, `next` absoluto do lunar, outro site, `//`, `javascript:`, `../central/`) e o cartão a 390px com JS desligado.
 
 ## Próximo passo
 

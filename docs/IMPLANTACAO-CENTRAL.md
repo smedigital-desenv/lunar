@@ -225,7 +225,9 @@ excluí-la também.
 
 ### Conferir
 
-Depois do primeiro deploy, `https://smedigital.com.br/lunar/pages/caixa-entrada.html`
+Depois do primeiro deploy, `https://smedigital.com.br/lunar/` deve abrir o
+sistema: o `index.html` da raiz encaminha para a caixa de entrada, e é a guarda
+que resolve a sessão. `https://smedigital.com.br/lunar/pages/caixa-entrada.html`
 deve carregar. Sem sessão no central, o esperado é ser levado para
 `/central/login.html` — isso já é o controle de acesso funcionando.
 
