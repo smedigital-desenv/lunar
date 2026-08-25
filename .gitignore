@@ -17,3 +17,20 @@ migracao_subped_dados_conferencia.sql
 # Sistema
 .DS_Store
 Thumbs.db
+
+# ── Dados: NUNCA versionar (repositório público) ─────────────────────────────
+# Script de carga e export carregam dado real junto, quase sempre sem quem
+# escreveu perceber. Entregue-os fora do repositório, para rodar no SQL Editor.
+# ⚠️ O .gitignore NÃO destrava arquivo já rastreado, e NÃO apaga o histórico.
+*.sql
+*.csv
+*.tsv
+*.dump
+*.sqlite
+*.sqlite3
+*.parquet
+*.xls
+*.xlsx
+*.xlsm
+*.mdb
+*.accdb
