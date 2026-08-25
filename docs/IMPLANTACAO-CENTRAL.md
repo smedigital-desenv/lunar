@@ -261,8 +261,9 @@ A partir daí, esse administrador cadastra os demais em `pages/admin.html`
 > ⚠️ **Super admin com e-mail fora do domínio não entra.** São três camadas
 > que barram: o trigger `trg_bloquear_dominio` em `auth.users`, o CHECK
 > `chk_email_dominio` na tabela `usuarios` e a validação nas funções de
-> provisionamento. `desenv.sme@gmail.com` administra o central, mas precisa de
-> uma conta `@educacao.pmrp.sp.gov.br` para usar o sistema de Demandas.
+> provisionamento. O administrador da rede é `desenvsme@educacao.pmrp.sp.gov.br`,
+> que já é do domínio — antes a administração saía de uma conta `@gmail.com`,
+> que passava no central mas era barrada aqui.
 > Mudar isso significa alterar as três camadas — é decisão de segurança, não
 > ajuste de configuração.
 
