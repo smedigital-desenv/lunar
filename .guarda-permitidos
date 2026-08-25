@@ -1,0 +1,31 @@
+# Exceções da guarda anti-vazamento.
+#
+# Um caminho por linha, relativo à raiz do repositório; linha terminada em `/`
+# cobre a pasta. Escreva SEMPRE o porquê — em bloco acima ou depois de `#` na
+# mesma linha. Sem justificativa, a próxima pessoa não tem como julgar se a
+# exceção ainda vale.
+#
+# ⚠️ Só entra aqui arquivo que a guarda barraria pela EXTENSÃO e que foi ABERTO
+# e conferido: sem nome, e-mail, RA, matrícula, CPF, telefone ou endereço. Esta
+# lista é para modelo em branco e definição de esquema — nunca para dado com
+# dono.
+#
+# ⚠️ Liberar o caminho NÃO desliga a checagem de CONTEÚDO. Um arquivo novo
+# dentro de uma pasta liberada continua barrado se trouxer CPF, chave privada,
+# service_role ou lista de e-mails. Conferido.
+#
+# ⚠️ O MESMO arquivo é lido pela guarda local, pelo workflow `guarda-dados.yml`
+# e pela auditoria semanal da rede.
+
+# Definição do banco: DDL, funções SECURITY DEFINER, policies de RLS e triggers.
+# É o esquema do sistema, referenciado por docs/SCHEMA.md — não é carga de dados.
+# Conferido em 2026-08-25 nos 47 arquivos: nenhum CPF, nenhuma credencial. Os
+# únicos endereços são contas de PAPEL do seed de desenvolvimento (secretario,
+# subped, admin.ti…), declaradas fictícias no topo de 008_seed.sql, e o padrão
+# de domínio `like '%@…'` das checagens de e-mail institucional.
+sql/
+
+# Consultas de diagnóstico da migração. O endereço que aparece é a conta de
+# sistema `dados.importados`, autora das linhas migradas — não é de ninguém.
+scripts/diagnostico_subped.sql
+scripts/diagnostico_subped_pessoas.sql
