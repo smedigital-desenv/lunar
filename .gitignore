@@ -17,3 +17,14 @@ migracao_subped_dados_conferencia.sql
 # Sistema
 .DS_Store
 Thumbs.db
+
+# Arquivo de dados NUNCA é versionado — este repositório é público e o site é
+# servido da raiz, então todo arquivo commitado vira URL baixável. Antes desta
+# regra o .gitignore bloqueava só três .sql pelo nome, e 47 outros entraram
+# pela porta aberta. Scripts de banco ficam em db/, fora do Git.
+*.sql
+*.csv
+*.dump
+*.xlsx
+*.xls
+db/
