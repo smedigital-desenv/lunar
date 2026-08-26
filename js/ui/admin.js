@@ -31,6 +31,7 @@ const USUARIOS_EXEMPLO = [
 let svc = null;   // serviço real quando há sessão; null em demo
 let ehAdmin = true;
 let dados = null;
+let mostrarInativos = false;
 
 function normalizaUsuario(u) {
   return {
@@ -113,9 +114,8 @@ function renderPendentes() {
     </form>`).join('');
 }
 
-function renderUsuarios() {
-  if (!dados.usuarios.length) return '<p class="texto-silencioso">Nenhum usuário.</p>';
-  return `<ul class="admin-lista">` + dados.usuarios.map(u => `
+function itemUsuario(u) {
+  return `
     <li class="admin-usuario${u.ativo ? '' : ' admin-usuario--inativo'}">
       <div class="admin-usuario__info">
         <strong>${escapeHtml(u.nome)}</strong>
@@ -128,12 +128,29 @@ function renderUsuarios() {
           : `<span class="badge-chip badge-situacao--inativa">Inativo</span>
              <button class="btn btn-sm btn-outline-secondary" data-acao="reativar" data-id="${escapeHtml(u.id)}">Reativar</button>`}
       </div>
-    </li>`).join('') + `</ul>`;
+    </li>`;
+}
+
+// Inativo não some do banco (regra 1), mas some da listagem principal —
+// fica só no filtro "Ver inativos", que carrega sob demanda.
+function renderUsuarios() {
+  const ativos = dados.usuarios.filter(u => u.ativo);
+  if (!ativos.length) return '<p class="texto-silencioso">Nenhum usuário ativo.</p>';
+  return `<ul class="admin-lista">` + ativos.map(itemUsuario).join('') + `</ul>`;
+}
+
+function renderInativos() {
+  const inativos = dados.usuarios.filter(u => !u.ativo);
+  if (!inativos.length) return '<p class="texto-silencioso">Nenhum usuário inativo.</p>';
+  return `<ul class="admin-lista">` + inativos.map(itemUsuario).join('') + `</ul>`;
 }
 
 function pintar() {
   document.getElementById('pendentes').innerHTML = renderPendentes();
   document.getElementById('usuarios').innerHTML = renderUsuarios();
+  const bloco = document.getElementById('usuarios-inativos');
+  bloco.hidden = !mostrarInativos;
+  if (mostrarInativos) bloco.innerHTML = renderInativos();
 }
 
 // ---------------------------------------------------------------- Ações
@@ -192,9 +209,18 @@ async function iniciar() {
     const form = e.target.closest('.admin-pend');
     if (form) { e.preventDefault(); aoLiberar(form); }
   });
-  document.getElementById('usuarios').addEventListener('click', (e) => {
+  const aoClicarAcao = (e) => {
     const b = e.target.closest('[data-acao]');
     if (b) aoMudarAtivo(b.dataset.acao, b.dataset.id);
+  };
+  document.getElementById('usuarios').addEventListener('click', aoClicarAcao);
+  document.getElementById('usuarios-inativos').addEventListener('click', aoClicarAcao);
+
+  document.getElementById('btn-ver-inativos').addEventListener('click', () => {
+    mostrarInativos = !mostrarInativos;
+    document.getElementById('btn-ver-inativos').textContent =
+      mostrarInativos ? 'Ocultar inativos' : 'Ver inativos';
+    pintar();
   });
 
   document.getElementById('carregando').hidden = true;

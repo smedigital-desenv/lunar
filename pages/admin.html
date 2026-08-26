@@ -42,8 +42,12 @@
       </section>
 
       <section class="cartao">
-        <h2 class="cartao__titulo">Usuários</h2>
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 class="cartao__titulo mb-0">Usuários</h2>
+          <button id="btn-ver-inativos" type="button" class="btn btn-sm btn-link p-0">Ver inativos</button>
+        </div>
         <div id="usuarios"></div>
+        <div id="usuarios-inativos" hidden></div>
       </section>
     </div>
   </main>
