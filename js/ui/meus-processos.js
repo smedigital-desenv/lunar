@@ -1,5 +1,5 @@
 // =====================================================================
-// meus-processos.js — visão única dos meus processos de entrada e saída.
+// meus-processos.js — visão única dos meus processos.
 // Tabela ordenável no desktop, cartões no celular, detalhe em modal sobre
 // a lista. Mesmo padrão da tela de Licitações.
 // O desenho fica em meus-processos-render.js; aqui é estado e carga.
@@ -27,11 +27,11 @@ const PREDICADOS = {
 const PESO_PRIORIDADE = { urgente: 0, alta: 1, normal: 2, baixa: 3 };
 
 const estado = {
-  fluxo: 'todos', situacao: 'todos', busca: '',
+  posse: 'todos', situacao: 'todos', busca: '',
   ordem: 'prazo', asc: true, pagina: 1
 };
 
-let processos = [];        // lista já unificada das duas caixas
+let processos = [];        // lista já unificada das duas consultas
 let emDemo = false;
 let truncado = false;
 let listaSuja = false;     // o modal gravou algo? então a lista recarrega
@@ -47,28 +47,41 @@ const EXEMPLO_ENTRADA = [
   { id: 'd3', numero: 'DEM-2026-000058', titulo: 'Vazamento no telhado — vistoria', situacao: 'aberta', prioridade: 'urgente', sigilo: 'normal', prazo: '2026-08-01' }
 ];
 const EXEMPLO_SAIDA = [
-  { id: 'd1', numero: 'DEM-2026-000042', titulo: 'Verificar contrato de merenda', situacao: 'em_andamento', prioridade: 'alta', sigilo: 'normal', prazo: '2026-08-05' },
-  { id: 'd8', numero: 'DEM-2026-000044', titulo: 'Pedido de transporte escolar', situacao: 'aberta', prioridade: 'normal', sigilo: 'normal', prazo: '2026-08-18' },
-  { id: 'd9', numero: 'DEM-2026-000047', titulo: 'Ocorrência com aluno (sigilo)', situacao: 'aguardando_complementacao', prioridade: 'alta', sigilo: 'restrito', prazo: '2026-08-03' }
+  { id: 'd1', numero: 'DEM-2026-000042', titulo: 'Verificar contrato de merenda', situacao: 'em_andamento', prioridade: 'alta', sigilo: 'normal', prazo: '2026-08-05', vinculo: 'criador' },
+  { id: 'd8', numero: 'DEM-2026-000044', titulo: 'Pedido de transporte escolar', situacao: 'aberta', prioridade: 'normal', sigilo: 'normal', prazo: '2026-08-18', vinculo: 'criador' },
+  { id: 'd9', numero: 'DEM-2026-000047', titulo: 'Ocorrência com aluno (sigilo)', situacao: 'aguardando_complementacao', prioridade: 'alta', sigilo: 'restrito', prazo: '2026-08-03', vinculo: 'encaminhou' },
+  { id: 'd14', numero: 'DEM-2026-000068', titulo: 'Parecer técnico já entregue', situacao: 'em_andamento', prioridade: 'normal', sigilo: 'normal', prazo: '2026-08-22', vinculo: 'executou' },
+  { id: 'd11', numero: 'DEM-2026-000052', titulo: 'Surto de piolho — comunicado', situacao: 'concluida', prioridade: 'normal', sigilo: 'normal', prazo: '2026-07-20', vinculo: 'criador' }
 ];
 
-// Junta as duas caixas numa lista só. A mesma demanda pode estar nas duas
-// (eu criei E sou o responsável): vira UMA linha com fluxo 'ambos', senão
-// apareceria duplicada e pareceria defeito.
+// Em que estado o processo está PARA MIM. As duas consultas do banco já
+// respondem quase tudo: o que vem da caixa de entrada tem trabalho meu em
+// aberto (ela nunca devolve concluída); o que vem só da outra depende do
+// vínculo que a RPC informa — criador, encaminhou e delegou_subtarefa são
+// acompanhamento, executou é trabalho meu já entregue.
+function posseDe(d, veioDaEntrada) {
+  if (veioDaEntrada) return 'comigo';
+  if (d.situacao === 'concluida') return 'encerrado';
+  return d.vinculo === 'executou' ? 'fiz_minha_parte' : 'com_outro';
+}
+
+// Junta as duas consultas numa lista só. A mesma demanda costuma estar nas
+// duas (eu criei E sou o responsável) e vira UMA linha: quem chega primeiro
+// fica, e a entrada é lida primeiro justamente para 'comigo' prevalecer —
+// se há trabalho meu em aberto, é isso que importa saber.
 function unificar(entrada, saida) {
   const por = new Map();
-  const juntar = (lista, fluxo) => (lista ?? []).forEach(d => {
-    const ja = por.get(d.id);
-    if (ja) { ja.fluxo = 'ambos'; return; }
+  const juntar = (lista, veioDaEntrada) => (lista ?? []).forEach(d => {
+    if (por.has(d.id)) return;
     por.set(d.id, {
       demandaId: d.id, numero: d.numero, titulo: d.titulo,
       situacao: d.situacao, prioridade: d.prioridade,
-      sigilo: d.sigilo, prazo: d.prazo, fluxo,
+      sigilo: d.sigilo, prazo: d.prazo, posse: posseDe(d, veioDaEntrada),
       href: `./demanda.html?id=${encodeURIComponent(d.id)}`
     });
   });
-  juntar(entrada, 'entrada');
-  juntar(saida, 'saida');
+  juntar(entrada, true);
+  juntar(saida, false);
   return [...por.values()];
 }
 
@@ -135,10 +148,10 @@ function preencherCronogramas(itens) {
 function selecionar() {
   let itens = processos.filter(PREDICADOS[estado.situacao] ?? PREDICADOS.todos);
 
-  // 'ambos' pertence às duas caixas, então aparece nos dois filtros.
-  if (estado.fluxo !== 'todos') {
-    itens = itens.filter(i => i.fluxo === estado.fluxo || i.fluxo === 'ambos');
-  }
+  // Os estados não se sobrepõem: filtrar é comparação simples. 'Encerrado'
+  // não é opção aqui — quem procura processo concluído usa o filtro de
+  // situação, para não haver dois controles dizendo a mesma coisa.
+  if (estado.posse !== 'todos') itens = itens.filter(i => i.posse === estado.posse);
   const termo = estado.busca.trim().toLowerCase();
   if (termo) {
     itens = itens.filter(i => i.numero.toLowerCase().includes(termo)
@@ -187,7 +200,7 @@ function abrir(href) {
   });
 }
 
-for (const [id, chave] of [['f-fluxo', 'fluxo'], ['f-situacao', 'situacao']]) {
+for (const [id, chave] of [['f-posse', 'posse'], ['f-situacao', 'situacao']]) {
   document.getElementById(id).addEventListener('change', (e) => {
     estado[chave] = e.target.value;
     estado.pagina = 1;

@@ -48,9 +48,10 @@
   /* Fluxo do processo em "Meus processos" — de onde ele vem, do ponto de
      vista de quem olha. Hues afastados dos de situação/prioridade para as
      duas leituras não se confundirem. */
-  --fluxo-entrada: #0f766e;   /* verde-azulado: chegou para mim   */
-  --fluxo-saida:   #7c3aed;   /* violeta: saiu de mim             */
-  --fluxo-ambos:   #002b5e;   /* marinho: as duas coisas          */
+  --posse-comigo:          #0f766e;  /* verde-azulado: é a minha fila     */
+  --posse-com-outro:       #7c3aed;  /* violeta: está com outra pessoa    */
+  --posse-fiz-minha-parte: #b45309;  /* âmbar: entreguei, não me prende   */
+  --posse-encerrado:       #64748b;  /* cinza: acabou                     */
 
   /* Layout — cantos generosos e sombras em camadas mais amplas, como no
      padrão de referência (cartões "flutuam" mais). */
@@ -1093,28 +1094,32 @@ body.embed .pagina { padding-top: .6rem; }
 }
 .tabela-lic__ordenar--ativa { color: var(--cor-primaria); }
 
-/* ---- Meus processos: fluxo de entrada x saída ----------------------
-   A cor identifica de onde o processo vem, num canal visual diferente
-   das pílulas de situação/prioridade (faixa à esquerda), para as duas
-   informações poderem ser lidas ao mesmo tempo sem competir.
-   'ambos' = a mesma demanda que eu criei e da qual sou responsável. */
+/* ---- Meus processos: com quem o processo está ----------------------
+   A cor diz de quem é a bola agora, num canal visual diferente das
+   pílulas de situação/prioridade (faixa à esquerda), para as duas
+   informações poderem ser lidas ao mesmo tempo sem competir. Os quatro
+   estados não se sobrepõem — ver ROTULO_POSSE em
+   js/ui/meus-processos-render.js. */
 .tabela-lista__titulo { max-width: 26rem; }
 .tabela-lista__cronograma { max-width: 20rem; }
 
-.badge-fluxo { color: #fff; }
-.badge-fluxo--entrada { background: var(--fluxo-entrada); }
-.badge-fluxo--saida   { background: var(--fluxo-saida); }
-.badge-fluxo--ambos   { background: var(--fluxo-ambos); }
+.badge-posse { color: #fff; }
+.badge-posse--comigo          { background: var(--posse-comigo); }
+.badge-posse--com_outro       { background: var(--posse-com-outro); }
+.badge-posse--fiz_minha_parte { background: var(--posse-fiz-minha-parte); }
+.badge-posse--encerrado       { background: var(--posse-encerrado); }
 
-.linha-fluxo > td:first-child { border-left: 4px solid transparent; }
-.linha-fluxo--entrada > td:first-child { border-left-color: var(--fluxo-entrada); }
-.linha-fluxo--saida   > td:first-child { border-left-color: var(--fluxo-saida); }
-.linha-fluxo--ambos   > td:first-child { border-left-color: var(--fluxo-ambos); }
+.linha-posse > td:first-child { border-left: 4px solid transparent; }
+.linha-posse--comigo          > td:first-child { border-left-color: var(--posse-comigo); }
+.linha-posse--com_outro       > td:first-child { border-left-color: var(--posse-com-outro); }
+.linha-posse--fiz_minha_parte > td:first-child { border-left-color: var(--posse-fiz-minha-parte); }
+.linha-posse--encerrado       > td:first-child { border-left-color: var(--posse-encerrado); }
 
 .cartao-processo { border-left: 4px solid var(--cinza-300); }
-.cartao-fluxo--entrada { border-left-color: var(--fluxo-entrada); }
-.cartao-fluxo--saida   { border-left-color: var(--fluxo-saida); }
-.cartao-fluxo--ambos   { border-left-color: var(--fluxo-ambos); }
+.cartao-posse--comigo          { border-left-color: var(--posse-comigo); }
+.cartao-posse--com_outro       { border-left-color: var(--posse-com-outro); }
+.cartao-posse--fiz_minha_parte { border-left-color: var(--posse-fiz-minha-parte); }
+.cartao-posse--encerrado       { border-left-color: var(--posse-encerrado); }
 
 /* Marcos do cronograma (tarefas de 1º nível ainda em aberto). O lugar é
    reservado vazio e preenchido quando a consulta volta — sem marcos, a

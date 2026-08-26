@@ -30,7 +30,7 @@ export function renderLista(itens, { colunas, cartao, linhaClasse }, ordem, asc)
     const tds = colunas.map(c =>
       `<td${c.classe ? ` class="${escapeHtml(c.classe)}"` : ''}>${c.celula(item)}</td>`).join('');
     const extra = linhaClasse ? ` ${escapeHtml(linhaClasse(item))}` : '';
-    return `<tr data-href="${escapeHtml(item.href)}" class="linha-fluxo${extra}">${tds}</tr>`;
+    return `<tr data-href="${escapeHtml(item.href)}" class="linha-posse${extra}">${tds}</tr>`;
   }).join('');
 
   return `<div class="table-responsive d-none d-md-block">
