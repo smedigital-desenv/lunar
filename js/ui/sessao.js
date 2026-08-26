@@ -46,7 +46,7 @@ async function montarTrocaTeste(auth, emailAtual) {
     e.target.disabled = true;
     try {
       await auth.loginSenha(email, SENHA_TESTE);
-      location.href = './caixa-entrada.html';
+      location.href = './meus-processos.html';
     } catch (err) {
       alert('Falha ao trocar de usuário: ' + (err.message || ''));
       e.target.disabled = false;

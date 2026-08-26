@@ -22,7 +22,7 @@ function modoDemo() {
   document.getElementById('btn-senha').disabled = true;
 }
 
-function irParaInicio() { location.href = './caixa-entrada.html'; }
+function irParaInicio() { location.href = './meus-processos.html'; }
 
 async function iniciar() {
   const erroUrl = new URLSearchParams(location.search).get('erro');
@@ -37,7 +37,7 @@ async function iniciar() {
   }
   if (!auth.estaConfigurado()) { modoDemo(); return; }
 
-  // Já autenticado? Vai direto para a caixa de entrada — MAS não quando
+  // Já autenticado? Vai direto para Meus processos — MAS não quando
   // chegamos aqui por erro da guarda de rota (?erro=): senão a guarda manda
   // ao login e o login manda de volta, em loop infinito. Nesse caso ficamos
   // no login exibindo o erro (ex.: schema não exposto, usuário não provisionado).

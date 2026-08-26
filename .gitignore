@@ -17,3 +17,10 @@ migracao_subped_dados_conferencia.sql
 # Sistema
 .DS_Store
 Thumbs.db
+
+# Scripts de banco: NUNCA versionados (regra permanente da rede — o
+# repositório é público e todo arquivo commitado vira URL baixável).
+# Eles moram em db/ no disco de quem trabalha e são rodados no SQL Editor
+# do Supabase. Ver sql/LEIA-ME.md.
+db/
+*.sql

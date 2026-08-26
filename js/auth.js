@@ -32,7 +32,7 @@ export function emailNoDominio(email) {
 
 // Resolve caminhos relativos independentemente de estarmos em /pages/.
 function paginaInicial() {
-  return location.pathname.includes('/pages/') ? './caixa-entrada.html' : './pages/caixa-entrada.html';
+  return location.pathname.includes('/pages/') ? './meus-processos.html' : './pages/meus-processos.html';
 }
 
 // ---------------------------------------------------------------- Login

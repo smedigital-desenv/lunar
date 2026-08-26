@@ -7,7 +7,7 @@
 
 import { escapeHtml, badgeSituacao, badgePrioridade, badgeSigilo, fmtPrazo } from './componentes.js';
 
-// Onde "Meus processos" mostra o fluxo (entrada/saída), aqui o eixo é a
+// Onde "Meus processos" mostra com quem o processo está, aqui o eixo é a
 // unidade: quem vê tudo precisa saber de quem é cada demanda. Mostra a
 // secretaria (subsecretaria ancestral) e a sigla da unidade em si.
 const chipUnidade = (i) => {
