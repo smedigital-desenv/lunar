@@ -621,7 +621,11 @@ a.cartao:active { transform: translateY(0); }
   border: 1px solid var(--cinza-200);
   border-radius: var(--raio);
   box-shadow: var(--sombra-forte);
-  z-index: 1030;
+  /* Precisa ficar acima de .nav-principal (1040): no desktop (≥720px)
+     .app-header vira position:static e quem fixa é a barra de navegação,
+     então os dois passam a disputar a mesma pilha de empilhamento — sem
+     isso o painel abria atrás dos itens "Nova/Licitações/Painel/Buscar". */
+  z-index: 1045;
 }
 
 /* No celular o sino fica no MEIO do cabeçalho, então ancorar o painel pela
