@@ -22,7 +22,7 @@ function modoDemo() {
   document.getElementById('btn-senha').disabled = true;
 }
 
-function irParaInicio() { location.href = './caixa-entrada.html'; }
+function irParaInicio() { location.href = './meus-processos.html'; }
 
 async function iniciar() {
   const erroUrl = new URLSearchParams(location.search).get('erro');

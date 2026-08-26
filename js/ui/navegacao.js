@@ -6,9 +6,13 @@
 
 import { escapeHtml } from './componentes.js';
 
+// "Meus processos" abre o sistema: ela responde onde cada processo está,
+// que era o que as antigas abas Entrada e Saída tentavam dizer em duas
+// listas separadas — com a mesma demanda aparecendo nas duas quando a
+// pessoa criava um processo do qual era responsável. As páginas
+// caixa-entrada.html e caixa-saida.html continuam de pé para quem tiver
+// um link salvo; só não têm mais lugar na barra.
 const ABAS = [
-  { chave: 'entrada', rotulo: 'Entrada', icone: '\u{1F4E5}', href: 'caixa-entrada.html' },
-  { chave: 'saida',   rotulo: 'Saída',   icone: '\u{1F4E4}', href: 'caixa-saida.html' },
   { chave: 'meus-processos', rotulo: 'Meus processos', icone: '\u{1F4DD}', href: 'meus-processos.html' },
   { chave: 'todos',   rotulo: 'Todos',   icone: '\u{1F4CB}', href: 'lista.html?kpi=todos' },
   { chave: 'nova',    rotulo: 'Nova',    icone: '+',         href: 'nova-demanda.html', destaque: true },
