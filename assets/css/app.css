@@ -197,6 +197,16 @@ body {
   margin: 0 auto;
   padding: var(--gap) .9rem 5rem;
 }
+/* No celular o --gap fica enxuto de propósito (tudo cabe na tela sem
+   rolar demais). A partir do desktop sobra espaço horizontal de sobra
+   e o mesmo valor deixava a tela "achatada" — cartões, cabeçalho e
+   filtros grudados uns nos outros. Como quase todo espaçamento vertical
+   do app.css referencia --gap (regra de token único), alargar aqui dá
+   respiro em todas as telas de uma vez, sem caçar cada tela por fora. */
+@media (min-width: 720px) {
+  :root { --gap: 1.5rem; }
+  .pagina { padding-left: 1.5rem; padding-right: 1.5rem; }
+}
 
 /* --------------------------------------------------------------- Cartões */
 .cartao {
