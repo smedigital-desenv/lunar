@@ -179,6 +179,13 @@ function renderArvore(tarefas, usuarioId) {
       const acaoTrocar = souCriador && ativa
         ? `<button class="btn btn-sm btn-link p-0" data-tarefa-acao="reencaminhar" data-tarefa-id="${escapeHtml(t.id)}">Trocar destino</button>`
         : '';
+      // "Alterar" corrige texto e prazo enquanto a tarefa está em aberto —
+      // prazo esquecido na criação, ou prazo ampliado. Só aparece para quem
+      // delegou; chefia no escopo também pode, e quem decide é o banco
+      // (048), não a interface (regra 4).
+      const acaoAlterar = souCriador && ativa && t.situacao === 'aberta'
+        ? `<button class="btn btn-sm btn-link p-0" data-tarefa-acao="editar_tarefa" data-tarefa-id="${escapeHtml(t.id)}">Alterar</button>`
+        : '';
       return `
       <li>
         <div class="tarefa-no${t.ativo === false ? ' tarefa-no--inativa' : ''}">
@@ -188,6 +195,7 @@ function renderArvore(tarefas, usuarioId) {
           ${acaoConcluir}
           ${acaoDevolver}
           ${acaoTrocar}
+          ${acaoAlterar}
         </div>
         ${ramo(t.id)}
       </li>`; }).join('') + `</ul>`;
