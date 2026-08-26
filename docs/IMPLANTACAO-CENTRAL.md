@@ -299,6 +299,20 @@ Em `https://smedigital.com.br/central/admin.html`:
 > `index.html` do portal ignora a simulação. Use o botão **Ver**, que mostra a
 > árvore de permissões na própria tela.
 
+> ⚠️ **A simulação do central não atravessa para o lunar, e não deve mesmo.**
+> Abrir uma tela daqui com "Ver como" ligado mostra a tarja de simulação por
+> cima da SUA sessão: o cabeçalho traz o seu nome, e a caixa de entrada é a
+> sua. O motivo está em `js/auth-central.js` — a ponte valida o **token**, e
+> durante a simulação o token continua sendo o de quem simula, ainda que
+> `AcessoSME.perfil` vire o perfil observado. Se atravessasse, seria uma
+> falha de segurança: daria para agir no sistema com a identidade alheia, e
+> a auditoria registraria a pessoa errada.
+>
+> Consequência prática: **não dá para validar o acesso de alguém ao lunar
+> sem que a pessoa entre.** O "Ver como" confere o lado do central (quais
+> telas o perfil libera); o lado do lunar — sessão, RLS, os dados que ela
+> enxerga — só o login dela exercita.
+
 ## Passo 6 — Primeiro acesso do administrador
 
 Quem é **super admin no central** e tem e-mail `@educacao.pmrp.sp.gov.br`
