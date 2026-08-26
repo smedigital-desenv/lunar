@@ -30,8 +30,7 @@
       <ol>
         <li><a href="#conceitos">Antes de começar: demanda e subtarefa</a></li>
         <li><a href="#navegacao">Como circular pelo sistema</a></li>
-        <li><a href="#entrada">Caixa de entrada</a></li>
-        <li><a href="#saida">Caixa de saída</a></li>
+        <li><a href="#meus-processos">Meus processos</a></li>
         <li><a href="#nova">Abrir uma nova demanda</a></li>
         <li><a href="#movimentos">Movimentar uma demanda</a>
           <ul>
@@ -76,12 +75,13 @@
       <p>
         No celular, a barra fica no rodapé da tela. No computador, no topo.
       </p>
-      <figure class="ajuda__figura">
-        <img src="../assets/img/tutorial/navegacao.png" alt="Barra de navegação com as opções Entrada, Saída, Todos, Nova, Painel e Buscar" loading="lazy">
-      </figure>
+      <!-- Print retirado em 2026-08-26: assets/img/tutorial/navegacao.png
+           mostra a barra antiga, com as abas Entrada e Saída que não existem
+           mais. O arquivo continua em disco; devolver a <figure> assim que
+           houver um print da barra atual. -->
       <ul class="ajuda__lista">
-        <li><strong>Entrada</strong> — o que está com você para fazer.</li>
-        <li><strong>Saída</strong> — o que você abriu ou encaminhou.</li>
+        <li><strong>Meus processos</strong> — tudo que passa por você, com
+          quem está esperando o quê.</li>
         <li><strong>Todos</strong> — tudo que você tem permissão de ver.</li>
         <li><strong>Nova</strong> — abrir uma demanda.</li>
         <li><strong>Painel</strong> — números e gráficos.</li>
@@ -93,58 +93,58 @@
       </p>
     </section>
 
-    <!-- ------------------------------------------------ Entrada -->
-    <section class="cartao" id="entrada">
-      <h2 class="ajuda__titulo">3. Caixa de entrada</h2>
+    <!-- ---------------------------------------- Meus processos -->
+    <section class="cartao" id="meus-processos">
+      <h2 class="ajuda__titulo">3. Meus processos</h2>
       <p>
-        É a sua lista de trabalho. Aparece aqui toda demanda em que você
-        <strong>é o responsável atual</strong> ou em que <strong>tem uma
-        subtarefa em aberto</strong>. Demandas concluídas saem da lista
-        sozinhas.
+        É a sua lista de trabalho e de acompanhamento, num lugar só. Aparece
+        aqui todo processo que passa por você: os que você abriu, os que
+        encaminhou, os que repartiu em subtarefas e aqueles em que executou
+        alguma tarefa.
       </p>
-      <figure class="ajuda__figura">
-        <img src="../assets/img/tutorial/caixa-entrada.png" alt="Caixa de entrada mostrando a lista de demandas com número, título, situação e prazo" loading="lazy">
-      </figure>
+      <!-- Print retirado em 2026-08-26: assets/img/tutorial/caixa-entrada.png
+           é a tela antiga — título "Caixa de entrada", sem a etiqueta de quem
+           o processo aguarda e com a barra de oito abas. O arquivo continua em
+           disco; devolver a <figure> assim que houver um print de Meus
+           processos. Vale para caixa-saida.png, que não é mais usado. -->
+      <p>
+        A etiqueta colorida responde à pergunta que mais importa —
+        <strong>de quem este processo está esperando?</strong>
+      </p>
+      <ul class="ajuda__lista">
+        <li><strong>Aguardando minha resposta</strong> — a bola é sua. Ou
+          existe tarefa atribuída a você, ou o processo é seu e ainda não
+          teve andamento.</li>
+        <li><strong>Aguardando outras pessoas</strong> — a responsabilidade
+          está com outra pessoa. Vale tanto para o que você encaminhou quanto
+          para aquele em que você já fez a sua parte e devolveu.</li>
+        <li><strong>Encerrado</strong> — o processo foi concluído.</li>
+      </ul>
       <p>Em cada item da lista você lê, de relance:</p>
       <ul class="ajuda__lista">
-        <li>o <strong>número</strong> da demanda;</li>
-        <li>o <strong>título</strong>;</li>
+        <li>o <strong>número</strong> do processo e o <strong>título</strong>;</li>
+        <li>de quem ele está <strong>aguardando</strong>;</li>
         <li>a <strong>situação</strong> (Aberta, Em andamento, Aguardando complementação…);</li>
         <li>a <strong>prioridade</strong> (Normal, Alta, Urgente);</li>
+        <li>o <strong>cronograma</strong> — as próximas tarefas em aberto;</li>
         <li>o <strong>prazo</strong>.</li>
       </ul>
       <p>
-        Os botões no alto filtram a lista: <strong>Pendentes</strong>,
-        <strong>Em andamento</strong>, <strong>Urgentes</strong>. Toque em
-        qualquer item para abrir a demanda.
+        Os filtros no alto cruzam duas perguntas: de quem o processo aguarda
+        e em que situação ele está — inclusive <strong>Encerrados</strong>,
+        que é o seu histórico. A caixa de busca procura por número ou título
+        dentro da própria lista. Toque em qualquer item para abrir o processo.
       </p>
       <p class="ajuda__nota">
-        Se uma demanda sumiu daqui, quase sempre é porque ela foi concluída ou
-        porque a responsabilidade passou para outra pessoa. Ela continua
-        visível em <strong>Todos</strong> e na <strong>Busca</strong>.
-      </p>
-    </section>
-
-    <!-- ------------------------------------------------ Saída -->
-    <section class="cartao" id="saida">
-      <h2 class="ajuda__titulo">4. Caixa de saída</h2>
-      <p>
-        É o acompanhamento do que <strong>saiu das suas mãos</strong>: as
-        demandas que você abriu ou encaminhou. Serve para cobrar andamento sem
-        precisar procurar uma por uma.
-      </p>
-      <figure class="ajuda__figura">
-        <img src="../assets/img/tutorial/caixa-saida.png" alt="Caixa de saída com as demandas abertas ou encaminhadas pelo usuário" loading="lazy">
-      </figure>
-      <p>
-        Diferente da entrada, aqui <strong>aparecem também as concluídas</strong>
-        (filtro <strong>Encerrados</strong>) — é o seu histórico.
+        Se um processo não está aqui, é porque você nunca teve vínculo com
+        ele. Continua visível em <strong>Todos</strong> e na
+        <strong>Busca</strong>, dentro do que você tem permissão de ver.
       </p>
     </section>
 
     <!-- ------------------------------------------------ Nova -->
     <section class="cartao" id="nova">
-      <h2 class="ajuda__titulo">5. Abrir uma nova demanda</h2>
+      <h2 class="ajuda__titulo">4. Abrir uma nova demanda</h2>
       <p>Toque em <strong>Nova</strong> na barra de navegação.</p>
       <figure class="ajuda__figura">
         <img src="../assets/img/tutorial/nova-demanda.png" alt="Formulário de nova demanda com os campos título, objeto/queixa e demais informações" loading="lazy">
@@ -183,7 +183,7 @@
 
     <!-- ------------------------------------------------ Movimentos -->
     <section class="cartao" id="movimentos">
-      <h2 class="ajuda__titulo">6. Movimentar uma demanda</h2>
+      <h2 class="ajuda__titulo">5. Movimentar uma demanda</h2>
       <p>
         Abra a demanda e desça até a barra de ações. O botão <strong>azul
         cheio</strong> é o próximo passo mais provável; os demais ficam ao
@@ -216,7 +216,7 @@
       <div class="ajuda__comparacao">
         <div class="ajuda__coluna">
           <h4>Encaminhar</h4>
-          <p>A demanda inteira muda de dono. Sai da sua caixa de entrada.</p>
+          <p>A demanda inteira muda de dono. Passa a aguardar a outra pessoa.</p>
         </div>
         <div class="ajuda__coluna">
           <h4>Nova subtarefa</h4>
@@ -296,7 +296,7 @@
 
     <!-- ------------------------------------------------ Regras -->
     <section class="cartao" id="regras">
-      <h2 class="ajuda__titulo">7. O que o sistema não deixa fazer</h2>
+      <h2 class="ajuda__titulo">6. O que o sistema não deixa fazer</h2>
       <p>
         Estas travas existem porque a demanda pode virar processo
         administrativo, e o histórico precisa ser confiável.
