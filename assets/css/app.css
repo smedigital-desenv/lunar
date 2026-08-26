@@ -50,7 +50,6 @@
      duas leituras não se confundirem. */
   --posse-aguardando-mim:    #0f766e;  /* verde-azulado: a bola é minha   */
   --posse-aguardando-outros: #7c3aed;  /* violeta: espera outra pessoa    */
-  --posse-fiz-minha-parte:   #b45309;  /* âmbar: entreguei, não me prende */
   --posse-encerrado:         #64748b;  /* cinza: acabou                   */
 
   /* Layout — cantos generosos e sombras em camadas mais amplas, como no
@@ -1106,19 +1105,16 @@ body.embed .pagina { padding-top: .6rem; }
 .badge-posse { color: #fff; }
 .badge-posse--aguardando_mim    { background: var(--posse-aguardando-mim); }
 .badge-posse--aguardando_outros { background: var(--posse-aguardando-outros); }
-.badge-posse--fiz_minha_parte   { background: var(--posse-fiz-minha-parte); }
 .badge-posse--encerrado         { background: var(--posse-encerrado); }
 
 .linha-posse > td:first-child { border-left: 4px solid transparent; }
 .linha-posse--aguardando_mim    > td:first-child { border-left-color: var(--posse-aguardando-mim); }
 .linha-posse--aguardando_outros > td:first-child { border-left-color: var(--posse-aguardando-outros); }
-.linha-posse--fiz_minha_parte   > td:first-child { border-left-color: var(--posse-fiz-minha-parte); }
 .linha-posse--encerrado         > td:first-child { border-left-color: var(--posse-encerrado); }
 
 .cartao-processo { border-left: 4px solid var(--cinza-300); }
 .cartao-posse--aguardando_mim    { border-left-color: var(--posse-aguardando-mim); }
 .cartao-posse--aguardando_outros { border-left-color: var(--posse-aguardando-outros); }
-.cartao-posse--fiz_minha_parte   { border-left-color: var(--posse-fiz-minha-parte); }
 .cartao-posse--encerrado         { border-left-color: var(--posse-encerrado); }
 
 /* Marcos do cronograma (tarefas de 1º nível ainda em aberto). O lugar é

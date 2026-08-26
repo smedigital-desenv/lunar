@@ -7,12 +7,11 @@
 
 import { escapeHtml, badgeSituacao, badgePrioridade, badgeSigilo, fmtPrazo } from './componentes.js';
 
-// De quem o processo está esperando. Estados que não se sobrepõem — cada
-// processo é exatamente um deles:
+// De quem o processo está esperando. Três estados que não se sobrepõem —
+// cada processo é exatamente um deles:
 //
 //   aguardando_mim     tarefa minha em aberto, ou processo meu sem andamento
 //   aguardando_outros  a responsabilidade está com outra pessoa
-//   fiz_minha_parte    executei a tarefa que me deram e nada mais me prende
 //   encerrado          o processo foi concluído
 //
 // Substitui o eixo entrada/saída, que dizia de onde o processo veio e não
@@ -22,10 +21,14 @@ import { escapeHtml, badgeSituacao, badgePrioridade, badgeSigilo, fmtPrazo } fro
 // O verbo importa: "aguardando" diz o que falta acontecer. Rótulo de posse
 // ("comigo", "com outra pessoa") se lê como propriedade e leva a perguntar
 // se o outro tem tarefa — pergunta que a lista não responde nem precisa.
+//
+// A linha responde UMA pergunta: de quem este processo espera? Por que ele
+// está na minha lista (criei, encaminhei, repartir, ou só executei uma
+// tarefa nele) é outra pergunta, e o lugar dela seria um filtro — não uma
+// quarta etiqueta colorida disputando a mesma leitura.
 export const ROTULO_POSSE = {
   aguardando_mim: 'Aguardando minha resposta',
   aguardando_outros: 'Aguardando outras pessoas',
-  fiz_minha_parte: 'Já fiz minha parte',
   encerrado: 'Encerrado'
 };
 

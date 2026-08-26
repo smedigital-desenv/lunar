@@ -47,22 +47,22 @@ const EXEMPLO_ENTRADA = [
   { id: 'd3', numero: 'DEM-2026-000058', titulo: 'Vazamento no telhado — vistoria', situacao: 'aberta', prioridade: 'urgente', sigilo: 'normal', prazo: '2026-08-01' }
 ];
 const EXEMPLO_SAIDA = [
-  { id: 'd1', numero: 'DEM-2026-000042', titulo: 'Verificar contrato de merenda', situacao: 'em_andamento', prioridade: 'alta', sigilo: 'normal', prazo: '2026-08-05', vinculo: 'criador' },
-  { id: 'd8', numero: 'DEM-2026-000044', titulo: 'Pedido de transporte escolar', situacao: 'aberta', prioridade: 'normal', sigilo: 'normal', prazo: '2026-08-18', vinculo: 'criador' },
-  { id: 'd9', numero: 'DEM-2026-000047', titulo: 'Ocorrência com aluno (sigilo)', situacao: 'aguardando_complementacao', prioridade: 'alta', sigilo: 'restrito', prazo: '2026-08-03', vinculo: 'encaminhou' },
-  { id: 'd14', numero: 'DEM-2026-000068', titulo: 'Parecer técnico já entregue', situacao: 'em_andamento', prioridade: 'normal', sigilo: 'normal', prazo: '2026-08-22', vinculo: 'executou' },
-  { id: 'd11', numero: 'DEM-2026-000052', titulo: 'Surto de piolho — comunicado', situacao: 'concluida', prioridade: 'normal', sigilo: 'normal', prazo: '2026-07-20', vinculo: 'criador' }
+  { id: 'd1', numero: 'DEM-2026-000042', titulo: 'Verificar contrato de merenda', situacao: 'em_andamento', prioridade: 'alta', sigilo: 'normal', prazo: '2026-08-05' },
+  { id: 'd8', numero: 'DEM-2026-000044', titulo: 'Pedido de transporte escolar', situacao: 'aberta', prioridade: 'normal', sigilo: 'normal', prazo: '2026-08-18' },
+  { id: 'd9', numero: 'DEM-2026-000047', titulo: 'Ocorrência com aluno (sigilo)', situacao: 'aguardando_complementacao', prioridade: 'alta', sigilo: 'restrito', prazo: '2026-08-03' },
+  // d14: só executei uma tarefa aqui — continua na lista, aguardando os outros.
+  { id: 'd14', numero: 'DEM-2026-000068', titulo: 'Parecer técnico já entregue', situacao: 'em_andamento', prioridade: 'normal', sigilo: 'normal', prazo: '2026-08-22' },
+  { id: 'd11', numero: 'DEM-2026-000052', titulo: 'Surto de piolho — comunicado', situacao: 'concluida', prioridade: 'normal', sigilo: 'normal', prazo: '2026-07-20' }
 ];
 
-// Em que estado o processo está PARA MIM. As duas consultas do banco já
-// respondem quase tudo: o que vem da caixa de entrada tem trabalho meu em
-// aberto (ela nunca devolve concluída); o que vem só da outra depende do
-// vínculo que a RPC informa — criador, encaminhou e delegou_subtarefa são
-// acompanhamento, executou é trabalho meu já entregue.
+// De quem o processo espera. As duas consultas do banco já respondem: o
+// que vem da caixa de entrada tem trabalho meu em aberto (ela nunca
+// devolve concluída); o resto espera outra pessoa, seja porque eu criei,
+// encaminhei, repartir, ou apenas executei uma tarefa nele — para o
+// processo dá no mesmo, a bola não é minha.
 function posseDe(d, veioDaEntrada) {
   if (veioDaEntrada) return 'aguardando_mim';
-  if (d.situacao === 'concluida') return 'encerrado';
-  return d.vinculo === 'executou' ? 'fiz_minha_parte' : 'aguardando_outros';
+  return d.situacao === 'concluida' ? 'encerrado' : 'aguardando_outros';
 }
 
 // Junta as duas consultas numa lista só. A mesma demanda costuma estar nas
