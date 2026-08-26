@@ -7,20 +7,24 @@
 
 import { escapeHtml, badgeSituacao, badgePrioridade, badgeSigilo, fmtPrazo } from './componentes.js';
 
-// Com quem o processo está, do ponto de vista de quem olha. Quatro estados
-// que não se sobrepõem — cada processo é exatamente um deles:
+// De quem o processo está esperando. Estados que não se sobrepõem — cada
+// processo é exatamente um deles:
 //
-//   comigo           há trabalho meu em aberto (é a minha fila)
-//   com_outro        eu criei, encaminhei ou reparti; a bola está com outra pessoa
-//   fiz_minha_parte  executei a tarefa que me deram e nada mais me prende
-//   encerrado        o processo foi concluído
+//   aguardando_mim     tarefa minha em aberto, ou processo meu sem andamento
+//   aguardando_outros  a responsabilidade está com outra pessoa
+//   fiz_minha_parte    executei a tarefa que me deram e nada mais me prende
+//   encerrado          o processo foi concluído
 //
 // Substitui o eixo entrada/saída, que dizia de onde o processo veio e não
-// com quem ele está — e obrigava a inventar 'ambos' para o caso mais comum
+// de quem ele espera — e obrigava a inventar 'ambos' para o caso mais comum
 // de todos: criar um processo do qual você mesmo é o responsável.
+//
+// O verbo importa: "aguardando" diz o que falta acontecer. Rótulo de posse
+// ("comigo", "com outra pessoa") se lê como propriedade e leva a perguntar
+// se o outro tem tarefa — pergunta que a lista não responde nem precisa.
 export const ROTULO_POSSE = {
-  comigo: 'Comigo',
-  com_outro: 'Com outra pessoa',
+  aguardando_mim: 'Aguardando minha resposta',
+  aguardando_outros: 'Aguardando outras pessoas',
   fiz_minha_parte: 'Já fiz minha parte',
   encerrado: 'Encerrado'
 };
@@ -57,7 +61,7 @@ export const COLUNAS = [
     celula: i => `<span class="demanda-cabecalho__numero">${escapeHtml(i.numero)}</span>` },
   { chave: 'titulo', rotulo: 'Título', classe: 'tabela-lista__titulo',
     celula: i => escapeHtml(i.titulo) },
-  { chave: 'posse', rotulo: 'Com quem está', celula: i => badgePosse(i.posse) },
+  { chave: 'posse', rotulo: 'Aguardando', celula: i => badgePosse(i.posse) },
   { chave: 'situacao', rotulo: 'Situação', celula: i => badgeSituacao(i.situacao) },
   { chave: 'prioridade', rotulo: 'Prioridade', celula: i => badgePrioridade(i.prioridade) },
   { chave: 'cronograma', rotulo: 'Cronograma', classe: 'tabela-lista__cronograma',

@@ -48,10 +48,10 @@
   /* Fluxo do processo em "Meus processos" — de onde ele vem, do ponto de
      vista de quem olha. Hues afastados dos de situação/prioridade para as
      duas leituras não se confundirem. */
-  --posse-comigo:          #0f766e;  /* verde-azulado: é a minha fila     */
-  --posse-com-outro:       #7c3aed;  /* violeta: está com outra pessoa    */
-  --posse-fiz-minha-parte: #b45309;  /* âmbar: entreguei, não me prende   */
-  --posse-encerrado:       #64748b;  /* cinza: acabou                     */
+  --posse-aguardando-mim:    #0f766e;  /* verde-azulado: a bola é minha   */
+  --posse-aguardando-outros: #7c3aed;  /* violeta: espera outra pessoa    */
+  --posse-fiz-minha-parte:   #b45309;  /* âmbar: entreguei, não me prende */
+  --posse-encerrado:         #64748b;  /* cinza: acabou                   */
 
   /* Layout — cantos generosos e sombras em camadas mais amplas, como no
      padrão de referência (cartões "flutuam" mais). */
@@ -1104,22 +1104,22 @@ body.embed .pagina { padding-top: .6rem; }
 .tabela-lista__cronograma { max-width: 20rem; }
 
 .badge-posse { color: #fff; }
-.badge-posse--comigo          { background: var(--posse-comigo); }
-.badge-posse--com_outro       { background: var(--posse-com-outro); }
-.badge-posse--fiz_minha_parte { background: var(--posse-fiz-minha-parte); }
-.badge-posse--encerrado       { background: var(--posse-encerrado); }
+.badge-posse--aguardando_mim    { background: var(--posse-aguardando-mim); }
+.badge-posse--aguardando_outros { background: var(--posse-aguardando-outros); }
+.badge-posse--fiz_minha_parte   { background: var(--posse-fiz-minha-parte); }
+.badge-posse--encerrado         { background: var(--posse-encerrado); }
 
 .linha-posse > td:first-child { border-left: 4px solid transparent; }
-.linha-posse--comigo          > td:first-child { border-left-color: var(--posse-comigo); }
-.linha-posse--com_outro       > td:first-child { border-left-color: var(--posse-com-outro); }
-.linha-posse--fiz_minha_parte > td:first-child { border-left-color: var(--posse-fiz-minha-parte); }
-.linha-posse--encerrado       > td:first-child { border-left-color: var(--posse-encerrado); }
+.linha-posse--aguardando_mim    > td:first-child { border-left-color: var(--posse-aguardando-mim); }
+.linha-posse--aguardando_outros > td:first-child { border-left-color: var(--posse-aguardando-outros); }
+.linha-posse--fiz_minha_parte   > td:first-child { border-left-color: var(--posse-fiz-minha-parte); }
+.linha-posse--encerrado         > td:first-child { border-left-color: var(--posse-encerrado); }
 
 .cartao-processo { border-left: 4px solid var(--cinza-300); }
-.cartao-posse--comigo          { border-left-color: var(--posse-comigo); }
-.cartao-posse--com_outro       { border-left-color: var(--posse-com-outro); }
-.cartao-posse--fiz_minha_parte { border-left-color: var(--posse-fiz-minha-parte); }
-.cartao-posse--encerrado       { border-left-color: var(--posse-encerrado); }
+.cartao-posse--aguardando_mim    { border-left-color: var(--posse-aguardando-mim); }
+.cartao-posse--aguardando_outros { border-left-color: var(--posse-aguardando-outros); }
+.cartao-posse--fiz_minha_parte   { border-left-color: var(--posse-fiz-minha-parte); }
+.cartao-posse--encerrado         { border-left-color: var(--posse-encerrado); }
 
 /* Marcos do cronograma (tarefas de 1º nível ainda em aberto). O lugar é
    reservado vazio e preenchido quando a consulta volta — sem marcos, a

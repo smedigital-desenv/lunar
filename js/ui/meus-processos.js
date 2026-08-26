@@ -60,15 +60,15 @@ const EXEMPLO_SAIDA = [
 // vínculo que a RPC informa — criador, encaminhou e delegou_subtarefa são
 // acompanhamento, executou é trabalho meu já entregue.
 function posseDe(d, veioDaEntrada) {
-  if (veioDaEntrada) return 'comigo';
+  if (veioDaEntrada) return 'aguardando_mim';
   if (d.situacao === 'concluida') return 'encerrado';
-  return d.vinculo === 'executou' ? 'fiz_minha_parte' : 'com_outro';
+  return d.vinculo === 'executou' ? 'fiz_minha_parte' : 'aguardando_outros';
 }
 
 // Junta as duas consultas numa lista só. A mesma demanda costuma estar nas
 // duas (eu criei E sou o responsável) e vira UMA linha: quem chega primeiro
-// fica, e a entrada é lida primeiro justamente para 'comigo' prevalecer —
-// se há trabalho meu em aberto, é isso que importa saber.
+// fica, e a entrada é lida primeiro para 'aguardando_mim' prevalecer — se
+// há trabalho meu em aberto, é isso que importa saber.
 function unificar(entrada, saida) {
   const por = new Map();
   const juntar = (lista, veioDaEntrada) => (lista ?? []).forEach(d => {
