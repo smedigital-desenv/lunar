@@ -70,6 +70,19 @@ export async function listarPorDemanda(demandaId) {
   return (data ?? []).map(t => ({ ...t, responsavel_nome: t.responsavel?.nome ?? null }));
 }
 
+// Corrige texto e prazo de uma tarefa que ninguém realizou ainda. Não é
+// ressalva: enquanto o responsável não se manifesta, corrigir é corrigir
+// (mesma doutrina da janela de retificação, regra 6). `campos` aceita
+// titulo, descricao e prazo; o que não vier fica como está, e prazo vazio
+// limpa. Janela, permissão e justificativa são validadas no banco (048).
+export function editarTarefa(tarefaId, campos, justificativa) {
+  return rpc('fn_editar_tarefa', {
+    p_tarefa_id: tarefaId,
+    p_campos: campos,
+    p_justificativa: justificativa
+  });
+}
+
 // Troca o destinatário de uma tarefa já encaminhada (só enquanto o
 // destinatário não agiu). Regra e permissão validadas no banco.
 export function reencaminhar({ tarefaId, novoDestinatarioId, texto }) {
