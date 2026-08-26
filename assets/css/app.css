@@ -1057,6 +1057,9 @@ body.embed .pagina { padding-top: .6rem; }
 .cartao-processo .marco { display: flex; width: 100%; gap: .5rem; }
 .cartao-processo .marco__nome { max-width: none; flex: 1 1 auto; }
 .cartao-processo .marco__data { flex: 0 0 auto; }
+.cartao-processo .marco__quem { flex: 0 1 auto; }
+/* O "+N" não é um marco: não ocupa a linha toda como os outros. */
+.cartao-processo .marco--resto { width: auto; }
 
 /* Painel: grade de cards por fase. */
 .fases {
@@ -1135,6 +1138,13 @@ body.embed .pagina { padding-top: .6rem; }
   text-overflow: ellipsis; white-space: nowrap;
 }
 .marco__data { color: var(--cinza-500); font-variant-numeric: tabular-nums; }
+/* Quem está com a tarefa. Encolhe antes do título quando falta espaço: o
+   título diz O QUE falta, e é ele que não pode sumir primeiro. */
+.marco__quem {
+  max-width: 7rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--cor-primaria); font-weight: 600;
+}
+.marco--resto { border-style: solid; font-weight: 600; }
 
 /* Modal do processo de licitação sobre a lista. */
 .modal-proc {
