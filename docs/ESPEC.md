@@ -75,6 +75,7 @@ Na prática: Gabinete enxerga toda a Secretaria; Subsecretário enxerga suas ger
 | Retificar movimentação de terceiros (janela aberta) | não | não | sim (no escopo) | sim (no escopo) | sim | sim |
 | Registrar ressalva após intervenção de terceiro | sim | sim | sim | sim | sim | sim |
 | Editar campos da demanda | não | não | sim (no escopo) | sim (no escopo) | sim | sim |
+| Alterar texto e prazo de tarefa não realizada | sim (que delegou) | sim (que delegou) | sim (no escopo) | sim (no escopo) | sim | sim |
 | Inativar / reativar demanda ou tarefa | não | não | sim (no escopo) | sim (no escopo) | sim | sim |
 | Reabrir demanda concluída | não | não | sim (no escopo) | sim (no escopo) | sim | sim |
 | Ver demanda de sigilo `restrito` fora da tramitação | não | não | sim (no escopo) | sim (no escopo) | sim | não |
@@ -151,11 +152,17 @@ Não existe DELETE em nenhuma tabela do sistema. Demandas e tarefas são inativa
 
 ## 10. EDIÇÃO E RETIFICAÇÃO
 
-Duas regras distintas:
+Três regras distintas:
 
 **a) Campos da demanda** (título, descrição, objeto/queixa, categoria, prioridade, prazo, escola, aluno): editáveis por gerente ou superior, dentro do seu escopo, com **justificativa obrigatória**. Cada edição grava em `auditoria` os valores anterior e novo em JSONB (`dados_anteriores`, `dados_novos`).
 
-**b) Texto de movimentação ou devolutiva**: **nunca editável in loco**, por nenhum perfil. Aplica-se o modelo de retificação do processo administrativo:
+**b) Texto e prazo de tarefa NÃO REALIZADA** (título, descrição, prazo): editáveis por quem delegou a tarefa, ou por gerente e acima no escopo, com **justificativa obrigatória** — e **sem ressalva**. Vale enquanto a tarefa está `aberta` e o responsável não registrou nenhuma movimentação nela além da que a criou. É a mesma doutrina da janela de retificação (item c): enquanto ninguém agiu sobre o registro, corrigir é corrigir. Depois que o responsável se manifesta, a tarefa é histórico de terceiro e só cabe retificação ou ressalva do texto da movimentação.
+
+O caso que originou a regra: subtarefa criada sem prazo, ou com prazo que precisa ser ampliado. A alternativa era inativar e recriar, o que duplica a linha do tempo e notifica a pessoa de novo.
+
+A alteração grava movimentação do tipo `edicao` dizendo o que mudou (com o prazo anterior e o novo), a auditoria registra os valores anterior e novo, e o responsável é notificado quando o prazo muda.
+
+**c) Texto de movimentação ou devolutiva**: **nunca editável in loco**, por nenhum perfil. Aplica-se o modelo de retificação do processo administrativo:
 
 - O registro original permanece íntegro e visível, marcado como retificado.
 - É criada uma nova movimentação do tipo `retificacao`, com `movimentacao_retificada_id` apontando para a original, contendo o texto correto e a justificativa.
@@ -189,6 +196,7 @@ fn_solicitar_complementacao(...)
 fn_concluir(demanda_id, conclusao)
 fn_reabrir(demanda_id, justificativa)
 fn_editar_demanda(demanda_id, campos jsonb, justificativa)
+fn_editar_tarefa(tarefa_id, campos jsonb, justificativa)
 fn_retificar_movimentacao(movimentacao_id, texto_correto, justificativa)
 fn_registrar_ressalva(movimentacao_id, texto_correto, justificativa)
 fn_inativar(entidade, id, motivo)

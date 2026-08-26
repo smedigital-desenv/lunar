@@ -36,6 +36,17 @@ export function camposDaAcao(chave, ctx) {
         { nome: 'descricao', rotulo: 'Descrição', tipo: 'textarea' },
         { nome: 'prazo', rotulo: 'Prazo (opcional)', tipo: 'date' } ] };
     }
+    case 'editar_tarefa': {
+      // Campos pré-preenchidos com o valor atual: corrigir um prazo não
+      // deveria custar redigitar o título. O banco recusa se o
+      // responsável já tiver se manifestado (janela fechada).
+      const t = (ctx.tarefas || []).find(x => x.id === ctx.tarefaId) || {};
+      return { titulo: 'Alterar tarefa', textoConfirmar: 'Salvar', campos: [
+        { nome: 'titulo', rotulo: 'Título', tipo: 'text', valor: t.titulo, obrigatorio: true },
+        { nome: 'descricao', rotulo: 'Descrição', tipo: 'textarea', valor: t.descricao },
+        { nome: 'prazo', rotulo: 'Prazo (vazio remove)', tipo: 'date', valor: t.prazo },
+        { nome: 'justificativa', rotulo: 'Justificativa', tipo: 'textarea', obrigatorio: true } ] };
+    }
     case 'reencaminhar': return { titulo: 'Trocar destinatário', textoConfirmar: 'Trocar', campos: [
       { nome: 'destinatario', rotulo: 'Novo destinatário', tipo: 'select', opcoes: usuarios, obrigatorio: true },
       { nome: 'texto', rotulo: 'Observação (opcional)', tipo: 'textarea' } ] };
@@ -133,6 +144,9 @@ async function executar(chave, vals, ctx) {
     case 'subtarefa': return tar.criarSubtarefa({ parentId: vals.parent || null, demandaId: id,
       responsavelId: vals.responsavel, titulo: vals.titulo,
       descricao: vals.descricao || null, prazo: vals.prazo || null });
+    case 'editar_tarefa': return tar.editarTarefa(ctx.tarefaId, {
+      titulo: vals.titulo, descricao: vals.descricao || '', prazo: vals.prazo || ''
+    }, vals.justificativa);
     case 'reencaminhar': return tar.reencaminhar({ tarefaId: ctx.tarefaId,
       novoDestinatarioId: vals.destinatario, texto: vals.texto || null });
     case 'devolutiva': return tar.registrarDevolutiva(ctx.tarefaId, vals.texto, []);
