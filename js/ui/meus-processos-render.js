@@ -32,19 +32,32 @@ export const ROTULO_POSSE = {
   encerrado: 'Encerrado'
 };
 
-// Marcos = tarefas de 1º nível ainda em aberto. Chegam depois da lista
-// (uma consulta por processo visível), então o lugar fica reservado no
-// HTML e é preenchido quando a resposta volta.
+// Marcos = tarefas ainda em aberto, com quem está cada uma. Chegam depois
+// da lista (uma consulta por processo visível), então o lugar fica
+// reservado no HTML e é preenchido quando a resposta volta.
+//
+// O nome de quem tem a tarefa é o que responde "existe subtarefa aberta, e
+// com quem?" sem precisar abrir o processo.
 //
 // Vazio devolve vazio: na tabela o CSS põe um traço para a coluna não
 // desalinhar; no cartão o lugar simplesmente some, em vez de virar ruído.
-export function renderCronograma(marcos) {
-  if (!marcos?.length) return '';
-  return marcos.map(m =>
-    `<span class="marco" title="${escapeHtml(m.titulo)}">
+export function renderCronograma(cron) {
+  const marcos = cron?.marcos ?? [];
+  if (!marcos.length) return '';
+  const resto = cron.restantes
+    ? `<span class="marco marco--resto" title="Mais ${cron.restantes} tarefa(s) em aberto">`
+      + `+${cron.restantes}</span>`
+    : '';
+  return marcos.map(m => {
+    const quem = m.responsavel_nome
+      ? `<span class="marco__quem">${escapeHtml(m.responsavel_nome)}</span>` : '';
+    const dica = m.titulo + (m.responsavel_nome ? ` — ${m.responsavel_nome}` : '');
+    return `<span class="marco" title="${escapeHtml(dica)}">
       <span class="marco__nome">${escapeHtml(m.titulo)}</span>
+      ${quem}
       <span class="marco__data">${escapeHtml(fmtPrazo(m.prazo))}</span>
-    </span>`).join('');
+    </span>`;
+  }).join('') + resto;
 }
 
 // A mesma chave endereça o lugar do cronograma na linha da tabela E no

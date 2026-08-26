@@ -13,7 +13,7 @@ import * as demo from './demo.js';
 
 const POR_PAGINA = 20;
 const TETO = 500;          // carga única por caixa; acima disso a tela avisa
-const MARCOS = 3;          // marcos exibidos por processo
+const MARCOS = 3;          // marcos exibidos por processo; o resto vira "+N"
 
 const PREDICADOS = {
   todos: () => true,
@@ -43,6 +43,8 @@ window.marcarListaSuja = () => { listaSuja = true; };
 // ------------------------------------------------------------- Dados
 const EXEMPLO_ENTRADA = [
   { id: 'd1', numero: 'DEM-2026-000042', titulo: 'Verificar contrato de merenda', situacao: 'em_andamento', prioridade: 'alta', sigilo: 'normal', prazo: '2026-08-05' },
+  // d15: meu processo, mas quem tem tarefa aberta é outra pessoa.
+  { id: 'd15', numero: 'DEM-2026-000057', titulo: 'Olhar o lunar', situacao: 'aberta', prioridade: 'normal', sigilo: 'normal', prazo: null, aguarda_outros: true },
   { id: 'd2', numero: 'DEM-2026-000051', titulo: 'Emitir parecer sobre transferência', situacao: 'aberta', prioridade: 'normal', sigilo: 'normal', prazo: '2026-08-12' },
   { id: 'd3', numero: 'DEM-2026-000058', titulo: 'Vazamento no telhado — vistoria', situacao: 'aberta', prioridade: 'urgente', sigilo: 'normal', prazo: '2026-08-01' }
 ];
@@ -61,7 +63,11 @@ const EXEMPLO_SAIDA = [
 // encaminhei, repartir, ou apenas executei uma tarefa nele — para o
 // processo dá no mesmo, a bola não é minha.
 function posseDe(d, veioDaEntrada) {
-  if (veioDaEntrada) return 'aguardando_mim';
+  // Estar na caixa de entrada não basta: eu continuo responsável por um
+  // processo cujo trabalho reparti em subtarefas — criar subtarefa não
+  // move a responsabilidade, de propósito. Nesse caso a bola está com
+  // quem tem a tarefa aberta, e é o banco que responde isso (`047`).
+  if (veioDaEntrada) return d.aguarda_outros ? 'aguardando_outros' : 'aguardando_mim';
   return d.situacao === 'concluida' ? 'encerrado' : 'aguardando_outros';
 }
 
@@ -111,6 +117,12 @@ async function carregarTudo() {
 // ------------------------------------------------------- Cronograma
 const cacheCronograma = new Map();
 
+// Sem prazo vai para o fim, como no `order by` do banco.
+const porPrazo = (a, z) =>
+  String(a.prazo ?? '9999-12-31').localeCompare(String(z.prazo ?? '9999-12-31'));
+
+const CRONOGRAMA_VAZIO = { marcos: [], restantes: 0 };
+
 async function obterCronograma(demandaId) {
   if (cacheCronograma.has(demandaId)) return cacheCronograma.get(demandaId);
   try {
@@ -118,16 +130,24 @@ async function obterCronograma(demandaId) {
     // página, senão a tela deixa de abrir offline/em demonstração.
     const { listarPorDemanda } = await import('../services/tarefas.js');
     const tarefas = await listarPorDemanda(demandaId);
-    const marcos = tarefas
-      .filter(t => t.parent_id === null && t.ativo !== false && t.situacao !== 'concluida')
-      .slice(0, MARCOS);
-    cacheCronograma.set(demandaId, marcos);
-    return marcos;
+    // Toda tarefa em aberto conta, em QUALQUER nível. Antes o filtro era
+    // `parent_id === null`, então uma subtarefa ramificada dentro de outra
+    // ficava invisível na lista — e saber que existe trabalho pendente com
+    // alguém é justamente o que se vem procurar aqui.
+    const abertas = tarefas
+      .filter(t => t.ativo !== false && t.situacao !== 'concluida')
+      .sort(porPrazo);
+    const cron = {
+      marcos: abertas.slice(0, MARCOS),
+      restantes: Math.max(0, abertas.length - MARCOS)
+    };
+    cacheCronograma.set(demandaId, cron);
+    return cron;
   } catch (e) {
     // O cronograma é acessório: falhar aqui não pode derrubar a lista.
     console.error('Cronograma indisponível para', demandaId, e);
-    cacheCronograma.set(demandaId, []);
-    return [];
+    cacheCronograma.set(demandaId, CRONOGRAMA_VAZIO);
+    return CRONOGRAMA_VAZIO;
   }
 }
 
@@ -138,9 +158,9 @@ async function obterCronograma(demandaId) {
 function preencherCronogramas(itens) {
   if (emDemo) return;                       // sem banco a consultar
   const lista = document.getElementById('lista');
-  itens.forEach(item => obterCronograma(item.demandaId).then(marcos => {
+  itens.forEach(item => obterCronograma(item.demandaId).then(cron => {
     lista.querySelectorAll(`[data-cronograma="${CSS.escape(chaveCronograma(item))}"]`)
-      .forEach(el => { el.innerHTML = renderCronograma(marcos); });
+      .forEach(el => { el.innerHTML = renderCronograma(cron); });
   }));
 }
 
