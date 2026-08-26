@@ -115,16 +115,46 @@ async function pedirTokenAPonte(tokenCentral) {
   return dados;
 }
 
-// Garante sessão local com o MESMO e-mail de quem está logado no central.
+// O e-mail com que a pessoa entra na rede nem sempre é o da conta local: a
+// ponte traduz um no outro quando o endereço de login pertence a outra conta
+// deste projeto compartilhado (ver o bloco 4a da central-bridge). A tradução
+// só é conhecida DEPOIS de chamar a ponte, mas a comparação abaixo acontece
+// ANTES — por isso guardamos o que ela respondeu.
+//
+// Sem esta memória, quem tem os dois endereços diferentes cairia no ramo
+// "trocou de conta" a cada carregamento e gastaria um magic link por página.
+// Sem localStorage a pessoa perde só o atalho, não o acesso.
+const CHAVE_CONTA = 'ACESSO_CONTA_v1';
+
+function contaConhecida(emailLogin) {
+  try {
+    return JSON.parse(localStorage.getItem(CHAVE_CONTA) || '{}')[emailLogin] || null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function lembrarConta(emailLogin, emailConta) {
+  if (!emailLogin || !emailConta) return;
+  try {
+    const mapa = JSON.parse(localStorage.getItem(CHAVE_CONTA) || '{}');
+    if (mapa[emailLogin] === emailConta) return;
+    mapa[emailLogin] = emailConta;
+    localStorage.setItem(CHAVE_CONTA, JSON.stringify(mapa));
+  } catch (_) { /* sem localStorage: só perde o atalho */ }
+}
+
+// Garante sessão local para quem está logado no central.
 async function garantirSessaoLocal(api) {
   // Tem que ser o e-mail REAL, não o simulado: durante a simulação o
   // AcessoSME.perfil vira o perfil observado, mas o token continua sendo o de
   // quem simula — e é o token que a ponte valida. Usar o e-mail simulado aqui
   // faria a comparação nunca bater, derrubando a sessão a cada carregamento.
   const emailReal = String(api.realPerfil?.email || api.perfil?.email || '').toLowerCase();
+  const emailEsperado = contaConhecida(emailReal) || emailReal;
 
   const { data: { session } } = await supabase.auth.getSession();
-  if (session && String(session.user.email || '').toLowerCase() === emailReal) return true;
+  if (session && String(session.user.email || '').toLowerCase() === emailEsperado) return true;
 
   // Trocou de conta no central: encerra só esta aba, sem invalidar os refresh
   // tokens da pessoa em outros dispositivos.
@@ -149,7 +179,12 @@ async function garantirSessaoLocal(api) {
     const { error } = await supabase.auth.verifyOtp({
       token_hash: ponte.token_hash, type: tipos[i]
     });
-    if (!error) return true;
+    if (!error) {
+      // A ponte só informa `email_conta` quando ela mesma traduziu; nas
+      // versões anteriores o campo não vem, e aí não há o que lembrar.
+      lembrarConta(emailReal, String(ponte.email_conta || '').toLowerCase());
+      return true;
+    }
     ultimoErro = error;
     if (i + 1 < tipos.length) ponte = await pedirTokenAPonte(tokenCentral);
   }

@@ -18,7 +18,9 @@
 //      `trg_bloquear_dominio` de sql/012, checada aqui antes para devolver
 //      mensagem legível em vez da exceção do Postgres).
 //   3. Confere NO CENTRAL que a pessoa tem acesso ao sistema 'lunar'.
-//   4. Emite um magic link para esse e-mail AQUI e devolve só o token_hash.
+//   4. Traduz o e-mail de login para o e-mail da conta local, quando os
+//      dois divergirem (ver o bloco 4a), e emite um magic link para essa
+//      conta AQUI, devolvendo só o token_hash.
 //   O navegador troca o hash por uma sessão deste projeto (verifyOtp) e a
 //   partir daí `auth.uid()` volta a funcionar — RLS e funções SECURITY
 //   DEFINER seguem valendo exatamente como antes.
@@ -159,17 +161,58 @@ Deno.serve(async (req) => {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    let link = await admin.auth.admin.generateLink({ type: "magiclink", email });
+    // ── 4a) O e-mail do LOGIN nem sempre é o da CONTA daqui ───────────────
+    // `gestao.usuarios.email` é o endereço pelo qual a pessoa entra na rede;
+    // `auth.users.email` é o da conta que assina o trabalho dela aqui dentro.
+    // Para quase todo mundo os dois coincidem e este bloco não faz nada.
+    //
+    // Divergem quando o endereço de login já pertence a OUTRA conta de
+    // `auth.users`. O projeto é compartilhado com outros sistemas e o e-mail
+    // é único no projeto inteiro, então isso acontece de verdade — e nenhuma
+    // das saídas óbvias existe:
+    //   • apagar a outra conta é destruir usuário de um vizinho;
+    //   • apontar a pessoa para ela é impossível: `gestao.usuarios.id` É a
+    //     conta de autenticação (FK para `auth.users`), e é esse id que
+    //     assina demandas, tarefas, movimentações e auditoria — tabelas
+    //     imutáveis, sem DELETE em lugar nenhum (regras 1 e 3).
+    //
+    // Então a tradução acontece aqui, pelo vínculo que já existe. Sem ela a
+    // ponte abriria a sessão da conta errada e a pessoa veria "Cadastro
+    // pendente" — com o próprio trabalho na tela ao lado, invisível para ela.
+    let emailConta = email;
+    {
+      const { data: local, error: erroLocal } = await admin
+        .schema("gestao").from("usuarios")
+        .select("id").eq("email", email).maybeSingle();
+      if (erroLocal) {
+        // Não derruba o login: sem tradução, o caminho é o de sempre.
+        console.error("[central-bridge] não consegui resolver a conta local:", erroLocal.message);
+      } else if (local?.id) {
+        const { data: conta, error: erroConta } = await admin.auth.admin.getUserById(local.id);
+        if (erroConta) {
+          console.error("[central-bridge] conta local sem par em auth.users:", erroConta.message);
+        } else if (conta?.user?.email) {
+          emailConta = String(conta.user.email).trim().toLowerCase();
+        }
+      }
+    }
+
+    let link = await admin.auth.admin.generateLink({ type: "magiclink", email: emailConta });
 
     // Primeiro acesso de alguém que existe no central mas ainda não tem conta
     // aqui: cria e tenta de novo. A conta nasce SEM acesso ao sistema — ela
     // passa a aparecer em `fn_listar_contas_pendentes` para um admin liberar.
-    if (link.error) {
+    //
+    // Só quando o endereço de login É o da conta. Havendo tradução, a conta
+    // existe por definição (veio de `gestao.usuarios`), e criar outra com o
+    // e-mail de login seria fabricar justamente a colisão que a tradução
+    // existe para contornar.
+    if (link.error && emailConta === email) {
       const criado = await admin.auth.admin.createUser({ email, email_confirm: true });
       if (criado.error && !/already/i.test(criado.error.message)) {
         return json({ erro: "falha_ao_criar_usuario", detalhe: criado.error.message }, 500);
       }
-      link = await admin.auth.admin.generateLink({ type: "magiclink", email });
+      link = await admin.auth.admin.generateLink({ type: "magiclink", email: emailConta });
     }
     if (link.error) return json({ erro: "falha_ao_gerar_sessao", detalhe: link.error.message }, 500);
 
@@ -195,10 +238,15 @@ Deno.serve(async (req) => {
     // Devolve também o tipo de verificação: o verifyOtp do navegador precisa
     // usar exatamente este valor, senão o Supabase recusa com
     // "Email link is invalid or has expired".
+    // `email` é por onde a pessoa entrou; `email_conta` é a conta em que a
+    // sessão abre. O front compara a sessão contra o segundo — comparar com
+    // o primeiro o faria concluir "trocou de conta" a cada carregamento e
+    // pedir um magic link por página.
     return json({
       token_hash: hash,
       tipo: link.data?.properties?.verification_type || "magiclink",
       email,
+      email_conta: emailConta,
     });
   } catch (e) {
     return json({ erro: "falha_inesperada", detalhe: String(e) }, 500);

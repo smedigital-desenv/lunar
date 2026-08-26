@@ -3,7 +3,7 @@
 > Atualizado ao final de cada sessão do Claude Code. Máximo 40 linhas.
 > Formato: o que está pronto, o que vem a seguir, decisões que não estão no código.
 
-**Última atualização:** 2026-08-24 (Catálogo de telas no central documentado)
+**Última atualização:** 2026-08-24 (Catálogo de telas + tradução de e-mail na ponte)
 **Fase atual:** Sessões 1–11 concluídas. Módulo de Licitações pronto (L1–L6). Tela consolidada de processos entrada/saída com cronograma. Falta implantar licitações no real (ver checklist). Fase 2 do módulo (atas/contratos, solicitações, KPIs, regras de fase) por planejar.
 
 > **Todos os SQL (`001`…`013` + seed) executados no Supabase** (confirmado pelo usuário, 2026-08-01).
@@ -93,6 +93,8 @@
 
 - **Catálogo do central documentado (2026-08-24):** `docs/CATALOGO-CENTRAL.md` — a matriz completa das 16 telas × 6 papéis, o script idempotente que cadastra e libera o que faltar, e as consultas de conferência. Fecha a pendência que voltou três vezes aqui ("registrar a tela X no catálogo"): `organograma`, depois `licitacoes`/`processo-licitacao`/`nova-licitacao`, depois `painel-licitacoes` — e `meus-processos`, que nunca chegou a ser anotada. **Só três telas têm recorte**, e todas as três copiam uma regra que já existe no banco do lunar: `admin` e `organograma` (`pode_administrar` / `pode_gerir_organograma`) e `nova-licitacao` (`fn_lic_criar_processo`: escopo global ou nível ≥ gerente). As demais são de todos os papéis. **`equipes` e `processo-licitacao` ficam abertas de propósito** — nelas o fechado é a *ação* (`fn_definir_equipe`, `fn_lic_pode_editar`), não a consulta; fechar a tela tiraria a leitura de quem tem direito a ela sem tirar poder de ninguém. O script grava **só `pode_ver`**: não existe um `data-perm` sequer neste repositório, então `pode_editar`/`pode_exportar` do central não governam nada aqui. Escrito com `where not exists` em todo lugar — não renomeia tela existente nem sobrescreve liberação ajustada à mão no painel. **Falta rodar no SQL Editor do projeto central** (o sandbox desta sessão bloqueia `*.supabase.co`).
 
+- **Endereço de login diferente do endereço da conta (2026-08-24):** o `sql/039` cadastrou os 52 titulares com e-mails **inventados** por regra (primeiro nome + último sobrenome). Quando a pessoa usa outra caixa institucional, o endereço real já pode pertencer a **outra conta de `auth.users`** — o projeto é compartilhado e o e-mail é único no projeto inteiro. Nenhuma das saídas óbvias existe: apagar a outra conta destrói usuário de vizinho, e apontar a pessoa para ela é impossível porque `gestao.usuarios.id` **é** a conta de autenticação (FK para `auth.users`) e assina demandas, tarefas, movimentações e auditoria — imutáveis, sem DELETE (regras 1 e 3). Então a `central-bridge` passou a **traduzir**: procura `gestao.usuarios` pelo e-mail do token, pega o e-mail da conta correspondente e emite o magic link para ela (bloco 4a). O vínculo é o `gestao.usuarios.email`, que já existia — nenhuma tabela nova. `js/auth-central.js` é o par obrigatório: ele comparava a sessão local contra o e-mail do central e, com os dois divergindo, concluiria "trocou de conta" a cada carregamento — **um magic link por página**. Agora a ponte devolve `email_conta` e o front guarda a tradução (`ACESSO_CONTA_v1` no `localStorage`); sem `localStorage` perde-se o atalho, não o acesso. Quem tem os dois endereços iguais não é afetado em nada. **Falta republicar a Edge Function** (o deploy do Pages não a leva junto) — e **nada disto foi testado contra o central real**: a rede do sandbox bloqueia os dois projetos Supabase. `auth-central.js` ficou com 262 linhas, pouco acima do teto de ~250.
+
 ## Próximo passo
 
 - **Ligar o real:** rodar `sql/011`+`sql/012`+`sql/013`, preencher `js/config.js`, habilitar provider Email (login de teste com usuários do seed, senha `dev-123456`) e/ou Google OAuth, deploy da Edge Function `relatorios` + bucket. Aí as telas saem do modo demo.
@@ -101,6 +103,7 @@
 - **Implantar a Fase 4** (o código está pronto; falta o que só se faz no servidor): rodar o SQL `036`, habilitar o provider **Email** no Auth do lunar, publicar a Edge Function com `--no-verify-jwt`, e servir o sistema em `smedigital.com.br/lunar/` — **mesma origem do central**, senão não há SSO. Roteiro completo em `docs/IMPLANTACAO-CENTRAL.md`.
 - `js/ui/login.js` ficou **fora de uso** (a página virou redirecionamento). Mantido de propósito: é a única interface de login própria que existe.
 - **Rodar o catálogo do central** (`docs/CATALOGO-CENTRAL.md`, passos 1 e 2 no SQL Editor do projeto **central**): sem isso `meus-processos`, `licitacoes`, `painel-licitacoes`, `processo-licitacao` e `nova-licitacao` seguem invisíveis para todo mundo que não é super admin da rede.
+- **Republicar a `central-bridge`** com a tradução do bloco 4a e conferir no ar com uma conta cujos endereços divergem. Enquanto não subir, o front novo é inofensivo: sem `email_conta` na resposta, ele não guarda tradução nenhuma.
 - **Antes de produção:** inativar os usuários do `sql/008_seed.sql` (senha `dev-123456`).
 
 ## Decisões do usuário aplicadas (2026-07-31)

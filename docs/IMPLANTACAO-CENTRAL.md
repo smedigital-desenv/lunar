@@ -233,6 +233,53 @@ Confira também que `https://smedigital.com.br/lunar/sql/008_seed.sql`
 devolve **404**. Se devolver o arquivo, o `rsync` do workflow não excluiu o
 que devia.
 
+## Quando o e-mail de login não é o e-mail da conta
+
+Acontece, e não é defeito. O `sql/039` cadastrou os 52 titulares com
+endereços **inventados** por regra (primeiro nome + último sobrenome). Quem
+usa outra caixa institucional entra na rede por um endereço que, aqui, pode
+já pertencer a **outra conta de `auth.users`** — o projeto é compartilhado e
+o e-mail é único no projeto inteiro.
+
+Não tente resolver apagando ou trocando conta:
+
+- **Apagar a outra conta** destrói usuário de um sistema vizinho. Uma
+  varredura por chave estrangeira não prova que ela está livre: o único FK
+  para `auth.users` neste banco é o de `gestao.usuarios`, então as
+  dependências dos vizinhos são invisíveis para o SQL.
+- **Apontar a pessoa para a outra conta** é impossível.
+  `gestao.usuarios.id` **é** a conta de autenticação, e é esse id que assina
+  demandas, tarefas, movimentações e auditoria. Movimentação e auditoria são
+  imutáveis por trigger e não existe DELETE em lugar nenhum: reatribuir
+  histórico não é difícil, é vedado por desenho.
+
+Quem resolve é a `central-bridge`, no bloco **4a**: ela procura
+`gestao.usuarios` pelo e-mail do token, pega o e-mail da conta
+correspondente e emite o magic link **para essa conta**. O vínculo é o
+próprio `gestao.usuarios.email`.
+
+Para ligar isso a uma pessoa, então, basta pôr o endereço de login em dois
+lugares — e **nenhum deles é o `auth.users`**:
+
+1. no perfil dela **no central** (é por onde ela entra);
+2. em `gestao.usuarios.email` **aqui** (é o que faz a ponte encontrá-la).
+
+O `auth.users` dela continua com o endereço antigo, para sempre, e está
+certo: ele é a identidade interna, não o login.
+
+> ⚠️ `js/auth-central.js` é parte disso, não enfeite. Ele compara a sessão
+> local contra o e-mail do central; com os dois divergindo, concluiria
+> "trocou de conta" a cada carregamento e pediria **um magic link por
+> página**. A ponte devolve `email_conta` e o front guarda a tradução em
+> `localStorage` (`ACESSO_CONTA_v1`). Publicar um sem o outro é pior do que
+> não publicar nenhum.
+
+Efeito colateral conhecido: a conta que ficou com o endereço de login
+continua existindo e aparece em "contas pendentes" do `pages/admin.html`,
+com o mesmo e-mail que a pessoa já mostra na tela. Provisioná-la falha no
+UNIQUE de `gestao.usuarios.email` — erro claro, sem estrago, mas confunde
+quem administra.
+
 ## Passo 5 — Cadastrar as pessoas no central
 
 > As **telas** do sistema (o que cada papel enxerga) são cadastro à parte, e
