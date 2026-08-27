@@ -148,6 +148,16 @@ body {
   border-color: var(--cinza-300);
   padding: .5rem .7rem;
   transition: border-color var(--transicao), box-shadow var(--transicao);
+  min-width: 0; /* deixa encolher de verdade dentro do grid (row/col) */
+}
+/* Rótulo/opção mais longo que a coluna (ex.: filtros de busca lado a lado
+   no celular) cortava com reticências em alguns navegadores e "vazava"
+   pra fora da caixa em outros. Só em campo de uma linha — textarea
+   também usa .form-control e precisa continuar quebrando linha. */
+select.form-select, input.form-control {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .form-control:focus, .form-select:focus {
   border-color: var(--cor-primaria);
