@@ -769,8 +769,13 @@ a.cartao:active { transform: translateY(0); }
      (texto claro, borda translúcida) ficam ilegíveis — sobrescreve só
      aqui dentro. */
   .sessao__id { text-align: left; }
-  .sessao__nome, .sessao__perfil { max-width: none; }
-  .sessao__nome { color: var(--cinza-900); }
+  /* Nome completo (o organograma tem gente com 4-5 palavras no nome) sem
+     limite de largura e ainda em nowrap virava texto maior que o painel
+     e o navegador quebrava do jeito dele, feio. Fonte menor + quebra de
+     linha deliberada (normal, não nowrap) cabe melhor num painel de
+     12rem e ainda lê bem em duas linhas quando precisa. */
+  .sessao__nome, .sessao__perfil { max-width: none; white-space: normal; overflow: visible; text-overflow: clip; }
+  .sessao__nome { color: var(--cinza-900); font-size: .76rem; line-height: 1.25; }
   .sessao__perfil { color: var(--cinza-500); }
   /* Cada item vira uma linha de menu (largura cheia, texto à esquerda)
      em vez de pílula solta — mais fácil de tocar e lê como menu, não
