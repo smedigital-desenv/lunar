@@ -62,11 +62,18 @@ export function montarBotao(el, usuario) {
   botao.className = 'sessao__demo';
   const pintar = () => {
     const on = ligado();
-    botao.textContent = on ? 'Demonstração: ligada' : 'Demonstração';
+    // Texto completo só no desktop (CSS troca por "Demo" no celular, onde
+    // "Demonstração: ligada" competia por espaço com nome/Sair) — o
+    // aria-label garante o texto inteiro pra leitor de tela nos dois casos.
+    botao.innerHTML = `<span aria-hidden="true" class="sessao__demo-completo">${on ? 'Demonstração: ligada' : 'Demonstração'}</span>`
+      + `<span aria-hidden="true" class="sessao__demo-curto">${on ? 'Demo •' : 'Demo'}</span>`;
     botao.classList.toggle('sessao__demo--on', on);
     botao.title = on
       ? 'Exibindo dados de exemplo. Clique para voltar aos dados reais.'
       : 'Exibir dados de exemplo, sem tocar no banco.';
+    botao.setAttribute('aria-label', on
+      ? 'Modo demonstração ligado — clique para voltar aos dados reais'
+      : 'Ativar modo demonstração');
     botao.setAttribute('aria-pressed', String(on));
   };
   pintar();

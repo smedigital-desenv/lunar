@@ -514,6 +514,16 @@ a.cartao:active { transform: translateY(0); }
 .sessao__demo--on {
   background: #fff3cd; color: #664d03; border-color: #ffe69c; opacity: 1;
 }
+/* "Demonstração: ligada" por extenso só sobra espaço no desktop — no
+   celular competia com nome e Sair. Texto some por completo do lado
+   errado (aria-hidden nos dois spans); o botão carrega o texto inteiro
+   no aria-label, então leitor de tela não perde nada. */
+.sessao__demo-curto { display: none; }
+@media (max-width: 575.98px) {
+  .sessao__demo { padding: .1rem .5rem; font-size: .68rem; }
+  .sessao__demo-completo { display: none; }
+  .sessao__demo-curto { display: inline; }
+}
 
 /* --------------------------------------------------------------- Organograma
    Árvore recolhível. A indentação vem de --nivel, calculada no JS, em vez de
