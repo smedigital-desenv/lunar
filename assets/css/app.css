@@ -176,8 +176,11 @@ body {
   box-shadow: 0 12px 30px rgba(0, 43, 94, .22);
 }
 .app-header__barra {
-  max-width: var(--largura-max);
-  margin: 0 auto;
+  /* Sem max-width/margin:auto de propósito: ao contrário do conteúdo da
+     página (centralizado, com teto de leitura), o cabeçalho é uma barra
+     de ferramentas — "voltar + título" deve colar na borda esquerda da
+     tela e "sino + usuário" na borda direita, não ficar preso dentro de
+     uma faixa central com espaço vazio nas duas pontas em tela larga. */
   display: flex;
   align-items: center;
   gap: .75rem;
@@ -210,6 +213,7 @@ body {
 @media (min-width: 720px) {
   :root { --gap: 1.5rem; }
   .pagina { padding-left: 1.5rem; padding-right: 1.5rem; }
+  .app-header__barra { padding-left: 1.5rem; padding-right: 1.5rem; }
 }
 
 /* --------------------------------------------------------------- Cartões */
