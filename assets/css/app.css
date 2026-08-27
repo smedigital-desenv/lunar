@@ -714,7 +714,23 @@ a.cartao:active { transform: translateY(0); }
 .sessao { display: flex; align-items: center; gap: .5rem; }
 .sessao__id { display: flex; flex-direction: column; line-height: 1.1; text-align: right; }
 .sessao__nome { font-size: .82rem; font-weight: 600; color: #fff; max-width: 9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.sessao__perfil { font-size: .68rem; color: rgba(255, 255, 255, .8); }
+.sessao__perfil { font-size: .68rem; color: rgba(255, 255, 255, .8); max-width: 9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* No celular, nome + cargo (em duas linhas) mais os atalhos Ajuda/Admin/
+   Equipes espremiam o título da página até sobrar 1-2 letras. Cargo é
+   secundário (some; ainda dá pra ver na tela de Equipes) e o nome
+   encolhe mais — Sair e os atalhos administrativos continuam visíveis,
+   só o texto do nome que fica mais curto. */
+@media (max-width: 575.98px) {
+  .sessao__perfil { display: none; }
+  .sessao__nome { max-width: 5rem; }
+  /* Ajuda/Admin/Equipes são 3 "pílulas" que não encolhem (flex rígido) —
+     sozinhas já estouravam a largura da tela e escondiam até o botão
+     Sair fora da viewport. Sem outro lugar pra caber no celular sem
+     tirar o título, saem daqui; continuam alcançáveis pela versão
+     desktop e uma linkando a outra (admin.html ⇄ equipes.html). */
+  .sessao__admin { display: none; }
+}
 .sessao__sair {
   background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .22); color: #cbd5e1;
   font-size: .72rem; font-weight: 800; letter-spacing: .01em;
