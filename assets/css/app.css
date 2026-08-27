@@ -159,6 +159,11 @@ select.form-select, input.form-control {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* O padding uniforme (.7rem) acima é pensado pra input de texto — no
+   select ele deixa pouca folga entre o texto e a setinha (o texto
+   comprido chegava a passar por baixo dela). Só o select ganha mais
+   espaço à direita, reservado pra setinha. */
+.form-select { padding-right: 2rem; }
 .form-control:focus, .form-select:focus {
   border-color: var(--cor-primaria);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor-primaria) 15%, transparent);
