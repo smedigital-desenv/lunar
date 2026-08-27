@@ -514,16 +514,6 @@ a.cartao:active { transform: translateY(0); }
 .sessao__demo--on {
   background: #fff3cd; color: #664d03; border-color: #ffe69c; opacity: 1;
 }
-/* "Demonstração: ligada" por extenso só sobra espaço no desktop — no
-   celular competia com nome e Sair. Texto some por completo do lado
-   errado (aria-hidden nos dois spans); o botão carrega o texto inteiro
-   no aria-label, então leitor de tela não perde nada. */
-.sessao__demo-curto { display: none; }
-@media (max-width: 575.98px) {
-  .sessao__demo { padding: .1rem .5rem; font-size: .68rem; }
-  .sessao__demo-completo { display: none; }
-  .sessao__demo-curto { display: inline; }
-}
 
 /* --------------------------------------------------------------- Organograma
    Árvore recolhível. A indentação vem de --nivel, calculada no JS, em vez de
@@ -734,28 +724,27 @@ a.cartao:active { transform: translateY(0); }
 }
 .notif-vazio { padding: 1rem .8rem; }
 
-/* --------------------------------------------------------------- Sessão (cabeçalho) */
-.app-header__sessao { flex: 0 0 auto; }
+/* --------------------------------------------------------------- Sessão (cabeçalho)
+   Nome + cargo + Ajuda/Admin/Equipes + Sair não cabem ao lado do título
+   no celular. No desktop `.sessao__painel` é só a barra de sempre (o
+   avatar fica invisível); no celular ela vira um painel escondido atrás
+   de um avatar com a inicial do nome — mesmo padrão de abrir/fechar do
+   sino de notificações. */
+.app-header__sessao { flex: 0 0 auto; position: relative; }
 .sessao { display: flex; align-items: center; gap: .5rem; }
+.sessao__avatar {
+  display: none; /* só o celular mostra — regra abaixo */
+  width: 2rem; height: 2rem; border-radius: 50%;
+  background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .4);
+  color: #fff; font-weight: 700; font-size: .95rem; line-height: 1;
+  align-items: center; justify-content: center; cursor: pointer;
+  transition: background var(--transicao);
+}
+.sessao__avatar:hover, .sessao__avatar[aria-expanded="true"] { background: rgba(255, 255, 255, .26); }
+.sessao__painel { display: flex; align-items: center; gap: .5rem; }
 .sessao__id { display: flex; flex-direction: column; line-height: 1.1; text-align: right; }
 .sessao__nome { font-size: .82rem; font-weight: 600; color: #fff; max-width: 9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sessao__perfil { font-size: .68rem; color: rgba(255, 255, 255, .8); max-width: 9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-/* No celular, nome + cargo (em duas linhas) mais os atalhos Ajuda/Admin/
-   Equipes espremiam o título da página até sobrar 1-2 letras. Cargo é
-   secundário (some; ainda dá pra ver na tela de Equipes) e o nome
-   encolhe mais — Sair e os atalhos administrativos continuam visíveis,
-   só o texto do nome que fica mais curto. */
-@media (max-width: 575.98px) {
-  .sessao__perfil { display: none; }
-  .sessao__nome { max-width: 5rem; }
-  /* Ajuda/Admin/Equipes são 3 "pílulas" que não encolhem (flex rígido) —
-     sozinhas já estouravam a largura da tela e escondiam até o botão
-     Sair fora da viewport. Sem outro lugar pra caber no celular sem
-     tirar o título, saem daqui; continuam alcançáveis pela versão
-     desktop e uma linkando a outra (admin.html ⇄ equipes.html). */
-  .sessao__admin { display: none; }
-}
 .sessao__sair {
   background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .22); color: #cbd5e1;
   font-size: .72rem; font-weight: 800; letter-spacing: .01em;
@@ -763,6 +752,41 @@ a.cartao:active { transform: translateY(0); }
   transition: color var(--transicao), background var(--transicao), border-color var(--transicao);
 }
 .sessao__sair:hover { color: #fff; background: rgba(0, 229, 255, .12); border-color: rgba(0, 229, 255, .6); }
+
+@media (max-width: 575.98px) {
+  .sessao__avatar { display: flex; }
+  .sessao__painel {
+    display: none;
+    position: absolute; top: calc(100% + .5rem); right: 0;
+    flex-direction: column; align-items: stretch; gap: .5rem;
+    min-width: 12rem; padding: .75rem;
+    background: #fff; border: 1px solid var(--cinza-200);
+    border-radius: var(--raio); box-shadow: var(--sombra-forte);
+    z-index: 1045; /* mesmo nível do .notif__painel, mesmo motivo (nav-principal fica em 1040) */
+  }
+  .sessao__painel--aberto { display: flex; }
+  /* Dentro do painel branco, os tons pensados pro cabeçalho escuro
+     (texto claro, borda translúcida) ficam ilegíveis — sobrescreve só
+     aqui dentro. */
+  .sessao__id { text-align: left; }
+  .sessao__nome, .sessao__perfil { max-width: none; }
+  .sessao__nome { color: var(--cinza-900); }
+  .sessao__perfil { color: var(--cinza-500); }
+  /* Cada item vira uma linha de menu (largura cheia, texto à esquerda)
+     em vez de pílula solta — mais fácil de tocar e lê como menu, não
+     como barra de botões. Especificidade ".sessao__painel .sessao__X"
+     de propósito: as regras base (mais abaixo no arquivo, mesma
+     especificidade de uma classe só) venciam a media query por ordem. */
+  .sessao__painel .sessao__admin, .sessao__painel .sessao__demo, .sessao__painel .sessao__sair {
+    width: 100%; text-align: left; border-radius: var(--raio-sm);
+  }
+  .sessao__painel .sessao__admin { color: var(--cor-primaria); }
+  .sessao__painel .sessao__admin:hover { background: var(--cor-primaria-clara); }
+  .sessao__painel .sessao__demo { border-color: var(--cinza-300); color: var(--cinza-700); }
+  .sessao__painel .sessao__demo:hover { background: var(--cinza-100); }
+  .sessao__painel .sessao__sair { color: var(--cinza-700); border-color: var(--cinza-300); }
+  .sessao__painel .sessao__sair:hover { color: var(--cinza-900); background: var(--cinza-100); border-color: var(--cinza-300); }
+}
 
 /* --------------------------------------------------------------- Tela de login */
 .tela-login {

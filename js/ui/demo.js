@@ -62,18 +62,11 @@ export function montarBotao(el, usuario) {
   botao.className = 'sessao__demo';
   const pintar = () => {
     const on = ligado();
-    // Texto completo só no desktop (CSS troca por "Demo" no celular, onde
-    // "Demonstração: ligada" competia por espaço com nome/Sair) — o
-    // aria-label garante o texto inteiro pra leitor de tela nos dois casos.
-    botao.innerHTML = `<span aria-hidden="true" class="sessao__demo-completo">${on ? 'Demonstração: ligada' : 'Demonstração'}</span>`
-      + `<span aria-hidden="true" class="sessao__demo-curto">${on ? 'Demo •' : 'Demo'}</span>`;
+    botao.textContent = on ? 'Demonstração: ligada' : 'Demonstração';
     botao.classList.toggle('sessao__demo--on', on);
     botao.title = on
       ? 'Exibindo dados de exemplo. Clique para voltar aos dados reais.'
       : 'Exibir dados de exemplo, sem tocar no banco.';
-    botao.setAttribute('aria-label', on
-      ? 'Modo demonstração ligado — clique para voltar aos dados reais'
-      : 'Ativar modo demonstração');
     botao.setAttribute('aria-pressed', String(on));
   };
   pintar();
@@ -84,5 +77,8 @@ export function montarBotao(el, usuario) {
     location.reload();          // as telas carregam os dados na abertura
   });
 
-  el.insertBefore(botao, el.querySelector('.sessao__sair') ?? null);
+  // O botão Sair não é mais sempre filho direto de `el` (mora dentro do
+  // painel de sessão no celular) — insere no pai real, seja ele qual for.
+  const sair = el.querySelector('.sessao__sair');
+  (sair ? sair.parentNode : el).insertBefore(botao, sair ?? null);
 }
