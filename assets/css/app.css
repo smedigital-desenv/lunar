@@ -809,12 +809,27 @@ a.cartao:active { transform: translateY(0); }
   border-radius: 0 0 3px 3px;
   background: var(--cor-primaria);
 }
+/* O "+" era o glifo de texto da fonte, centralizado por flexbox — mas o
+   desenho do "+" no Inter Bold não é simétrico dentro da própria caixa
+   de linha, então sobrava espaço de um lado e ficava "torto" mesmo
+   centralizado. Trocado por um "+" desenhado em CSS (duas barras via
+   ::before/::after), que fica exatamente centrado em qualquer fonte. */
 .nav-principal__item--destaque .nav-principal__icone {
   width: 2rem; height: 2rem; border-radius: 50%;
   background: var(--gradiente-primario); color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.4rem; font-weight: 700; box-shadow: var(--sombra-media);
+  position: relative;
+  font-size: 0;
+  box-shadow: var(--sombra-media);
 }
+.nav-principal__item--destaque .nav-principal__icone::before,
+.nav-principal__item--destaque .nav-principal__icone::after {
+  content: "";
+  position: absolute; top: 50%; left: 50%;
+  background: currentColor; border-radius: 1px;
+  transform: translate(-50%, -50%);
+}
+.nav-principal__item--destaque .nav-principal__icone::before { width: 52%; height: 11%; }
+.nav-principal__item--destaque .nav-principal__icone::after { width: 11%; height: 52%; }
 body.com-nav { padding-bottom: 4rem; }
 
 @media (min-width: 720px) {
@@ -839,7 +854,7 @@ body.com-nav { padding-bottom: 4rem; }
   }
   .nav-principal__item--ativo::after { display: none; }
   .nav-principal__icone { font-size: 1.05rem; }
-  .nav-principal__item--destaque .nav-principal__icone { width: 1.5rem; height: 1.5rem; font-size: 1.1rem; }
+  .nav-principal__item--destaque .nav-principal__icone { width: 1.5rem; height: 1.5rem; }
   body.com-nav { padding-bottom: 0; }
 }
 
