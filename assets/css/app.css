@@ -67,7 +67,11 @@
   --brilho-acento: 0 0 0 1px rgba(0, 229, 255, .18), 0 0 18px rgba(0, 229, 255, .35);
 
   --gap: 1rem;
-  --largura-max: 1040px;
+  /* min() em vez de um número fixo: acompanha a largura da tela até um
+     teto (linhas de texto/forms não ficam absurdamente compridas em
+     monitor ultrawide), em vez de parar sempre no mesmo tamanho e sobrar
+     faixa vazia nas laterais em telas grandes. */
+  --largura-max: min(1400px, 94vw);
   --transicao: 160ms cubic-bezier(.4, 0, .2, 1);
   --altura-nav: 3.4rem;   /* barra de navegação no rodapé (celular) */
 }
@@ -1113,7 +1117,7 @@ body.embed .pagina { padding-top: .6rem; }
 .fase-card--desvio { border-style: dashed; opacity: .92; }
 
 /* Lista de licitações no desktop: página larga + tabela ordenável. */
-.pagina--larga { max-width: 1500px; }
+.pagina--larga { max-width: min(2000px, 97vw); }
 .tabela-lic { font-size: .88rem; }
 .tabela-lic tbody tr { cursor: pointer; }
 .tabela-lic__objeto { max-width: 28rem; }
