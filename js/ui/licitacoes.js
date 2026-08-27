@@ -6,6 +6,7 @@
 // Filtros de URL: ?categoria= &fase= &prioridade= &parados=1 &busca=
 // =====================================================================
 
+import './filtros-exp.js';
 import { escapeHtml, fmtData } from './componentes.js';
 import {
   ROTULO_CATEGORIA, ROTULO_PRIORIDADE_LIC, COR_PRIORIDADE,

@@ -5,6 +5,7 @@
 // O desenho fica em meus-processos-render.js; aqui é estado e carga.
 // =====================================================================
 
+import './filtros-exp.js';
 import { COLUNAS, cartao, linhaClasse, renderCronograma, chaveCronograma }
   from './meus-processos-render.js';
 import { renderLista, renderPaginacao, ligarEventos } from './tabela-processos.js';

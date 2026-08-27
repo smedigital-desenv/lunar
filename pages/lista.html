@@ -24,14 +24,6 @@
     </div>
 
     <form id="filtros" class="row g-2 mb-3" autocomplete="off">
-      <!-- As opções saem do organograma real; some para quem enxerga uma
-           só secretaria, porque aí não há o que separar. -->
-      <div class="col-12 col-md-4" id="campo-unidade" hidden>
-        <select id="f-unidade" class="form-select form-select-sm"
-                aria-label="Filtrar por secretaria">
-          <option value="">Todas as secretarias</option>
-        </select>
-      </div>
       <div class="col-12 col-md-4">
         <input id="f-busca" class="form-control form-control-sm" type="search"
                placeholder="Título ou número…" aria-label="Buscar por título ou número">
@@ -41,6 +33,22 @@
       </div>
       <div class="col-6 col-md-2 d-grid">
         <a class="btn btn-sm btn-primary" href="./nova-demanda.html">+ Nova</a>
+      </div>
+      <!-- As opções saem do organograma real; some para quem enxerga uma
+           só secretaria, porque aí não há o que separar. lista.js troca
+           o `hidden` deste bloco (não do <select> lá dentro). -->
+      <div class="col-12" id="campo-unidade" hidden>
+        <details class="filtros-exp">
+          <summary>Filtros</summary>
+          <div class="filtros-exp__corpo row g-2">
+            <div class="col-12 col-md-4">
+              <select id="f-unidade" class="form-select form-select-sm"
+                      aria-label="Filtrar por secretaria">
+                <option value="">Todas as secretarias</option>
+              </select>
+            </div>
+          </div>
+        </details>
       </div>
     </form>
 

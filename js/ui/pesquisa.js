@@ -4,6 +4,7 @@
 // Em modo demo, filtra um conjunto de exemplo no cliente.
 // =====================================================================
 
+import './filtros-exp.js';
 import { cartaoLista } from './caixa.js';
 import { fmtPrazo } from './componentes.js';
 
