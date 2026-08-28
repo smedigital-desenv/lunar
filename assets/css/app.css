@@ -855,10 +855,14 @@ a.cartao:active { transform: translateY(0); }
 }
 .admin-lista { list-style: none; margin: 0; padding: 0; }
 .admin-usuario {
-  display: flex; align-items: center; justify-content: space-between; gap: .6rem;
+  /* align-items:flex-start (não center): nome com 3+ palavras quebra em
+     duas linhas com frequência (organograma real tem gente assim) — com
+     "center" o botão flutuava em cima da segunda linha do nome em vez de
+     ficar ao lado da primeira. */
+  display: flex; align-items: flex-start; justify-content: space-between; gap: .6rem;
   padding: .55rem 0; border-bottom: 1px solid var(--cinza-100);
 }
-.admin-usuario__info { display: flex; flex-direction: column; min-width: 0; }
+.admin-usuario__info { display: flex; flex-direction: column; min-width: 0; overflow-wrap: break-word; }
 .admin-usuario__info .texto-silencioso { font-size: .8rem; }
 .admin-usuario__acoes { display: flex; align-items: center; gap: .4rem; flex: 0 0 auto; }
 .admin-usuario--inativo .admin-usuario__info strong { color: var(--cinza-500); text-decoration: line-through; }
