@@ -9,6 +9,7 @@ import './filtros-exp.js';
 import { COLUNAS, cartao, linhaClasse, renderCronograma, chaveCronograma }
   from './meus-processos-render.js';
 import { renderLista, renderPaginacao, ligarEventos } from './tabela-processos.js';
+import { escapeHtml } from './componentes.js';
 import { abrirModalProcesso } from './modal-processo.js';
 import * as demo from './demo.js';
 
@@ -28,7 +29,7 @@ const PREDICADOS = {
 const PESO_PRIORIDADE = { urgente: 0, alta: 1, normal: 2, baixa: 3 };
 
 const estado = {
-  posse: 'todos', situacao: 'todos', busca: '',
+  posse: 'todos', situacao: 'todos', tipo: 'todos', busca: '',
   ordem: 'prazo', asc: true, pagina: 1
 };
 
@@ -43,15 +44,15 @@ window.marcarListaSuja = () => { listaSuja = true; };
 
 // ------------------------------------------------------------- Dados
 const EXEMPLO_ENTRADA = [
-  { id: 'd1', numero: 'DEM-2026-000042', titulo: 'Verificar contrato de merenda', situacao: 'em_andamento', prioridade: 'alta', sigilo: 'normal', prazo: '2026-08-05' },
+  { id: 'd1', numero: 'DEM-2026-000042', titulo: 'Verificar contrato de merenda', situacao: 'em_andamento', prioridade: 'alta', sigilo: 'normal', prazo: '2026-08-05', tipo_id: 't-rec', tipo_nome: 'Reclamação' },
   // d15: meu processo, mas quem tem tarefa aberta é outra pessoa.
-  { id: 'd15', numero: 'DEM-2026-000057', titulo: 'Olhar o lunar', situacao: 'aberta', prioridade: 'normal', sigilo: 'normal', prazo: null, aguarda_outros: true },
+  { id: 'd15', numero: 'DEM-2026-000057', titulo: 'Olhar o lunar', situacao: 'aberta', prioridade: 'normal', sigilo: 'normal', prazo: null, aguarda_outros: true, tipo_id: 't-sub', tipo_nome: 'Para subsecretários' },
   { id: 'd2', numero: 'DEM-2026-000051', titulo: 'Emitir parecer sobre transferência', situacao: 'aberta', prioridade: 'normal', sigilo: 'normal', prazo: '2026-08-12' },
   { id: 'd3', numero: 'DEM-2026-000058', titulo: 'Vazamento no telhado — vistoria', situacao: 'aberta', prioridade: 'urgente', sigilo: 'normal', prazo: '2026-08-01' }
 ];
 const EXEMPLO_SAIDA = [
   { id: 'd1', numero: 'DEM-2026-000042', titulo: 'Verificar contrato de merenda', situacao: 'em_andamento', prioridade: 'alta', sigilo: 'normal', prazo: '2026-08-05' },
-  { id: 'd8', numero: 'DEM-2026-000044', titulo: 'Pedido de transporte escolar', situacao: 'aberta', prioridade: 'normal', sigilo: 'normal', prazo: '2026-08-18' },
+  { id: 'd8', numero: 'DEM-2026-000044', titulo: 'Pedido de transporte escolar', situacao: 'aberta', prioridade: 'normal', sigilo: 'normal', prazo: '2026-08-18', tipo_id: 't-sub', tipo_nome: 'Para subsecretários' },
   { id: 'd9', numero: 'DEM-2026-000047', titulo: 'Ocorrência com aluno (sigilo)', situacao: 'aguardando_complementacao', prioridade: 'alta', sigilo: 'restrito', prazo: '2026-08-03' },
   // d14: só executei uma tarefa aqui — continua na lista, aguardando os outros.
   { id: 'd14', numero: 'DEM-2026-000068', titulo: 'Parecer técnico já entregue', situacao: 'em_andamento', prioridade: 'normal', sigilo: 'normal', prazo: '2026-08-22' },
@@ -84,6 +85,7 @@ function unificar(entrada, saida) {
       demandaId: d.id, numero: d.numero, titulo: d.titulo,
       situacao: d.situacao, prioridade: d.prioridade,
       sigilo: d.sigilo, prazo: d.prazo, posse: posseDe(d, veioDaEntrada),
+      tipoId: d.tipo_id ?? null, tipoNome: d.tipo_nome ?? null,
       href: `./demanda.html?id=${encodeURIComponent(d.id)}`
     });
   });
@@ -165,6 +167,38 @@ function preencherCronogramas(itens) {
   }));
 }
 
+// As opções saem dos tipos PRESENTES na lista, não do catálogo inteiro:
+// assim o seletor nunca oferece um tipo que não filtraria nada, e um tipo
+// inativado na administração continua aparecendo enquanto houver processo
+// seu com ele. "Sem tipo" só aparece se existir processo sem classificar.
+function montarOpcoesTipo() {
+  const sel = document.getElementById('f-tipo');
+  if (!sel) return;
+  const nomes = new Map();
+  let temSemTipo = false;
+  for (const p of processos) {
+    if (p.tipoId) nomes.set(p.tipoId, p.tipoNome || '(tipo sem nome)');
+    else temSemTipo = true;
+  }
+  const ordenados = [...nomes.entries()]
+    .sort((a, z) => a[1].localeCompare(z[1], 'pt-BR'));
+
+  const anterior = estado.tipo;
+  sel.innerHTML = '<option value="todos">Todos os tipos</option>'
+    + ordenados.map(([id, nome]) =>
+        `<option value="${escapeHtml(id)}">${escapeHtml(nome)}</option>`).join('')
+    + (temSemTipo ? '<option value="sem_tipo">Sem tipo</option>' : '');
+
+  // O tipo escolhido pode ter sumido da lista depois de recarregar (o
+  // último processo dele saiu): volta a "todos" em vez de filtrar por um
+  // valor que o seletor não mostra mais.
+  const existe = anterior === 'todos'
+    || (anterior === 'sem_tipo' && temSemTipo)
+    || nomes.has(anterior);
+  estado.tipo = existe ? anterior : 'todos';
+  sel.value = estado.tipo;
+}
+
 // --------------------------------------------------------- Seleção
 function selecionar() {
   let itens = processos.filter(PREDICADOS[estado.situacao] ?? PREDICADOS.todos);
@@ -173,6 +207,8 @@ function selecionar() {
   // não é opção aqui — quem procura processo concluído usa o filtro de
   // situação, para não haver dois controles dizendo a mesma coisa.
   if (estado.posse !== 'todos') itens = itens.filter(i => i.posse === estado.posse);
+  if (estado.tipo === 'sem_tipo') itens = itens.filter(i => !i.tipoId);
+  else if (estado.tipo !== 'todos') itens = itens.filter(i => i.tipoId === estado.tipo);
   const termo = estado.busca.trim().toLowerCase();
   if (termo) {
     itens = itens.filter(i => i.numero.toLowerCase().includes(termo)
@@ -191,6 +227,7 @@ function selecionar() {
 }
 
 function atualizar() {
+  montarOpcoesTipo();
   const itens = selecionar();
   const paginas = Math.max(1, Math.ceil(itens.length / POR_PAGINA));
   estado.pagina = Math.min(Math.max(1, estado.pagina), paginas);
@@ -221,7 +258,7 @@ function abrir(href) {
   });
 }
 
-for (const [id, chave] of [['f-posse', 'posse'], ['f-situacao', 'situacao']]) {
+for (const [id, chave] of [['f-posse', 'posse'], ['f-tipo', 'tipo'], ['f-situacao', 'situacao']]) {
   document.getElementById(id).addEventListener('change', (e) => {
     estado[chave] = e.target.value;
     estado.pagina = 1;
