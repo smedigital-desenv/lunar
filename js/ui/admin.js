@@ -197,6 +197,11 @@ async function iniciar() {
     if (b) aoMudarAtivo(b.dataset.acao, b.dataset.id);
   });
 
+  // Seção de tipos: módulo próprio, mesma decisão de sessão e permissão
+  // já tomada aqui. O banco confere de novo a cada escrita (sql/049).
+  const { montarTipos } = await import('./admin-tipos.js');
+  await montarTipos({ servico: svc, demo: dados.demo });
+
   document.getElementById('carregando').hidden = true;
   document.getElementById('conteudo').hidden = false;
 }

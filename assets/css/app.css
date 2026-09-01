@@ -740,6 +740,23 @@ a.cartao:active { transform: translateY(0); }
 .admin-usuario__info .texto-silencioso { font-size: .8rem; }
 .admin-usuario__acoes { display: flex; align-items: center; gap: .4rem; flex: 0 0 auto; }
 .admin-usuario--inativo .admin-usuario__info strong { color: var(--cinza-500); text-decoration: line-through; }
+
+/* Tipos de demanda: mesma linha do usuário, mais o formulário embutido —
+   editar no lugar evita tirar a pessoa da lista para uma outra tela. */
+.admin-tipo {
+  display: flex; align-items: center; justify-content: space-between; gap: .6rem;
+  padding: .55rem 0; border-bottom: 1px solid var(--cinza-100);
+}
+.admin-tipo__info { display: flex; flex-direction: column; min-width: 0; }
+.admin-tipo__info .texto-silencioso { font-size: .8rem; }
+.admin-tipo__acoes { display: flex; align-items: center; gap: .5rem; flex: 0 0 auto; }
+.admin-tipo--inativo .admin-tipo__info strong { color: var(--cinza-500); text-decoration: line-through; }
+.admin-tipo--novo { justify-content: flex-start; }
+.admin-tipo__form { display: grid; grid-template-columns: 1fr; gap: .4rem; width: 100%; }
+.admin-tipo__botoes { display: flex; gap: .4rem; }
+@media (min-width: 640px) {
+  .admin-tipo__form { grid-template-columns: 1fr 1.4fr auto; align-items: center; }
+}
 .sessao__admin {
   color: #cbd5e1; font-size: .72rem; font-weight: 800; letter-spacing: .01em;
   text-decoration: none; padding: .3rem .6rem; border-radius: 999px;

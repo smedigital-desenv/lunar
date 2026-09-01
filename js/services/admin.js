@@ -61,6 +61,17 @@ export function definirUnidadeUsuario(usuarioId, unidadeId) {
   return rpc('fn_definir_unidade_usuario', { p_usuario_id: usuarioId, p_unidade_id: unidadeId });
 }
 
+// Tipos de demanda — TODOS, inclusive os inativos. O referencias.js só
+// traz os ativos (é o que o seletor de nova demanda precisa); a tela de
+// administração precisa ver os inativos para poder reativá-los.
+export async function listarTiposTodos() {
+  await aguardarSessao();
+  const { data, error } = await supabase
+    .from('tipos_demanda').select('id, nome, descricao, ativo').order('nome');
+  if (error) throw error;
+  return data;
+}
+
 // --- Escrita (RPC) ----------------------------------------------------
 
 // Cria ou ajusta o acesso de uma conta (idempotente). Retorna o id.
@@ -76,4 +87,24 @@ export function inativarUsuario(id, motivo) {
 
 export function reativarUsuario(id, motivo) {
   return rpc('fn_reativar_usuario', { p_id: id, p_motivo: motivo });
+}
+
+// --- Tipos de demanda (RPC, sql/049) ----------------------------------
+
+// Cria quando `id` é nulo; edita quando vem. Devolve o id.
+export function salvarTipo({ id = null, nome, descricao = null, ativo = true }) {
+  return rpc('fn_tipo_salvar', {
+    p_nome: nome, p_descricao: descricao, p_id: id, p_ativo: ativo
+  });
+}
+
+// Não existe excluir (regra 1): demandas.tipo_id aponta para cá, e apagar
+// levaria junto a classificação de processos antigos. Inativar tira do
+// seletor e preserva o histórico.
+export function inativarTipo(id, motivo) {
+  return rpc('fn_tipo_inativar', { p_id: id, p_motivo: motivo });
+}
+
+export function reativarTipo(id, motivo) {
+  return rpc('fn_tipo_reativar', { p_id: id, p_motivo: motivo });
 }
