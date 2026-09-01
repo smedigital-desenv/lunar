@@ -67,7 +67,11 @@
   --brilho-acento: 0 0 0 1px rgba(0, 229, 255, .18), 0 0 18px rgba(0, 229, 255, .35);
 
   --gap: 1rem;
-  --largura-max: 1040px;
+  /* min() em vez de um número fixo: acompanha a largura da tela até um
+     teto (linhas de texto/forms não ficam absurdamente compridas em
+     monitor ultrawide), em vez de parar sempre no mesmo tamanho e sobrar
+     faixa vazia nas laterais em telas grandes. */
+  --largura-max: min(1400px, 94vw);
   --transicao: 160ms cubic-bezier(.4, 0, .2, 1);
   --altura-nav: 3.4rem;   /* barra de navegação no rodapé (celular) */
 }
@@ -144,7 +148,22 @@ body {
   border-color: var(--cinza-300);
   padding: .5rem .7rem;
   transition: border-color var(--transicao), box-shadow var(--transicao);
+  min-width: 0; /* deixa encolher de verdade dentro do grid (row/col) */
 }
+/* Rótulo/opção mais longo que a coluna (ex.: filtros de busca lado a lado
+   no celular) cortava com reticências em alguns navegadores e "vazava"
+   pra fora da caixa em outros. Só em campo de uma linha — textarea
+   também usa .form-control e precisa continuar quebrando linha. */
+select.form-select, input.form-control {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* O padding uniforme (.7rem) acima é pensado pra input de texto — no
+   select ele deixa pouca folga entre o texto e a setinha (o texto
+   comprido chegava a passar por baixo dela). Só o select ganha mais
+   espaço à direita, reservado pra setinha. */
+.form-select { padding-right: 2rem; }
 .form-control:focus, .form-select:focus {
   border-color: var(--cor-primaria);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor-primaria) 15%, transparent);
@@ -172,8 +191,11 @@ body {
   box-shadow: 0 12px 30px rgba(0, 43, 94, .22);
 }
 .app-header__barra {
-  max-width: var(--largura-max);
-  margin: 0 auto;
+  /* Sem max-width/margin:auto de propósito: ao contrário do conteúdo da
+     página (centralizado, com teto de leitura), o cabeçalho é uma barra
+     de ferramentas — "voltar + título" deve colar na borda esquerda da
+     tela e "sino + usuário" na borda direita, não ficar preso dentro de
+     uma faixa central com espaço vazio nas duas pontas em tela larga. */
   display: flex;
   align-items: center;
   gap: .75rem;
@@ -196,6 +218,17 @@ body {
   max-width: var(--largura-max);
   margin: 0 auto;
   padding: var(--gap) .9rem 5rem;
+}
+/* No celular o --gap fica enxuto de propósito (tudo cabe na tela sem
+   rolar demais). A partir do desktop sobra espaço horizontal de sobra
+   e o mesmo valor deixava a tela "achatada" — cartões, cabeçalho e
+   filtros grudados uns nos outros. Como quase todo espaçamento vertical
+   do app.css referencia --gap (regra de token único), alargar aqui dá
+   respiro em todas as telas de uma vez, sem caçar cada tela por fora. */
+@media (min-width: 720px) {
+  :root { --gap: 1.5rem; }
+  .pagina { padding-left: 1.5rem; padding-right: 1.5rem; }
+  .app-header__barra { padding-left: 1.5rem; padding-right: 1.5rem; }
 }
 
 /* --------------------------------------------------------------- Cartões */
@@ -621,7 +654,11 @@ a.cartao:active { transform: translateY(0); }
   border: 1px solid var(--cinza-200);
   border-radius: var(--raio);
   box-shadow: var(--sombra-forte);
-  z-index: 1030;
+  /* Precisa ficar acima de .nav-principal (1040): no desktop (≥720px)
+     .app-header vira position:static e quem fixa é a barra de navegação,
+     então os dois passam a disputar a mesma pilha de empilhamento — sem
+     isso o painel abria atrás dos itens "Nova/Licitações/Painel/Buscar". */
+  z-index: 1045;
 }
 
 /* No celular o sino fica no MEIO do cabeçalho, então ancorar o painel pela
@@ -687,12 +724,27 @@ a.cartao:active { transform: translateY(0); }
 }
 .notif-vazio { padding: 1rem .8rem; }
 
-/* --------------------------------------------------------------- Sessão (cabeçalho) */
-.app-header__sessao { flex: 0 0 auto; }
+/* --------------------------------------------------------------- Sessão (cabeçalho)
+   Nome + cargo + Ajuda/Admin/Equipes + Sair não cabem ao lado do título
+   no celular. No desktop `.sessao__painel` é só a barra de sempre (o
+   avatar fica invisível); no celular ela vira um painel escondido atrás
+   de um avatar com a inicial do nome — mesmo padrão de abrir/fechar do
+   sino de notificações. */
+.app-header__sessao { flex: 0 0 auto; position: relative; }
 .sessao { display: flex; align-items: center; gap: .5rem; }
+.sessao__avatar {
+  display: none; /* só o celular mostra — regra abaixo */
+  width: 2rem; height: 2rem; border-radius: 50%;
+  background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .4);
+  color: #fff; font-weight: 700; font-size: .95rem; line-height: 1;
+  align-items: center; justify-content: center; cursor: pointer;
+  transition: background var(--transicao);
+}
+.sessao__avatar:hover, .sessao__avatar[aria-expanded="true"] { background: rgba(255, 255, 255, .26); }
+.sessao__painel { display: flex; align-items: center; gap: .5rem; }
 .sessao__id { display: flex; flex-direction: column; line-height: 1.1; text-align: right; }
 .sessao__nome { font-size: .82rem; font-weight: 600; color: #fff; max-width: 9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.sessao__perfil { font-size: .68rem; color: rgba(255, 255, 255, .8); }
+.sessao__perfil { font-size: .68rem; color: rgba(255, 255, 255, .8); max-width: 9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sessao__sair {
   background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .22); color: #cbd5e1;
   font-size: .72rem; font-weight: 800; letter-spacing: .01em;
@@ -700,6 +752,76 @@ a.cartao:active { transform: translateY(0); }
   transition: color var(--transicao), background var(--transicao), border-color var(--transicao);
 }
 .sessao__sair:hover { color: #fff; background: rgba(0, 229, 255, .12); border-color: rgba(0, 229, 255, .6); }
+
+@media (max-width: 575.98px) {
+  .sessao__avatar { display: flex; }
+  .sessao__painel {
+    display: none;
+    position: absolute; top: calc(100% + .5rem); right: 0;
+    flex-direction: column; align-items: stretch; gap: .5rem;
+    min-width: 12rem; padding: .75rem;
+    background: #fff; border: 1px solid var(--cinza-200);
+    border-radius: var(--raio); box-shadow: var(--sombra-forte);
+    z-index: 1045; /* mesmo nível do .notif__painel, mesmo motivo (nav-principal fica em 1040) */
+  }
+  .sessao__painel--aberto { display: flex; }
+  /* Dentro do painel branco, os tons pensados pro cabeçalho escuro
+     (texto claro, borda translúcida) ficam ilegíveis — sobrescreve só
+     aqui dentro. */
+  .sessao__id { text-align: left; }
+  /* Nome completo (o organograma tem gente com 4-5 palavras no nome) sem
+     limite de largura e ainda em nowrap virava texto maior que o painel
+     e o navegador quebrava do jeito dele, feio. Fonte menor + quebra de
+     linha deliberada (normal, não nowrap) cabe melhor num painel de
+     12rem e ainda lê bem em duas linhas quando precisa. */
+  .sessao__nome, .sessao__perfil { max-width: none; white-space: normal; overflow: visible; text-overflow: clip; }
+  .sessao__nome { color: var(--cinza-900); font-size: .76rem; line-height: 1.25; }
+  .sessao__perfil { color: var(--cinza-500); }
+  /* Cada item vira uma linha de menu (largura cheia, texto à esquerda)
+     em vez de pílula solta — mais fácil de tocar e lê como menu, não
+     como barra de botões. Especificidade ".sessao__painel .sessao__X"
+     de propósito: as regras base (mais abaixo no arquivo, mesma
+     especificidade de uma classe só) venciam a media query por ordem. */
+  .sessao__painel .sessao__admin, .sessao__painel .sessao__demo, .sessao__painel .sessao__sair {
+    width: 100%; text-align: left; border-radius: var(--raio-sm);
+  }
+  .sessao__painel .sessao__admin { color: var(--cor-primaria); }
+  .sessao__painel .sessao__admin:hover { background: var(--cor-primaria-clara); }
+  .sessao__painel .sessao__demo { border-color: var(--cinza-300); color: var(--cinza-700); }
+  .sessao__painel .sessao__demo:hover { background: var(--cinza-100); }
+  .sessao__painel .sessao__sair { color: var(--cinza-700); border-color: var(--cinza-300); }
+  .sessao__painel .sessao__sair:hover { color: var(--cinza-900); background: var(--cinza-100); border-color: var(--cinza-300); }
+}
+
+/* --------------------------------------------------------------- Filtros expansíveis
+   As 4 telas de lista (Pesquisa, Licitações, Todos, Meus processos) têm
+   select/data de filtro empilhados antes da lista — no celular isso
+   empurra o conteúdo pra baixo da dobra só pra mostrar filtros que a
+   maioria nem mexe toda vez. Vira um <details>: "Filtros" fechado por
+   padrão no celular, campos aparecem ao tocar. Busca por texto e os
+   botões de ação (Buscar, +Novo, Parados…) ficam FORA do <details>,
+   sempre à mostra — não são "filtro que se ajusta e esquece", são a
+   ação mais comum da tela. Sem JS: os campos são lidos por id/name em
+   cada tela, então funcionam do mesmo jeito estejam ou não dentro do
+   <details>. No desktop (≥768px, onde os campos já cabiam numa linha só)
+   o gatilho some e o corpo fica sempre visível — vira só um contêiner. */
+.filtros-exp { margin-bottom: var(--gap); }
+.filtros-exp > summary {
+  display: inline-flex; align-items: center; gap: .4rem;
+  list-style: none; cursor: pointer; user-select: none;
+  padding: .4rem .9rem; border: 1px solid var(--cinza-300); border-radius: 999px;
+  font-size: .82rem; font-weight: 600; color: var(--cinza-700); background: #fff;
+  transition: border-color var(--transicao), color var(--transicao);
+}
+.filtros-exp > summary::-webkit-details-marker { display: none; }
+.filtros-exp > summary::after { content: "▾"; font-size: .65rem; transition: transform var(--transicao); }
+.filtros-exp[open] > summary::after { transform: rotate(180deg); }
+.filtros-exp > summary:hover { border-color: var(--cor-primaria-borda); color: var(--cor-primaria); }
+.filtros-exp__corpo { margin-top: .6rem; }
+@media (min-width: 768px) {
+  .filtros-exp > summary { display: none; }
+  .filtros-exp > .filtros-exp__corpo { display: flex !important; margin-top: 0; }
+}
 
 /* --------------------------------------------------------------- Tela de login */
 .tela-login {
@@ -733,10 +855,14 @@ a.cartao:active { transform: translateY(0); }
 }
 .admin-lista { list-style: none; margin: 0; padding: 0; }
 .admin-usuario {
-  display: flex; align-items: center; justify-content: space-between; gap: .6rem;
+  /* align-items:flex-start (não center): nome com 3+ palavras quebra em
+     duas linhas com frequência (organograma real tem gente assim) — com
+     "center" o botão flutuava em cima da segunda linha do nome em vez de
+     ficar ao lado da primeira. */
+  display: flex; align-items: flex-start; justify-content: space-between; gap: .6rem;
   padding: .55rem 0; border-bottom: 1px solid var(--cinza-100);
 }
-.admin-usuario__info { display: flex; flex-direction: column; min-width: 0; }
+.admin-usuario__info { display: flex; flex-direction: column; min-width: 0; overflow-wrap: break-word; }
 .admin-usuario__info .texto-silencioso { font-size: .8rem; }
 .admin-usuario__acoes { display: flex; align-items: center; gap: .4rem; flex: 0 0 auto; }
 .admin-usuario--inativo .admin-usuario__info strong { color: var(--cinza-500); text-decoration: line-through; }
@@ -812,12 +938,27 @@ a.cartao:active { transform: translateY(0); }
   border-radius: 0 0 3px 3px;
   background: var(--cor-primaria);
 }
+/* O "+" era o glifo de texto da fonte, centralizado por flexbox — mas o
+   desenho do "+" no Inter Bold não é simétrico dentro da própria caixa
+   de linha, então sobrava espaço de um lado e ficava "torto" mesmo
+   centralizado. Trocado por um "+" desenhado em CSS (duas barras via
+   ::before/::after), que fica exatamente centrado em qualquer fonte. */
 .nav-principal__item--destaque .nav-principal__icone {
   width: 2rem; height: 2rem; border-radius: 50%;
   background: var(--gradiente-primario); color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.4rem; font-weight: 700; box-shadow: var(--sombra-media);
+  position: relative;
+  font-size: 0;
+  box-shadow: var(--sombra-media);
 }
+.nav-principal__item--destaque .nav-principal__icone::before,
+.nav-principal__item--destaque .nav-principal__icone::after {
+  content: "";
+  position: absolute; top: 50%; left: 50%;
+  background: currentColor; border-radius: 1px;
+  transform: translate(-50%, -50%);
+}
+.nav-principal__item--destaque .nav-principal__icone::before { width: 52%; height: 11%; }
+.nav-principal__item--destaque .nav-principal__icone::after { width: 11%; height: 52%; }
 body.com-nav { padding-bottom: 4rem; }
 
 @media (min-width: 720px) {
@@ -842,7 +983,7 @@ body.com-nav { padding-bottom: 4rem; }
   }
   .nav-principal__item--ativo::after { display: none; }
   .nav-principal__icone { font-size: 1.05rem; }
-  .nav-principal__item--destaque .nav-principal__icone { width: 1.5rem; height: 1.5rem; font-size: 1.1rem; }
+  .nav-principal__item--destaque .nav-principal__icone { width: 1.5rem; height: 1.5rem; }
   body.com-nav { padding-bottom: 0; }
 }
 
@@ -1101,7 +1242,7 @@ body.embed .pagina { padding-top: .6rem; }
 .fase-card--desvio { border-style: dashed; opacity: .92; }
 
 /* Lista de licitações no desktop: página larga + tabela ordenável. */
-.pagina--larga { max-width: 1500px; }
+.pagina--larga { max-width: min(2000px, 97vw); }
 .tabela-lic { font-size: .88rem; }
 .tabela-lic tbody tr { cursor: pointer; }
 .tabela-lic__objeto { max-width: 28rem; }

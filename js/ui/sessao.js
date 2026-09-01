@@ -71,8 +71,18 @@ export async function iniciarSessao(elId = 'usuario-sessao') {
   const el = document.getElementById(elId);
   if (el) {
     el.classList.add('sessao');
+    // No celular, nome + cargo + Ajuda/Admin/Equipes + Sair não cabem ao
+    // lado do título sem espremer tudo (era o que a versão anterior
+    // fazia, escondendo cargo e os atalhos administrativos). Agora esse
+    // bloco vira um painel escondido por trás de um avatar com a inicial
+    // do nome — o CSS decide se o painel some (celular, até tocar no
+    // avatar) ou fica sempre visível e no estilo de barra (desktop, como
+    // sempre foi). O avatar em si só aparece no celular (CSS).
+    const inicial = escapeHtml((usuario.nome || '?').trim().charAt(0).toUpperCase() || '?');
     el.innerHTML =
-      `<span class="sessao__id" title="${escapeHtml(usuario.email)}">`
+      `<button type="button" id="sessao-avatar" class="sessao__avatar" aria-haspopup="true" aria-expanded="false" aria-controls="sessao-painel" aria-label="Menu de ${escapeHtml(usuario.nome)}">${inicial}</button>`
+      + `<div id="sessao-painel" class="sessao__painel">`
+      + `<span class="sessao__id" title="${escapeHtml(usuario.email)}">`
       + `<span class="sessao__nome">${escapeHtml(usuario.nome)}</span>`
       + `<span class="sessao__perfil">${escapeHtml(usuario.perfil_nome)}`
       + (usuario.unidade_sigla ? ` · ${escapeHtml(usuario.unidade_sigla)}` : '')
@@ -81,8 +91,31 @@ export async function iniciarSessao(elId = 'usuario-sessao') {
       + (usuario.pode_administrar
           ? `<a class="sessao__admin" href="./admin.html">Admin</a>`
             + `<a class="sessao__admin" href="./equipes.html">Equipes</a>` : '')
-      + `<button type="button" id="btn-sair" class="sessao__sair" aria-label="Sair">Sair</button>`;
+      + `<button type="button" id="btn-sair" class="sessao__sair" aria-label="Sair">Sair</button>`
+      + `</div>`;
     document.getElementById('btn-sair').addEventListener('click', () => auth.logout());
+
+    // Abrir/fechar o painel (só tem efeito visual no celular — no
+    // desktop o avatar fica invisível e o painel sempre à mostra, então
+    // os eventos abaixo não mudam nada por lá). Mesmo padrão do sino de
+    // notificações: classe de "aberto", fecha ao clicar fora ou Esc.
+    const avatar = document.getElementById('sessao-avatar');
+    const painel = document.getElementById('sessao-painel');
+    const fecharPainel = () => {
+      painel.classList.remove('sessao__painel--aberto');
+      avatar.setAttribute('aria-expanded', 'false');
+    };
+    avatar.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const abrindo = !painel.classList.contains('sessao__painel--aberto');
+      painel.classList.toggle('sessao__painel--aberto', abrindo);
+      avatar.setAttribute('aria-expanded', String(abrindo));
+    });
+    document.addEventListener('click', (e) => {
+      if (painel.classList.contains('sessao__painel--aberto') && !el.contains(e.target)) fecharPainel();
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fecharPainel(); });
+
     // Alternar demonstração: discreto, e só para quem administra.
     const demo = await import('./demo.js');
     demo.montarBotao(el, usuario);

@@ -7,6 +7,7 @@
 // Colunas e cartão em lista-render.js; esqueleto em tabela-processos.js.
 // =====================================================================
 
+import './filtros-exp.js';
 import { COLUNAS, cartao } from './lista-render.js';
 import { renderLista, renderPaginacao, ligarEventos } from './tabela-processos.js';
 import { abrirModalProcesso } from './modal-processo.js';

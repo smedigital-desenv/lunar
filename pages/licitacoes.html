@@ -24,41 +24,48 @@
     </div>
 
     <form id="filtros" class="row g-2 mb-3" autocomplete="off">
-      <div class="col-6 col-md-3">
-        <select id="f-categoria" class="form-select form-select-sm" aria-label="Categoria">
-          <option value="">Todas as categorias</option>
-          <option value="almox_sede">Almox e Sede</option>
-          <option value="nutricao">Nutrição</option>
-          <option value="servicos_obras">Serviços e Obras</option>
-        </select>
-      </div>
-      <div class="col-6 col-md-3">
-        <select id="f-fase" class="form-select form-select-sm" aria-label="Fase">
-          <option value="">Todas as fases</option>
-        </select>
-      </div>
-      <div class="col-6 col-md-2">
-        <select id="f-prioridade" class="form-select form-select-sm" aria-label="Prioridade">
-          <option value="">Todas as prioridades</option>
-          <option value="1_secretario">1 - Secretário</option>
-          <option value="2_alta">2 - Alta</option>
-          <option value="3_normal">3 - Normal</option>
-        </select>
-      </div>
-      <div class="col-6 col-md-2">
+      <div class="col-12 col-sm-6">
         <input id="f-busca" class="form-control form-control-sm" type="search"
                placeholder="Objeto ou número…"
                aria-label="Buscar por objeto ou número">
       </div>
-      <div class="col-4 col-md-1 d-grid">
+      <div class="col-4 col-sm-2 d-grid">
         <button id="f-parados" class="btn btn-sm btn-outline-danger" type="button"
                 title="Só processos parados além do prazo da fase">Parados</button>
       </div>
-      <div class="col-4 col-md-1 d-grid">
+      <div class="col-4 col-sm-2 d-grid">
         <a class="btn btn-sm btn-outline-primary" href="./painel-licitacoes.html">Painel</a>
       </div>
-      <div class="col-4 col-md-1 d-grid">
+      <div class="col-4 col-sm-2 d-grid">
         <a class="btn btn-sm btn-primary" href="./nova-licitacao.html">+ Novo</a>
+      </div>
+      <div class="col-12">
+        <details class="filtros-exp">
+          <summary>Filtros</summary>
+          <div class="filtros-exp__corpo row g-2">
+            <div class="col-6 col-md-3">
+              <select id="f-categoria" class="form-select form-select-sm" aria-label="Categoria">
+                <option value="">Todas as categorias</option>
+                <option value="almox_sede">Almox e Sede</option>
+                <option value="nutricao">Nutrição</option>
+                <option value="servicos_obras">Serviços e Obras</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-3">
+              <select id="f-fase" class="form-select form-select-sm" aria-label="Fase">
+                <option value="">Todas as fases</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-3">
+              <select id="f-prioridade" class="form-select form-select-sm" aria-label="Prioridade">
+                <option value="">Todas as prioridades</option>
+                <option value="1_secretario">1 - Secretário</option>
+                <option value="2_alta">2 - Alta</option>
+                <option value="3_normal">3 - Normal</option>
+              </select>
+            </div>
+          </div>
+        </details>
       </div>
     </form>
 

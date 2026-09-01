@@ -29,22 +29,6 @@
     </div>
 
     <form id="filtros" class="row g-2 mb-3" autocomplete="off">
-      <div class="col-6 col-md-3">
-        <select id="f-posse" class="form-select form-select-sm" aria-label="Aguardando">
-          <option value="todos">Aguardando: todos</option>
-          <option value="aguardando_mim">Minha resposta</option>
-          <option value="aguardando_outros">Outras pessoas</option>
-        </select>
-      </div>
-      <div class="col-6 col-md-3">
-        <select id="f-situacao" class="form-select form-select-sm" aria-label="Situação">
-          <option value="todos">Todas as situações</option>
-          <option value="pendentes">Pendentes</option>
-          <option value="em_andamento">Em andamento</option>
-          <option value="urgentes">Urgentes</option>
-          <option value="encerrados">Encerrados</option>
-        </select>
-      </div>
       <div class="col-12 col-md-4">
         <input id="f-busca" class="form-control form-control-sm" type="search"
                placeholder="Título ou número…" aria-label="Buscar por título ou número">
@@ -54,6 +38,29 @@
       </div>
       <div class="col-6 col-md-1 d-grid">
         <a class="btn btn-sm btn-primary" href="./nova-demanda.html">+ Nova</a>
+      </div>
+      <div class="col-12">
+        <details class="filtros-exp">
+          <summary>Filtros</summary>
+          <div class="filtros-exp__corpo row g-2">
+            <div class="col-6 col-md-3">
+              <select id="f-posse" class="form-select form-select-sm" aria-label="Aguardando">
+                <option value="todos">Aguardando: todos</option>
+                <option value="aguardando_mim">Minha resposta</option>
+                <option value="aguardando_outros">Outras pessoas</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-3">
+              <select id="f-situacao" class="form-select form-select-sm" aria-label="Situação">
+                <option value="todos">Todas as situações</option>
+                <option value="pendentes">Pendentes</option>
+                <option value="em_andamento">Em andamento</option>
+                <option value="urgentes">Urgentes</option>
+                <option value="encerrados">Encerrados</option>
+              </select>
+            </div>
+          </div>
+        </details>
       </div>
     </form>
 

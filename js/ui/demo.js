@@ -77,5 +77,8 @@ export function montarBotao(el, usuario) {
     location.reload();          // as telas carregam os dados na abertura
   });
 
-  el.insertBefore(botao, el.querySelector('.sessao__sair') ?? null);
+  // O botão Sair não é mais sempre filho direto de `el` (mora dentro do
+  // painel de sessão no celular) — insere no pai real, seja ele qual for.
+  const sair = el.querySelector('.sessao__sair');
+  (sair ? sair.parentNode : el).insertBefore(botao, sair ?? null);
 }
