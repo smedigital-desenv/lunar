@@ -3,7 +3,7 @@
 > Atualizado ao final de cada sessão do Claude Code. Máximo 40 linhas.
 > Formato: o que está pronto, o que vem a seguir, decisões que não estão no código.
 
-**Última atualização:** 2026-08-26 (Entrada/saída substituídos por "de quem o processo aguarda"; cronograma mostra de quem é cada tarefa aberta; edição de tarefa em aberto; tela de tipos de demanda; filtro por tipo em Meus processos)
+**Última atualização:** 2026-08-26 (Entrada/saída substituídos por "de quem o processo aguarda"; cronograma mostra de quem é cada tarefa aberta; edição de tarefa em aberto; tela de tipos de demanda; filtro por tipo em Meus processos; lembretes por e-mail)
 **Fase atual:** Sessões 1–11 concluídas. Módulo de Licitações pronto (L1–L6). "Meus processos" é a porta do sistema, com cronograma e o eixo *de quem o processo aguarda*. Falta implantar licitações no real (ver checklist). Fase 2 do módulo (atas/contratos, solicitações, KPIs, regras de fase) por planejar.
 
 > **Todos os SQL (`001`…`013` + seed) executados no Supabase** (confirmado pelo usuário, 2026-08-01).
@@ -129,6 +129,8 @@
 
 - **Limite registrado da simplificação:** o tipo é **um por demanda**. Assunto que já é "Denúncia" e precise ir ao colegiado obrigaria a trocar o tipo, perdendo a classificação original. Enquanto os assuntos do colegiado nascerem no gabinete já com o tipo certo, não incomoda. Se incomodar, o caminho desenhado e descartado nesta sessão era `demandas.colegiado_data date` (nulo = não pautado; a pauta de uma reunião é o conjunto com aquela data, e o histórico fica sem ninguém limpar nada).
 
+- **Lembretes semanais por e-mail (2026-09-01):** o gabinete quer avisar por e-mail quem tem tarefa em aberto, rodando um Apps Script na conta do gabinete. **A decisão que importa:** o Apps Script NÃO fala com o Supabase direto. A `anon` sozinha não devolve nada (RLS exige sessão) e a `service_role` num projeto do Apps Script daria, a quem tem acesso de edição, leitura do banco inteiro sem RLS — inclusive sigilo restrito e dados de crianças; projeto do Apps Script se copia, se compartilha e se herda junto com a conta. Arquitetura: Edge Function **`lembretes`** (versionada, sem segredo — molde do `relatorios`) apura e devolve; o Apps Script chama com um **segredo compartilhado** (`LEMBRETES_SEGREDO` no ambiente do Supabase, Propriedades do Script do outro lado) e envia. Publicar com **Verify JWT DESLIGADO** — não há sessão a apresentar; quem protege é o segredo, conferido em tempo constante. **Dado pessoal no e-mail:** título de demanda é texto livre e às vezes traz nome de aluno, e e-mail sai do controle de acesso (fica na caixa, é encaminhável, entra em backup). Regra decidida com o usuário: número, prazo e link sempre; título só quando `sigilo = 'normal'`; restrito vira "Processo sigiloso — abra no sistema". Recorte: tarefas ativas não concluídas (devolvida conta), de demanda ativa e não concluída, de pessoa ativa com e-mail; separadas em vencidas / próximos 7 dias / demais. Um e-mail por pessoa e um resumo semanal ao gabinete (sem título de processo). Validado com dublês de Deno e Supabase: 405/401/401/200 no guarda e 9 tarefas entrando, 6 saindo (fora as de processo concluído, processo inativo e pessoa inativa), com o sigiloso sem título. O `.gs` **não é versionado** — entregue na conversa, vive na conta do gabinete; tem `simular()` (não envia), `MODO_TESTE` (desvia tudo ao gabinete) e confere a cota do Gmail antes de começar.
+
 ## Próximo passo
 
 - **Ligar o real:** rodar `sql/011`+`sql/012`+`sql/013`, preencher `js/config.js`, habilitar provider Email (login de teste com usuários do seed, senha `dev-123456`) e/ou Google OAuth, deploy da Edge Function `relatorios` + bucket. Aí as telas saem do modo demo.
@@ -137,6 +139,7 @@
 - **Implantar a Fase 4** (o código está pronto; falta o que só se faz no servidor): rodar o SQL `036`, habilitar o provider **Email** no Auth do lunar, publicar a Edge Function com `--no-verify-jwt`, e servir o sistema em `smedigital.com.br/lunar/` — **mesma origem do central**, senão não há SSO. Roteiro completo em `docs/IMPLANTACAO-CENTRAL.md`.
 - `js/ui/login.js` ficou **fora de uso** (a página virou redirecionamento). Mantido de propósito: é a única interface de login própria que existe.
 - **Antes de produção:** inativar os usuários do `sql/008_seed.sql` (senha `dev-123456`).
+- **Publicar a Edge Function `lembretes`** (`--no-verify-jwt`), criar o segredo `LEMBRETES_SEGREDO` no Supabase e configurar o Apps Script na conta do gabinete. Roteiro na conversa da sessão.
 - **Tirar dois prints novos para a ajuda:** a barra de navegação atual e a tela "Meus processos". Salvar como `assets/img/tutorial/navegacao.png` e `.../caixa-entrada.png` (os nomes seguem citados nos comentários de `pages/ajuda.html`) e devolver as duas `<figure>`.
 
 ## Decisões do usuário aplicadas (2026-07-31)
